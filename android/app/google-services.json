@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "556116394721",
+    "firebase_url": "https://hunt-d7d89-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "hunt-d7d89",
+    "storage_bucket": "hunt-d7d89.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556116394721:android:47b70737ba6feecbdeada0",
+        "android_client_info": {
+          "package_name": "com.rendezvous"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "556116394721-of1iplusp9phq73sqhtm7c9qbamec4ud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3ul2tv13sDTslyGwCX0HpAd2rOMV5sgQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "556116394721-of1iplusp9phq73sqhtm7c9qbamec4ud.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "556116394721-0q46fbk9fgslsutddife12m9vln0fica.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.hunting"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556116394721:android:9cf3da3858f33f5cdeada0",
+        "android_client_info": {
+          "package_name": "com.rendezvous.android.taeheon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "556116394721-of1iplusp9phq73sqhtm7c9qbamec4ud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3ul2tv13sDTslyGwCX0HpAd2rOMV5sgQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "556116394721-of1iplusp9phq73sqhtm7c9qbamec4ud.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "556116394721-0q46fbk9fgslsutddife12m9vln0fica.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.hunting"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
