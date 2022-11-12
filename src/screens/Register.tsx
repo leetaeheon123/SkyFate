@@ -124,9 +124,11 @@ const LoginWithEmail = async (navigation:any) => {
   catch (error) {
     if(error.code === "auth/wrong-password") {
       Alert.alert("이메일은 존재하나 비밀번호가 다릅니다.")
+      //  == 추천인 코드가 다른상황 
     }
     if(error.code === "auth/user-not-found") {
       Alert.alert("해당 이메일이 없습니다. 다시한번 이메일을 확인해주세요")
+      // 추천인 코드는 있으나, 
     }
     
   }

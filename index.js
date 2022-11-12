@@ -2,7 +2,7 @@
  * @format
  */
 
-import {AppRegistry, Platform} from 'react-native';
+import {AppRegistry, Platform, Vibration} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
 import messaging from '@react-native-firebase/messaging';
@@ -22,7 +22,7 @@ const AndroidInforeground = () => {
   PushNotification.localNotificationSchedule({
     //... You can use all the options from localNotifications
     message: 'My Notification Message', // (required)
-    date: new Date(Date.now() + 60 * 1000), // in 60 secs
+    date: new Date(Date.now()), // in 60 secs
     allowWhileIdle: false, // (optional) set notification to work while on doze, default: false
 
     /* Android Only Properties */
@@ -48,9 +48,10 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('rremoteMessage.sentTime 보낸시간:', remoteMessage.sentTime);
 
   if (Platform === 'ios') {
-    SendPushNotificationInforeground();
+    // SendPushNotificationInforeground();
+    // Vibration.vibrate([400]);
   } else {
-    AndroidInforeground();
+    // AndroidInforeground();
   }
 });
 

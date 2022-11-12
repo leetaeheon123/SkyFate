@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef, memo , useContext, useMemo, useCallback} from 'react';
+import React, {useEffect, useState, useRef, useContext, useCallback} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -22,13 +22,11 @@ import storage from '@react-native-firebase/storage'
 
 import codePush from 'react-native-code-push';
 import { useQuery } from 'react-query';
-import database from '@react-native-firebase/database';
 
 import {firebase} from '@react-native-firebase/database';
 import Geolocation from 'react-native-geolocation-service';
 
 import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import {useNavigation} from '@react-navigation/native'
 import AppContext from '../UsefulFunctions/Appcontext'
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -47,10 +45,6 @@ import MarkerAnimationStyles from "../../styles/MarkerAnimation"
 import Ring from './Ring';
 
 import AsyncStorage from '@react-native-community/async-storage';
-import PushNotification from "react-native-push-notification";
-
-
-interface Props {}
 
 interface ILocation {
   latitude: number;
@@ -63,8 +57,6 @@ const reference = firebase
   .database(
     'https://hunt-d7d89-default-rtdb.asia-southeast1.firebasedatabase.app/',
   );
-
-
 
 const PushAxios = () => {
   axios.post('http://13.124.209.97/firebase/createPushNotificationToMan/uid', {
@@ -84,14 +76,14 @@ async function requestPushNotificationPermission() {
     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
   if (enabled) {
-    console.log('Authorization status:', authStatus);
+    // console.log('Authorization status:', authStatus);
   }
 }
 
 async function GetFCMToken() {
   const token = await messaging().getAPNSToken()
 
-  console.log("APNSToken:",token)
+  // console.log("APNSToken:",token)
 }
 
 const Get_Query_AllLocation = () => {
@@ -103,7 +95,7 @@ const Get_Query_AllLocation = () => {
     .then(snapshot => {
 
       let val = snapshot.val()
-      console.log("Get_Query_AllLocation_val",val)
+      // console.log("Get_Query_AllLocation_val",val)
       // if(val == false) {
         // val = [{}]
       // }
@@ -180,7 +172,7 @@ const Get_ProfileImageUrl = (userEmail:string) => {
     .doc(uM)
     .get()
     .then(doc => {
-      console.log("Get_ProfileImageUrl",doc.data()?.ProfileImageUrl)
+      // console.log("Get_ProfileImageUrl",doc.data()?.ProfileImageUrl)
       let PfIU = doc.data()?.ProfileImageUrl
       return PfIU
     }).then((ProfileImageUrl)=>{
@@ -249,7 +241,7 @@ const FirebaseInput = (userEmail:string, StorageUrl:string) => {
     ProfileImageUrl:StorageUrl,
   })
   .then(() => {
-    console.log('User updated!');
+    // console.log('User updated!');
   });
 
 }
@@ -275,9 +267,9 @@ const ImagePicker = (fun:Function) => {
     , async (res)=>{
       if (res.didCancel) return;
       // setImageUrl(res?.assets[0]?.Url);
-      console.log("ImagePicker",res.assets[0])
+      // console.log("ImagePicker",res.assets[0])
       let LocalImagePath = res.assets[0].uri
-      console.log("LocalImagePath223",LocalImagePath)
+      // console.log("LocalImagePath223",LocalImagePath)
       fun(LocalImagePath)
 
     
@@ -287,9 +279,9 @@ const ImagePicker = (fun:Function) => {
 
 const PutInStorage = async (LocalImagePath:any, userEmail:string, Gender:any) => {
   const DBUrl = `/ProfileImage/${Gender}/${userEmail}`
-  console.log("DBUrl:" , DBUrl)
+  // console.log("DBUrl:" , DBUrl)
   const reference = storage().ref(`${DBUrl}/ProfileImage`)
-  console.log("LocalImagePath",LocalImagePath)
+  // console.log("LocalImagePath",LocalImagePath)
   await reference.putFile(LocalImagePath)
   const StorageUrl = await reference.getDownloadURL()
   return StorageUrl
@@ -390,7 +382,7 @@ const UpdateMyLocation = async (userEmail: string ,Memo:string, PeopleNum:Number
   location:any) => {
 
   const ProfileImageUrl = await getProfileImageUrl(userEmail)
-  console.log("UpdateMyLocation",ProfileImageUrl)
+  // console.log("UpdateMyLocation",ProfileImageUrl)
 
   let CanPayNum;
   if(CanPayit == 1) {
@@ -439,14 +431,14 @@ function SendPushNotificationInforeground() {
 
 const SaveEmailInDevice = async (myContext: any) => {
   const userEmail = await AsyncStorage.getItem('IdentityToken');
-  console.log("asyncemail -> mycontext")
+  // console.log("asyncemail -> mycontext")
   myContext.setUserEmail(userEmail)
 }
 
 const SaveProfileImageUrlInDevice = async (myContext:any) => {
   const ProfileImageUrl = await AsyncStorage.getItem('ProfileImageUrl');
-  console.log("SaveProfileImageUrlInDevice",ProfileImageUrl)
-  console.log("asyncprofileImageUrl -> mycontext")
+  // console.log("SaveProfileImageUrlInDevice",ProfileImageUrl)
+  // console.log("asyncprofileImageUrl -> mycontext")
 
   myContext.setProfileImageUrl(ProfileImageUrl)
 
@@ -458,343 +450,6 @@ const SaveGenderInDevice = async (myContext:any) => {
   myContext.setUserGender(Gender)
 }
 
-const MapScreen = ({route}:any) => {
-
-  const [location, setLocation] = useState<ILocation | undefined>(undefined);
-
-  // useEffect(() => {
-  //   GetLocationPermission()
-  //   requestPushNotificationPermission()
-
-  // fcmService.registerAppWithFCM();
-  // fcmService.register(onRegister, onNotification, onOpenNotification);
-  // localNotificationService.configure(onOpenNotification);
-
-  //   SaveEmailInDevice(myContext)
-  //   SaveProfileImageUrlInDevice(myContext)
-  //   GetLocation(setLocation)
-
-  //   SaveGenderInDevice(myContext)
-
-  //   GetFCMToken()
-
-  //   // Get_GrilsLocations(setGrilsLocations)
-  //   // let sd = async function(){
-  //   //   await Get_itaewon_HotPlaceList_useEffect(setitaewon_HotPlaceListState)
-  //   // }
-  //   // sd()
-
-  //   console.log("useEffect[]")
-  // }, []);
-
-  const [ GpsOn, setGpsOn] = useState(false);
-
-  // useEffect(()=>{
-  //   console.log("GpsOn")
-  // }, [GpsOn])
-
-  const myContext = useContext(AppContext);
-
-  const [ ModalVisiable, setModalVisiable] = useState(false);
-  const [ Memo, setMemo] = useState("");
-  const [ PeopleNum, setPeopleNum] = useState(1);
-  const [ MoenyRadioBox, setMoneyRadioBox] = useState(1)
-
-  const ChangeModalVisiable = () => {
-    setModalVisiable(previousState => !previousState)
-  }
-
-  const [second, setSecond] = useState(180);
-  Counter(
-    // 분기처리후 null을 주면 00:00에서 멈추고 안주면
-    () => {
-      if(GpsOn == true) {
-        setSecond(second - 1);
-      } 
-    },
-    second >= 1 ? 1000 : null,
-    ()=>{
-      setSecond(180)
-      setGpsOn(false)
-    }
-  );
-
-
-  // const {data, isLoading} = useQuery("QueryLocation", Get_Query_AllLocation)
-
-  // const {data:itaewon_HotPlaceList, isLoading:itaewon_HotPlaceListisLoading} = useQuery("itaewon_HotPlaceList", Get_itaewon_HotPlaceList)
-
-  const [token, setToken] = useState('');
-
-  // 토큰값을 인수로 받아 스테이트화하는 onReigster함수 
-
-  const onRegister = (tk: string) => {
-    console.log('[App] onRegister : token :', tk);
-    if (tk) setToken(tk);
-  }
-  // notify를 인수로 받아 
-  // notify의 title, body, notify를 
-  const onNotification = (notify: any) => {
-    console.log('[App] onNotification : notify :', notify);
-    const options = {
-      soundName: 'default',
-      playSound: true,
-    };
-
-    localNotificationService.showNotification(
-      0,
-      notify.title,
-      notify.body,
-      notify,
-      options,
-    );
-
-    
-  }
-
-  const onOpenNotification = (notify: any) => {
-    console.log('[App] onOpenNotification : notify :', notify);
-    Alert.alert('Open Notification : notify.body :' + notify.body);
-  }
-  
-    const AnimationMarker = (ProfileImageUrl:string) => {
-      return (
-
-      <Marker
-        coordinate={{
-          latitude: location.latitude,
-          longitude: location.longitude,
-        }}>
-
-      <View style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center]}>
-        {[...Array(2).keys()].map((_, index) => (
-        <Ring key={index} index={index} />
-        ))}
-        <Image 
-          style={MarkerAnimationStyles.Image}
-          source={{uri:ProfileImageUrl}}/>
-        </View>
-      </Marker>
-      )
-    }
-
-    // const GirlsMarkerList = GirlsLocations.map((data:any, index)=>{
-    //     return (
-    //       <Marker
-    //         key={data.latitude}
-    //         coordinate={data}
-    //         title={data.Memo}
-    //         description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
-    //         >
-    //           <View
-    //           style={{
-    //             height:35,
-    //             width:35,
-    //             borderRadius:50,
-    //             backgroundColor:'white',
-    //             display:'flex',
-    //             justifyContent:'center',
-    //             alignItems:'center'
-    //           }}
-    //           >
-    //             <Image 
-    //               source={{uri:data.ProfileImageUrl}}
-    //               style={styles.Marker}
-    //               resizeMode="cover"
-    //             />
-    //           </View>
-    //       </Marker>
-    //   )
-    // })
-
-    const MinusIcon = <TouchableOpacity style={MapScreenStyles.MinusPeopleNumber}
-    onPress={() => {setPeopleNum(PeopleNum - 1)}}>
-    <AntDesgin name='minus' size={30} color="white"/>
-  </TouchableOpacity>
-
-  const PlusIcon = <TouchableOpacity style={MapScreenStyles.MinusPeopleNumber} 
-  onPress={() => {setPeopleNum(PeopleNum + 1)}}>
-  <AntDesgin name='plus' size={30} color="white"/>
-</TouchableOpacity>
-
-  return (
-    <View style={{width:'100%', height:'100%'}}>
-
-      <Modal 
-        animationType="slide"
-        transparent={true}
-        visible={ModalVisiable}
-      >
-        <SafeAreaView
-          style={MapScreenStyles.Memomodal}
-        >
-          <View style={{
-              display:'flex',
-              flexDirection:'row',
-              width:'100%',
-              height:50,
-            }}>
-            <TextInput
-              value={Memo}
-              onChangeText={(text) => setMemo(text)}
-              style={MapScreenStyles.MemoTextInput}>
-            </TextInput>
-
-            <TouchableOpacity 
-            style={[styles.RowCenter,MapScreenStyles.MoneyOption]}
-            onPress={()=>{
-              ChangeModalVisiable()}}
-            >
-              <MaterialIcons name='cancel' color="white" size={30}/>
-            </TouchableOpacity>            
-          </View>
-
-            <View style={MapScreenStyles.PeopleNumOption}>
-              <View style={[styles.Row_OnlyColumnCenter]}>
-                <Icon name='person-add' size={30} color="white"/>
-                <Text style={{color:'white'}}>인원</Text>
-            </View>
-
-              <View style={[{width:'50%',justifyContent:'flex-end'}, styles.Row_OnlyColumnCenter]}>
-                {MinusIcon}
-                <View style={[styles.RowCenter,{width:'30%', height:'100%'}]}>
-                  <Text style={[styles.WhiteColor,MapScreenStyles.TotalPeopleNum]}>{PeopleNum}</Text>
-                </View>
-                {PlusIcon}
-              </View>
-            </View>
-            
-            <View style={[styles.RowCenter, MapScreenStyles.MoneyOptionView]}>
-              <TouchableOpacity 
-              onPress={()=>{setMoneyRadioBox(1)}}
-              style={MoenyRadioBox == 1 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
-              >
-                <MaterialIcons name='attach-money' size={50} color="white"/>
-              </TouchableOpacity>
-              <TouchableOpacity 
-              onPress={()=>{setMoneyRadioBox(2)}}
-              style={MoenyRadioBox == 2 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
-              >
-                <MaterialIcons name='money-off' size={50} color="white" />
-              </TouchableOpacity>
-
-            </View>
-
-            <TouchableOpacity 
-            style={[styles.RowCenter,MapScreenStyles.CheckBoxView]}
-            
-            onPress={()=>{
-              UpdateMyLocation(myContext.userEmail,Memo, PeopleNum, MoenyRadioBox, location)
-              setGpsOn(true)
-              ChangeModalVisiable()
-              // PushAxios()
-            
-            }}
-            >
-              <AntDesgin name='checksquareo' color="white" size={30}/>
-
-            </TouchableOpacity>
-
-          
-        </SafeAreaView>
-
-      </Modal>
-    {location && (
-    <MapView
-    showsUserLocation={true}
-    //  followsUserLocation={true}
-    loadingEnabled={true}
-    userInterfaceStyle="light"
-    showsMyLocationButton={false}
-    style={{width:'100%', height:'100%'}}
-    initialRegion={{
-      latitude: location.latitude,
-      longitude: location.longitude,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
-     }}
-    minZoomLevel={8}
-    maxZoomLevel={16}
-    userLocationAnnotationTitle={"hello"}
-    userLocationCalloutEnabled={true}
-    >
-          <SafeAreaView> 
-            <Text style={{
-              color:'white'
-            }}>위치 On!
-            </Text>
-            {myContext.userGender == "Grils" ? 
-            <Text style={{color:'red', fontSize:22, fontWeight:'600'}}>
-            {Math.floor(second / 60)} : {second % 60}
-            </Text>
-            : null}
-            
-          </SafeAreaView>
-
-          {location != undefined ?
-          <Marker
-            coordinate={{ 
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-          />
-          : null}
-
-    </MapView>
-    )}
-    {myContext.userGender == "Grils" ? 
-          <View style={[
-            styles.NoFlexDirectionCenter,
-            {
-            width:'10%',
-            height:'5%',
-            borderRadius:5,
-            position:'relative',
-            left:'88%',
-            bottom:'88%',
-            backgroundColor:'#0064FF',
-          }]}>
-            <TouchableOpacity 
-            style={{
-              backgroundColor:'black',
-              borderRadius:25
-              // Frist
-            }}
-            onPress={()=>{
-              ChangeMyProfileImage(myContext.userEmail)
-            }}>
-              <Icon name='person' size={30} color='white'/>
-            </TouchableOpacity>
-
-          </View> 
-      :null}         
-      {myContext.userGender == "Grils" ? 
-       <View style={{
-        width:'20%',
-        height:50,
-        backgroundColor:'#202632',
-        position:'relative',
-        left:'40%',
-        bottom:'15%',
-        borderRadius:10,
-      }}>
-
-        <Button title="시작!!" onPress={()=>{
-          ChangeModalVisiable()
-
-          // SendPushNotificationInforeground()
-          // GetFCMToken()
-          // onCopy()
-
-        }}/>
-      </View>
-      : null}
-    </View>
-  )
-};
-
-
-
 const AndroidPushNoti = () => {
   console.log("AndroidPushNoti")
   
@@ -805,20 +460,10 @@ const AndroidPushNoti = () => {
     {},
     {}
   );
-  // id, title, message, data = {}, options = {}
-  // PushNotification.localNotification({
-  //   channelId: 'your-channel-id', // (required) channelId, if the channel doesn't exist, notification will not trigger.
-  //   title: 'title',
-  //   message: 'message',
-  //   playSound: true,
-  //   soundName: 'default',
-  //   userInteraction: false,
-  // });
 }
 
-const UserLocation = () => {
+const MapScreen = () => {
 
-  console.log("Render")
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
   const myContext = useContext(AppContext);
 
@@ -835,6 +480,7 @@ const UserLocation = () => {
   // notify의 title, body, notify를 
   const onNotification = (notify: any) => {
     console.log('[App] onNotification : notify :', notify);
+
     const options = {
       soundName: 'default',
       playSound: true,
@@ -850,9 +496,9 @@ const UserLocation = () => {
   }
 
   const onOpenNotification = (notify: any) => {
-    // console.log('[App] onOpenNotification : notify :', notify);
-    // Alert.alert('Open Notification : notify.body :' + notify.body);
-    Alert.alert('Open Notification : notify.body :');
+    console.log('[App] onOpenNotification : notify :', notify);
+    // Alert.alert('누군가가 위치 공유를 시작했습니다!');
+    // Alert.alert('Open Notification : notify.body :'+ );
 
   }
 
@@ -868,7 +514,7 @@ const UserLocation = () => {
     SaveProfileImageUrlInDevice(myContext)
     SaveGenderInDevice(myContext)
 
-    fcmService.register(onRegister, onNotification, onOpenNotification);
+    fcmService.register(onRegister, onNotification,onOpenNotification);
     localNotificationService.configure(onOpenNotification);
 
   }, []);
@@ -898,13 +544,24 @@ const UserLocation = () => {
       setGpsOn(false)
     }
   );
+
+  const ShowMyLocation = () => {
+    const date = new Date()
+    let day = date.getHours()
+    day = 23
+    console.log(day)
+    // day가 오후 10시 ~ 새벽 7시 
+    if(day >= 22 && day <=24 || day >= 1 && day <= 7) {
+      console.log("get")
+    }
+    // UpdateMyLocation(myContext.userEmail,Memo, PeopleNum, MoenyRadioBox, location)
+    // setGpsOn(true)
+    // ChangeModalVisiable()
+  }
   const {data, isLoading, refetch} = useQuery("QueryLocation", Get_Query_AllLocation)
 
   useEffect(()=>{
-    // console.log("updatenum")
-    // setGpsOn(!GpsOn)
     refetch
-    console.log(data)
     
   }, [updatenum])
 
@@ -1006,9 +663,8 @@ const UserLocation = () => {
             style={[styles.RowCenter,MapScreenStyles.CheckBoxView]}
             
             onPress={()=>{
-              UpdateMyLocation(myContext.userEmail,Memo, PeopleNum, MoenyRadioBox, location)
-              setGpsOn(true)
-              ChangeModalVisiable()
+              ShowMyLocation()
+              
               // PushAxios()
             
             }}
@@ -1111,8 +767,7 @@ const UserLocation = () => {
           
         </MapView>
       )}
-   
-
+  
       {myContext.userGender == "Grils" ? 
       <SafeAreaView style={{position:'absolute', left:'5%', top:'5%'}}>
         {/* 리팩토링 필요 */}
@@ -1160,11 +815,8 @@ const UserLocation = () => {
       {myContext.userGender == "Grils" ? 
        <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}
         onPress={()=> {
-          AndroidPushNoti()
-
+          // AndroidPushNoti()
         ChangeModalVisiable()
-        // SendPushNotificationInforeground()
-        // GetFCMToken()
         }}
        >
         <Text style={{color:'white'}}>시작!!</Text>
@@ -1173,8 +825,6 @@ const UserLocation = () => {
     </View>
   );
 };  
-
-
 
 // 자신의 위치를 트랙킹해서 맵에 보여주는 컴포넌트
 const TrackUserLocation = () => {
@@ -1415,5 +1065,5 @@ const MapScreenStyles = StyleSheet.create({
 
 });
 
-export default codePush(UserLocation);
+export default codePush(MapScreen);
 
