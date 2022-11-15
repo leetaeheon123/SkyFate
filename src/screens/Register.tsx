@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
+import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput,
+   StyleSheet , Pressable, Dimensions} from 'react-native';
 import {
   AppleButton,
   appleAuth,
@@ -10,6 +11,12 @@ import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-community/async-storage';
 import {login, getProfile} from '@react-native-seoul/kakao-login';
 import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
+import firestore from '@react-native-firebase/firestore';
+
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from './RootStackParamList';
+
+export type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">
 
 const signInWithKakao = async navigation => {
   const token = await login();
@@ -32,8 +39,6 @@ const GetKaKaoProfile = async navigation => {
   RegisterIdentityToken(Profile.id);
   navigation.navigate('BottomTab');
 };
-
-
 
 async function RegisterIdentityToken(IdentityToken:any, navigation:any) {
   try {
@@ -112,26 +117,62 @@ async function onAppleButtonPress(navigation: any) {
   }
 }
 
-const LoginWithEmail = async (navigation:any) => {
-
-  try {
-    const result = await signIn({email: "apk8269@gmail.com", password:"123456"})
-    // console.log(result)
-    let uid = result.user.email
-    RegisterIdentityToken(uid, navigation)
-
-  } 
-  catch (error) {
-    if(error.code === "auth/wrong-password") {
-      Alert.alert("이메일은 존재하나 비밀번호가 다릅니다.")
-      //  == 추천인 코드가 다른상황 
-    }
-    if(error.code === "auth/user-not-found") {
-      Alert.alert("해당 이메일이 없습니다. 다시한번 이메일을 확인해주세요")
-      // 추천인 코드는 있으나, 
-    }
-    
+const ValidInvitationCodeLength = (InvitationCode:string) => {
+  if(InvitationCode.length >= 7 && InvitationCode[6] == 'M' || InvitationCode[6] =="G" ) {
+    return true
   }
+
+  return false
+}
+
+const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
+
+  let Valid = ValidInvitationCodeLength(InvitationCode)
+  if(Valid == false){
+    return
+  }
+
+  let Gender = InvitationCode[6]
+
+  let DocName = 'InvitationCodeList'
+
+  if(Gender == 'M') {
+    DocName = 'Man' + DocName
+  } else if(Gender == 'G') {
+    DocName = 'Girl' + DocName
+  } 
+
+  firestore()
+  .collection(`Recommendation`)
+  .doc(DocName)
+  .get()
+  .then(doc => {
+    let datalist:any[] = doc.data()?.CaseA
+
+    let Validate = 0
+    datalist.map((data,index)=>{
+      console.log(data?.InvitationCode)
+      if(InvitationCode == data.InvitationCode && data.Used == false) {
+        // 초대코드가 존재한 경우 
+        Validate = 1
+      } else if(InvitationCode == data.InvitationCode && data.Used == true){
+        // 초대코드는 있으나 사용된경우
+        Validate = 2
+      } 
+    })
+    return Validate
+  }).then(async (Value)=>{
+    if(Value == 1){
+      navigation.navigate('RegisterScreen2', {
+        InvitationCode: InvitationCode,
+        Gender:Gender
+      })
+    } else if (Value == 0){
+      Alert.alert("존재하지 않는 초대코드입니다.")
+    } else if (Value == 2){
+      Alert.alert("이미 사용된 초대코드입니다")
+    } 
+  })
 }
 
 const RegisterInputGenerater = (props:any) => {
@@ -153,125 +194,38 @@ const RegisterInputGenerater = (props:any) => {
   );
 };
 
-function RegisterScreen() {
 
-  const KaKaoLoginButton = () => {
-    return (
-      <Button 
-      title="kakao login"
-      onPress={async () => {
-        signInWithKakao(navigation);
-      }}>
-      </Button>
-    )
-   
-  }
 
-  const AppleLoginButton =  <AppleButton
-  buttonStyle={AppleButton.Style.BLACK}
-  buttonType={AppleButton.Type.SIGN_IN}
-  style={{
-    width: 160, // You must specify a width
-    height: 45, // You must specify a height
-  }}
-  onPress={() => onAppleButtonPress(navigation)}
-  />
-
-  
-  const navigation = useNavigation();
-
-  const [TextInputEmail , setTextInputEmail] = useState("")
-  const [TextInputPassword , setTextInputPassword] = useState("")
-
-  return (
-    <>
-      {/* <Button
-        title="removeItem"
-        onPress={() => {
-          RemoveIdentity();
-        }}></Button> */}
-      <SafeAreaView>
-        {/* {Platform.OS === 'android' ? (
-          KaKaoLoginButton()
-        ) : (
-          AppleLoginButton
-        )} */}
-
-          <RegisterInputGenerater
-            Name="Email"
-            value={TextInputEmail}
-            StateChange={setTextInputEmail}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-        <Button title="직접로그인" onPress={() => {
-          LoginWithEmail(navigation)
-        }}></Button>
-      </SafeAreaView>
-    </>
-  );
-}
-
-const TossReigsterScreen = () => {
+const TossReigsterScreen = ({route}: RegisterScreenProps) => {
   const [BorderBottomColor, setBorderBottomColor] = useState('lightgray');
-  const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
 
-  const [TextInputEmail , setTextInputEmail] = useState("")
-  const [TextInputPassword , setTextInputPassword] = useState("")
+  const [TextInputInvitationCode , setTextInputInvitationCode] = useState("AHfPqWM0")
   const navigation = useNavigation();
+  const {width, height} = Dimensions.get('window')
+  
+  const TextInputStyle = StyleSheet.create({
+    TextInput: {
+      width: '100%',
+      height: '50%',
+      borderBottomColor: BorderBottomColor,
+      borderBottomWidth: 1,
+      fontSize:18,
+      fontWeight: '600',
+      color:'black',
+      backgroundColor:'skyblue'
+    },
+    ViewStyle:{
+      width: '100%',
+      height: '40%',
+      marginTop: '5%',
+      display: 'flex',
+      justifyContent: 'center',
+    }
+  })
 
-
-  const EmailTextInput = () => (
+  const InvitationCode = () => (
     <View
-      style={{
-        width: '100%',
-        height: '40%',
-        marginTop: '5%',
-        display: 'flex',
-        justifyContent: 'center',
-      }}>
-      <Text
-        style={{
-          color: 'lightgray',
-        }}>
-        이메일 입력
-      </Text>
-      <TextInput
-        style={{
-          width: '100%',
-          height: '50%',
-          // backgroundColor: 'white',
-          borderBottomColor: BorderBottomColor,
-          borderBottomWidth: 1,
-          fontSize:18,
-          fontWeight: '600',
-          color:'black'
-        }}
-        placeholder="가입하신 이메일을 입력해주세요"
-        onFocus={() => {
-          setBorderBottomColor('#0064FF');
-        }}
-        onEndEditing={() => {
-          setBorderBottomColor('lightgray');
-        }}
-        value={TextInputEmail}
-        onChangeText={value => {
-          setTextInputEmail(value);
-        }}
-      />
-    </View>
-  );
-
-  const PasswordTextInput = () => (
-    <View
-      style={{
-        width: '100%',
-        height: '40%',
-        marginTop: '5%',
-        display: 'flex',
-        justifyContent: 'center',
-      }}>
+      style={TextInputStyle.ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -279,27 +233,20 @@ const TossReigsterScreen = () => {
         초대코드 입력
       </Text>
       <TextInput
-        style={{
-          width: '100%',
-          height: '50%',
-          // backgroundColor: 'white',
-          borderBottomColor: BorderBottomColor2,
-          borderBottomWidth: 1,
-          fontSize:18,
-          fontWeight: '600',
-          color:'black'
-
-        }}
+        style={
+          TextInputStyle.TextInput
+        }
         placeholder="초대코드를 입력해주세요"
+        placeholderTextColor={'lightgray'}
         onFocus={() => {
-          setBorderBottomColor2('#0064FF');
+          setBorderBottomColor('#0064FF');
         }}
         onEndEditing={() => {
-          setBorderBottomColor2('lightgray');
+          setBorderBottomColor('lightgray');
         }}
-        value={TextInputPassword}
+        value={TextInputInvitationCode}
         onChangeText={value => {
-          setTextInputPassword(value);
+          setTextInputInvitationCode(value);
         }}
       />
     </View>
@@ -316,7 +263,6 @@ const TossReigsterScreen = () => {
         style={{
           width: '90%',
           height: '100%',
-          // backgroundColor: 'red',
           marginLeft: '5%',
         }}>
         <View
@@ -341,16 +287,16 @@ const TossReigsterScreen = () => {
           style={{
             height: '50%',
             width: '100%',
+            // backgroundColor:'red'
           }}>
-          {EmailTextInput()}
-          {PasswordTextInput()}
+          {InvitationCode()}
         </View>
 
         <View style={styles.CheckBox}>
         <Pressable
           style={styles.CheckBt}
           onPress={() => {
-            LoginWithEmail(navigation)
+            ValidateInvitationCode(TextInputInvitationCode, navigation)
           }}>
           <Text style={styles.CheckText}>다음</Text>
         </Pressable>
@@ -374,7 +320,8 @@ const styles = StyleSheet.create({
     height:'10%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0064FF'
+    backgroundColor: '#0064FF',
+    borderRadius:25
   },
   CheckText: {
     fontSize: 16,
@@ -425,7 +372,68 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'black',
   },
+  
 });
 
 export default TossReigsterScreen;
 
+
+// function RegisterScreen() {
+
+//   const KaKaoLoginButton = () => {
+//     return (
+//       <Button 
+//       title="kakao login"
+//       onPress={async () => {
+//         signInWithKakao(navigation);
+//       }}>
+//       </Button>
+//     )
+   
+//   }
+
+//   const AppleLoginButton =  <AppleButton
+//   buttonStyle={AppleButton.Style.BLACK}
+//   buttonType={AppleButton.Type.SIGN_IN}
+//   style={{
+//     width: 160, // You must specify a width
+//     height: 45, // You must specify a height
+//   }}
+//   onPress={() => onAppleButtonPress(navigation)}
+//   />
+
+  
+//   const navigation = useNavigation();
+
+//   const [TextInputEmail , setTextInputEmail] = useState("")
+//   const [TextInputPassword , setTextInputPassword] = useState("")
+
+//   return (
+//     <>
+//       {/* <Button
+//         title="removeItem"
+//         onPress={() => {
+//           RemoveIdentity();
+//         }}></Button> */}
+//       <SafeAreaView>
+//         {/* {Platform.OS === 'android' ? (
+//           KaKaoLoginButton()
+//         ) : (
+//           AppleLoginButton
+//         )} */}
+
+//           <RegisterInputGenerater
+//             Name="Email"
+//             value={TextInputEmail}
+//             StateChange={setTextInputEmail}
+//             autoCapitalize="none"
+//             autoCorrect={false}
+//           />
+
+//         <Button title="직접로그인" onPress={() => {
+//           LoginWithEmail(navigation)
+//         }}></Button>
+//       </SafeAreaView>
+//     </>
+//   );
+// }

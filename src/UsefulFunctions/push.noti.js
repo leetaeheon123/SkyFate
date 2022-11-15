@@ -49,7 +49,6 @@ class LocalNotificationService {
             userInteraction: false,
             playSound: true, // (optional) default: true
             soundName: 'default', // (optional) Sound to play when the notification is shown. Value of 'default' plays the default sound. It can be set to a custom sound such as 'android.resource://com.xyz/raw/my_sound'. It will look for the 'my_sound' audio file in 'res/raw' directory and play it. default: 'default' (default sound is played)
-            // number: 10, // (optional) Valid 32 bit integer specified as string. default: none (Cannot be zero)
             // Android only Properties
             ...this.buildAndroidNotification(id, title, message, data, options),
             // IOS and Android properties
@@ -57,6 +56,10 @@ class LocalNotificationService {
             // IOS and Android properties
           })
         : PushNotification.localNotification({
+            channelId: 'your-channel-id', // (required) channelId, if the channel doesn't exist, notification will not trigger.
+            title: title || '',
+            message: message || '',
+            userInteraction: false,
             /* Android Only Properties */
             ticker: 'My Notification Ticker', // (optional)
             ongoing: false, // (optional) set whether this is an "ongoing" notification

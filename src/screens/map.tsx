@@ -398,6 +398,8 @@ const UpdateMyLocation = async (userEmail: string ,Memo:string, PeopleNum:Number
     Memo = "."
   }
 
+  
+
   const EpochTime = +new Date()
   let ReplaceUserEmail = userEmail.replace('.com','')
 
@@ -417,6 +419,15 @@ const UpdateMyLocation = async (userEmail: string ,Memo:string, PeopleNum:Number
 
 
   // 현재 위치를 db에 업데이트시키는 코드 
+}
+
+const RemoveIdentityToken = async () => {
+  AsyncStorage.removeItem('IdentityToken');
+  // let id = await AsyncStorage.getItem('IdentityToken');
+  // let id2 = await AsyncStorage.getItem("ProfileImageUrl");
+
+  // console.log(id, id2)
+
 }
 // foreground에서 푸쉬알림 보기 테스트 
 function SendPushNotificationInforeground() {
@@ -497,7 +508,7 @@ const MapScreen = () => {
 
   const onOpenNotification = (notify: any) => {
     console.log('[App] onOpenNotification : notify :', notify);
-    // Alert.alert('누군가가 위치 공유를 시작했습니다!');
+    Alert.alert('누군가가 위치 공유를 시작했습니다!');
     // Alert.alert('Open Notification : notify.body :'+ );
 
   }
@@ -552,11 +563,13 @@ const MapScreen = () => {
     console.log(day)
     // day가 오후 10시 ~ 새벽 7시 
     if(day >= 22 && day <=24 || day >= 1 && day <= 7) {
-      console.log("get")
+        UpdateMyLocation(myContext.userEmail,Memo, PeopleNum, MoenyRadioBox, location)
+        setGpsOn(true)
+        ChangeModalVisiable()
+    } else {
+      Alert.alert("10시부터 새벽7시까지 이용 가능합니다.")
     }
-    // UpdateMyLocation(myContext.userEmail,Memo, PeopleNum, MoenyRadioBox, location)
-    // setGpsOn(true)
-    // ChangeModalVisiable()
+ 
   }
   const {data, isLoading, refetch} = useQuery("QueryLocation", Get_Query_AllLocation)
 
@@ -803,7 +816,8 @@ const MapScreen = () => {
               // Frist
             },styles.NoFlexDirectionCenter]}
             onPress={()=>{
-              forceUpdate()
+              RemoveIdentityToken()
+              // forceUpdate()
               // ChangeMyProfileImage(myContext.userEmail)
             }}>
               <Icon name='person' size={26} color='white'/>

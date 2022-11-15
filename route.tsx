@@ -1,11 +1,13 @@
 import React from 'react';
-import {View, Text, SafeAreaView} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+
 import MapScreen from './src/screens/map';
 import TrackUserLocation from './src/screens/map';
 
 import ManToManBoardWriteScreen from './src/screens/ManToManBoardWrite';
 import RegisterScreen from './src/screens/Register';
+import RegisterScreen2 from './src/screens/Register2';
+
 import IndicatorScreen from './src/screens/Indicator';
 
 import ManToManBoardScreen from './src/screens/ManToManBorad';
@@ -18,7 +20,9 @@ import TestGifScreen from './TestGif';
 import ImageUploadSample from './src/screens/ImageUploadSample';
 import PhoneRing from './src/screens/PhoneRing';
 
-const Stack = createNativeStackNavigator();
+import {RootStackParamList} from './src/screens/RootStackParamList';
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const Routes = () => {
   // 성별 가져오는 코드 필요합니다 - 2022 10 09 오후1시.
@@ -50,6 +54,11 @@ const Routes = () => {
         <Stack.Screen
           name="RegisterScreen"
           component={RegisterScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="RegisterScreen2"
+          component={RegisterScreen2}
           options={{headerShown: false}}
         />
         <Stack.Screen
