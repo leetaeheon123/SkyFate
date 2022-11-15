@@ -421,12 +421,15 @@ const UpdateMyLocation = async (userEmail: string ,Memo:string, PeopleNum:Number
   // 현재 위치를 db에 업데이트시키는 코드 
 }
 
+const CheckIdentityToken = async () => {
+let id = await AsyncStorage.getItem('IdentityToken');
+  let id2 = await AsyncStorage.getItem("ProfileImageUrl");
+
+  console.log(id, id2)
+}
 const RemoveIdentityToken = async () => {
   AsyncStorage.removeItem('IdentityToken');
-  // let id = await AsyncStorage.getItem('IdentityToken');
-  // let id2 = await AsyncStorage.getItem("ProfileImageUrl");
-
-  // console.log(id, id2)
+  
 
 }
 // foreground에서 푸쉬알림 보기 테스트 

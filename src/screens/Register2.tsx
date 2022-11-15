@@ -49,17 +49,17 @@ const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:strin
   }
 }
 
-const SignUpWithEmail = async (navigation:any, Email:string, Password:string , Gender:string) => {
+const SignUpWithEmail = async (navigation:any, Email:string, Password:string , Gender:string, InvitationCode:string) => {
   let BasicImageUrl = BasicImage(Gender)
   let GenderNumber = ParseIntGender(Gender)
   
   try {
-    // const result = await signUp({email: Email, password:Password})
-    // Alert.alert("회원가입 완료")
-    // let UserEmail = result.user.email
-    // RegisterIdentityToken(UserEmail, navigation,BasicImageUrl)
-    // SignUpFirestore(Email,GenderNumber, BasicImageUrl)
-    CheckInvitationCode()
+    const result = await signUp({email: Email, password:Password})
+    Alert.alert("회원가입 완료")
+    let UserEmail = result.user.email
+    RegisterIdentityToken(UserEmail, navigation,BasicImageUrl)
+    SignUpFirestore(Email,GenderNumber, BasicImageUrl)
+    CheckInvitationCode(InvitationCode)
   } 
   catch (error) {
     if (error.code === 'auth/email-already-in-use') {
@@ -103,16 +103,26 @@ const ParseIntGender = (Gender:string) => {
   return 0 
 }
 
-const CheckInvitationCode = () => {
+const CheckInvitationCode = (InvitationCode:string) => {
   firestore()
   .collection("InvitationCodeList")
-  .where('InvitationCode', '==', 'AHfPqWM0')
+  .where('InvitationCode', '==', InvitationCode)
   .get()
   .then((querySnapshot)=>{
-    console.log(querySnapshot.size)
+    let InvitationCodeNumber
     querySnapshot.forEach((doc) => {
-      console.log(doc.id, "=>", doc.data());
+      InvitationCodeNumber = doc.data().Number
+      console.log(doc.id, "=>", InvitationCodeNumber);
     });
+
+    return InvitationCodeNumber
+  }).then((InvitationCodeNumber)=>{
+    firestore()
+    .collection("InvitationCodeList")
+    .doc(String(InvitationCodeNumber))
+    .update({
+      Used:true
+    })
   })
 }
 
@@ -246,7 +256,7 @@ const TossReigsterScreen2 = ({navigation, route}:Register2ScreenProps) => {
         <Pressable
           style={styles.CheckBt}
           onPress={() => {
-            SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,Gender)
+            SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,Gender,InvitationCode)
           }}>
           <Text style={styles.CheckText}>다음</Text>
         </Pressable>

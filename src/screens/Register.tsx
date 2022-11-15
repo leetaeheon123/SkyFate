@@ -143,6 +143,87 @@ const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
   } 
 
   firestore()
+  .collection("InvitationCodeList")
+  .where('InvitationCode', '==', InvitationCode)
+  .get()
+  .then((querySnapshot)=>{
+    let Valid = 0
+    let length = querySnapshot.size
+    console.log(length)
+    querySnapshot.forEach((doc) => {
+      if(length == 1 && doc.data().Used == false) {
+        Valid = 1
+      } else if (length == 1 && doc.data().Used == true){
+        Valid = 2
+      }
+    });
+    return Valid
+  }).then(async (Valid)=>{
+    if(Valid == 1){
+      navigation.navigate('RegisterScreen2', {
+        InvitationCode: InvitationCode,
+        Gender:Gender
+      })
+    } else if (Valid == 0){
+      Alert.alert("존재하지 않는 초대코드입니다.")
+    } else if (Valid == 2){
+      Alert.alert("이미 사용된 초대코드입니다")
+    } 
+  })
+
+  // firestore()
+  // .collection(`Recommendation`)
+  // .doc(DocName)
+  // .get()
+  // .then(doc => {
+  //   let datalist:any[] = doc.data()?.CaseA
+
+  //   let Validate = 0
+  //   datalist.map((data,index)=>{
+  //     console.log(data?.InvitationCode)
+  //     if(InvitationCode == data.InvitationCode && data.Used == false) {
+  //       // 초대코드가 존재한 경우 
+  //       Validate = 1
+  //     } else if(InvitationCode == data.InvitationCode && data.Used == true){
+  //       // 초대코드는 있으나 사용된경우
+  //       Validate = 2
+  //     } 
+  //   })
+  //   return Validate
+  // }).then(async (Value)=>{
+  //   if(Value == 1){
+  //     navigation.navigate('RegisterScreen2', {
+  //       InvitationCode: InvitationCode,
+  //       Gender:Gender
+  //     })
+  //   } else if (Value == 0){
+  //     Alert.alert("존재하지 않는 초대코드입니다.")
+  //   } else if (Value == 2){
+  //     Alert.alert("이미 사용된 초대코드입니다")
+  //   } 
+  // })
+
+
+}
+
+const ValidateInvitationCodeCase2 = (InvitationCode:string, navigation:any) => {
+
+  let Valid = ValidInvitationCodeLength(InvitationCode)
+  if(Valid == false){
+    return
+  }
+
+  let Gender = InvitationCode[6]
+
+  let DocName = 'InvitationCodeList'
+
+  if(Gender == 'M') {
+    DocName = 'Man' + DocName
+  } else if(Gender == 'G') {
+    DocName = 'Girl' + DocName
+  } 
+
+  firestore()
   .collection(`Recommendation`)
   .doc(DocName)
   .get()
@@ -173,6 +254,8 @@ const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
       Alert.alert("이미 사용된 초대코드입니다")
     } 
   })
+
+
 }
 
 const RegisterInputGenerater = (props:any) => {
