@@ -7,6 +7,7 @@ import TrackUserLocation from './src/screens/map';
 import ManToManBoardWriteScreen from './src/screens/ManToManBoardWrite';
 import RegisterScreen from './src/screens/Register';
 import RegisterScreen2 from './src/screens/Register2';
+import TossLogin from './src/screens/Login';
 
 import IndicatorScreen from './src/screens/Indicator';
 
@@ -59,6 +60,11 @@ const Routes = () => {
         <Stack.Screen
           name="RegisterScreen2"
           component={RegisterScreen2}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="LoginScreen"
+          component={TossLogin}
           options={{headerShown: false}}
         />
         <Stack.Screen

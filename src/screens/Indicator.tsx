@@ -8,7 +8,7 @@ async function _bootstrapAsync(navigation:any) {
 
   // This will switch to the App screen or Auth screen and this loading
   // screen will be unmounted and thrown away.
-  navigation.navigate(userToken ? 'MapScreen' : 'RegisterScreen');
+  navigation.navigate(userToken ? 'MapScreen' : 'LoginScreen');
 }
 
 function IndicatorScreen() {

@@ -804,30 +804,27 @@ const MapScreen = () => {
        
       </SafeAreaView> 
       : null}
-
-      {myContext.userGender == "Grils" ? 
-          <View style={[
-            styles.NoFlexDirectionCenter,
-            MapScreenStyles.ChangeProfileView]}>
-            <TouchableOpacity 
-            style={[{
-              backgroundColor:'#202632',
-              // backgroundColor:'red',
-              borderRadius:25,
-              width:30,
-              height:30
-              // Frist
-            },styles.NoFlexDirectionCenter]}
-            onPress={()=>{
-              RemoveIdentityToken()
-              // forceUpdate()
-              // ChangeMyProfileImage(myContext.userEmail)
-            }}>
-              <Icon name='person' size={26} color='white'/>
-            </TouchableOpacity>
-
-          </View> 
-      :null}         
+      <View style={[
+        styles.NoFlexDirectionCenter,
+        MapScreenStyles.ChangeProfileView]}>
+        <TouchableOpacity 
+        style={[{
+          backgroundColor:'#202632',
+          // backgroundColor:'red',
+          borderRadius:25,
+          width:30,
+          height:30
+          // Frist
+        },styles.NoFlexDirectionCenter]}
+        onPress={()=>{
+          RemoveIdentityToken()
+          // forceUpdate()r
+          // ChangeMyProfileImage(myContext.userEmail)
+        }}>
+          <Icon name='person' size={26} color='white'/>
+        </TouchableOpacity>
+      </View> 
+        
 
       {myContext.userGender == "Grils" ? 
        <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}
@@ -836,7 +833,7 @@ const MapScreen = () => {
         ChangeModalVisiable()
         }}
        >
-        <Text style={{color:'white'}}>시작!!</Text>
+        <Text style={{color:'white'}}>시작하기</Text>
       </TouchableOpacity>
       : null}
     </View>
@@ -1056,13 +1053,14 @@ const MapScreenStyles = StyleSheet.create({
   },
 
   StartView :{
-    width:'20%',
+    width:'90%',
     height:50,
-    backgroundColor:'#202632',
+    // backgroundColor:'#202632',
+    backgroundColor:'#202124',
     position:'absolute',
-    left:'40%',
+    left:'5%',
     bottom:'10%',
-    borderRadius:25
+    borderRadius:10
   },
 
   GrilsMarker: {
