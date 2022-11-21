@@ -8,6 +8,8 @@ async function _bootstrapAsync(navigation:any) {
 
   // This will switch to the App screen or Auth screen and this loading
   // screen will be unmounted and thrown away.
+
+  // 원래는 LoginScreen이 아니라 ValidInvitationCodeScreen
   navigation.navigate(userToken ? 'MapScreen' : 'LoginScreen');
 }
 

@@ -1,49 +1,23 @@
 import React, {useState} from 'react';
-import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput,
-   StyleSheet , Pressable, Dimensions} from 'react-native';
-import {
-  AppleButton,
-  appleAuth,
-} from '@invertase/react-native-apple-authentication';
+import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
 
-import {useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-community/async-storage';
-import {login, getProfile} from '@react-native-seoul/kakao-login';
 import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
 import firestore from '@react-native-firebase/firestore';
 
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import {NativeStackScreenProps} from "@react-navigation/native-stack"
 import { RootStackParamList } from './RootStackParamList';
 
-export type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">
+export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">;
 
-const signInWithKakao = async navigation => {
-  const token = await login();
 
-  // console.warn(JSON.stringify(token));
-  // Alert.alert('Alert Title', `${JSON.stringify(token)}`, [
-  //   {
-  //     text: 'Cancel',
-  //     onPress: () => console.log('Cancel Pressed'),
-  //     style: 'cancel',
-  //   },
-  //   {text: 'OK', onPress: () => console.log('OK Pressed')},
-  // ]);
-  GetKaKaoProfile(navigation);
-};
+async function RegisterIdentityToken(IdentityToken:any, navigation:any,BasicImageUrl:any) {
 
-const GetKaKaoProfile = async navigation => {
-  const Profile = await getProfile();
-
-  RegisterIdentityToken(Profile.id);
-  navigation.navigate('BottomTab');
-};
-
-async function RegisterIdentityToken(IdentityToken:any, navigation:any) {
+  
   try {
     await AsyncStorage.setItem('IdentityToken', IdentityToken);
-    await AsyncStorage.setItem("ProfileImageUrl", "https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FGrils%2FBasicSetting%2FBasicSetting.jpeg?alt=media&token=fd69ef3f-cde5-4a36-a657-765f8ba9d42d");
+    await AsyncStorage.setItem("ProfileImageUrl", BasicImageUrl);
     
     navigation.navigate('MapScreen');
   } catch (error) {
@@ -52,241 +26,142 @@ async function RegisterIdentityToken(IdentityToken:any, navigation:any) {
   }
 }
 
-// function GetIdentityToken(va) {
-//   AsyncStorage.getItem('IdentityToken', (err, result) => {
-//     // console.log(result);
-//     va = result;
-//     console.log('va', va);
-//   });
 
-//   return va;
+const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:string) => {
 
-//   // return value;
-// }
+  try {
+    const result = await signIn({email: Email, password:InvitationCode})
+    // console.log(result)
+    let uid = result.user.email
+    RegisterIdentityToken(uid, navigation)
 
-async function onAppleButtonPress(navigation: any) {
-  const appleAuthRequestResponse = await appleAuth.performRequest({
-    requestedOperation: appleAuth.Operation.LOGIN,
-    requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-  });
-
-  // const {email, email_verified, is_private_email, sub} = jwt_decode(
-  //   appleAuthRequestResponse.identityToken,
-  // );
-  // console.log(email, email_verified, is_private_email, sub);
-
-  if (!appleAuthRequestResponse.identityToken) {
-    throw new Error('Apple Sign-In failed - no identify token returned');
-  }
-  // firebase apple id 등록과 관련된 코드, 일단 주석처리해놈 - 704
-  const {identityToken, nonce} = appleAuthRequestResponse;
-
-  const appleCredential = auth.AppleAuthProvider.credential(
-    identityToken,
-    nonce,
-  );
-
-  const credentialState = await appleAuth.getCredentialStateForUser(
-    appleAuthRequestResponse.user,
-  );
-
-  // const userCredential = await firebase
-  //   .auth()
-  //   .signInWithCredential(appleCredential);
-  // user is now signed in, any Firebase `onAuthStateChanged` listeners you have will trigger
-  // console.warn(`Firebase authenticated via Apple, UID: ${userCredential.user.uid}`);
-
-  console.log('authorizationCode', appleAuthRequestResponse.authorizationCode);
-  console.log('scopes', appleAuthRequestResponse.authorizedScopes);
-  console.log('email', appleAuthRequestResponse.email);
-  console.log('fullname', appleAuthRequestResponse.fullName);
-  console.log('identifyToken', appleAuthRequestResponse.identityToken);
-  console.log('nonce', appleAuthRequestResponse.nonce);
-  console.log('state', appleAuthRequestResponse.state);
-  console.log('user', appleAuthRequestResponse.user);
-  console.log('authorized', appleAuth.State.AUTHORIZED);
-  console.log('crentialstate', credentialState);
-  // console.log('applecredential', appleCredential);
-
-  // use credentialState response to ensure the user is authenticated
-  // identityToken을 식별자로 일단 앱을 배포한다.
-  if (credentialState === appleAuth.State.AUTHORIZED) {
-    (appleAuthRequestResponse.user, navigation);
-    auth().signInWithCredential(appleCredential);
-    // navigation.navigate('SelectSubJect');
-  }
-}
-
-const ValidInvitationCodeLength = (InvitationCode:string) => {
-  if(InvitationCode.length >= 7 && InvitationCode[6] == 'M' || InvitationCode[6] =="G" ) {
-    return true
-  }
-
-  return false
-}
-
-const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
-
-  let Valid = ValidInvitationCodeLength(InvitationCode)
-  if(Valid == false){
-    return
-  }
-
-  let Gender = InvitationCode[6]
-
-  let DocName = 'InvitationCodeList'
-
-  if(Gender == 'M') {
-    DocName = 'Man' + DocName
-  } else if(Gender == 'G') {
-    DocName = 'Girl' + DocName
   } 
+  catch (error) {
+    if(error.code === "auth/wrong-password") {
+      Alert.alert("이메일은 존재하나 비밀번호가 다릅니다.")
+      //  == 추천인 코드가 다른상황 
+    }
+    if(error.code === "auth/user-not-found") {
+      Alert.alert("해당 이메일이 없습니다. 다시한번 이메일을 확인해주세요")
+      // 추천인 코드는 있으나, 
+    }
+    
+  }
+}
 
+const SignUpWithEmail = async (navigation:any, Email:string, Password:string , Gender:string, InvitationCode:string, PkNumber:number) => {
+  let BasicImageUrl = BasicImage(Gender)
+  let GenderNumber = ParseIntGender(Gender)
+  
+  try {
+    const result = await signUp({email: Email, password:Password})
+    Alert.alert("회원가입 완료")
+    // await InvitationCodeToFriend를 서버로부터 가져오는 함수 
+    let UserEmail = result.user.email
+    RegisterIdentityToken(UserEmail, navigation,BasicImageUrl)
+    await SignUpFirestore(Email,GenderNumber, BasicImageUrl, InvitationCode,PkNumber)
+    ChangeUsedInvitationCode(InvitationCode)
+
+    // InvitationCodeList/{Number} Document에다가 InvitationCodeToFriend 추가하는 로직이 필요
+
+    // UpdateInvitationCodeToFriend를 업데이트해주는 코드 
+    UpdateInvitationCodeToFriend(PkNumber)
+  } 
+  catch (error) {
+    if (error.code === 'auth/email-already-in-use') {
+      Alert.alert("이메일이 이미 사용되었습니다")
+    }
+
+    if (error.code === 'auth/invalid-email') {
+      Alert.alert("해당 이메일값이 유효하지 않습니다. 다시한번 이메일을 확인해주세요")
+    }
+
+    if (error.code ==='auth/weak-password') {
+      Alert.alert('비밀번호가 6자리 이상이여야 합니다.')
+
+    }
+    console.log(error.code) 
+  }
+}
+
+const SignUpFirestore = async (Email:string,GenderNumber:number, BasicImageUrl:any, InvitationCode:string,
+  PkNumber:number) => {
+
+
+  firestore().collection("UserList").doc(Email).set({
+    Gender:GenderNumber,
+    ProfileImageUrl:BasicImageUrl,
+    InvitationCode: InvitationCode,
+    PkNumber: PkNumber
+  })
+}
+
+const BasicImage = (Gender:string) => {
+  if(Gender =="M"){
+    return "https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FMans%2FBasicSetting%2FBasicSettingM.jpeg?alt=media&token=1e7d09a6-81e7-42bf-a01c-ad36fab58069"
+  }else if(Gender == "G"){
+    return "https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FGrils%2FBasicSetting%2FBasicSetting.jpeg?alt=media&token=fd69ef3f-cde5-4a36-a657-765f8ba9d42d"
+  }
+  return ""
+}
+
+const ParseIntGender = (Gender:string) => {
+  if(Gender == "M") {
+    return 1
+  } else if( Gender == "G"){
+    return 2
+  } 
+  return 0 
+}
+
+const ChangeUsedInvitationCode = (InvitationCode:string) => {
   firestore()
   .collection("InvitationCodeList")
   .where('InvitationCode', '==', InvitationCode)
   .get()
   .then((querySnapshot)=>{
-    let Valid = 0
-    let length = querySnapshot.size
-    console.log(length)
+    let InvitationCodeNumber
     querySnapshot.forEach((doc) => {
-      if(length == 1 && doc.data().Used == false) {
-        Valid = 1
-      } else if (length == 1 && doc.data().Used == true){
-        Valid = 2
-      }
+      InvitationCodeNumber = doc.data().Number
+      console.log(doc.id, "=>", InvitationCodeNumber);
     });
-    return Valid
-  }).then(async (Valid)=>{
-    if(Valid == 1){
-      navigation.navigate('RegisterScreen2', {
-        InvitationCode: InvitationCode,
-        Gender:Gender
-      })
-    } else if (Valid == 0){
-      Alert.alert("존재하지 않는 초대코드입니다.")
-    } else if (Valid == 2){
-      Alert.alert("이미 사용된 초대코드입니다")
-    } 
-  })
 
-  // firestore()
-  // .collection(`Recommendation`)
-  // .doc(DocName)
-  // .get()
-  // .then(doc => {
-  //   let datalist:any[] = doc.data()?.CaseA
-
-  //   let Validate = 0
-  //   datalist.map((data,index)=>{
-  //     console.log(data?.InvitationCode)
-  //     if(InvitationCode == data.InvitationCode && data.Used == false) {
-  //       // 초대코드가 존재한 경우 
-  //       Validate = 1
-  //     } else if(InvitationCode == data.InvitationCode && data.Used == true){
-  //       // 초대코드는 있으나 사용된경우
-  //       Validate = 2
-  //     } 
-  //   })
-  //   return Validate
-  // }).then(async (Value)=>{
-  //   if(Value == 1){
-  //     navigation.navigate('RegisterScreen2', {
-  //       InvitationCode: InvitationCode,
-  //       Gender:Gender
-  //     })
-  //   } else if (Value == 0){
-  //     Alert.alert("존재하지 않는 초대코드입니다.")
-  //   } else if (Value == 2){
-  //     Alert.alert("이미 사용된 초대코드입니다")
-  //   } 
-  // })
-
-
-}
-
-const ValidateInvitationCodeCase2 = (InvitationCode:string, navigation:any) => {
-
-  let Valid = ValidInvitationCodeLength(InvitationCode)
-  if(Valid == false){
-    return
-  }
-
-  let Gender = InvitationCode[6]
-
-  let DocName = 'InvitationCodeList'
-
-  if(Gender == 'M') {
-    DocName = 'Man' + DocName
-  } else if(Gender == 'G') {
-    DocName = 'Girl' + DocName
-  } 
-
-  firestore()
-  .collection(`Recommendation`)
-  .doc(DocName)
-  .get()
-  .then(doc => {
-    let datalist:any[] = doc.data()?.CaseA
-
-    let Validate = 0
-    datalist.map((data,index)=>{
-      console.log(data?.InvitationCode)
-      if(InvitationCode == data.InvitationCode && data.Used == false) {
-        // 초대코드가 존재한 경우 
-        Validate = 1
-      } else if(InvitationCode == data.InvitationCode && data.Used == true){
-        // 초대코드는 있으나 사용된경우
-        Validate = 2
-      } 
+    return InvitationCodeNumber
+  }).then((InvitationCodeNumber)=>{
+    firestore()
+    .collection("InvitationCodeList")
+    .doc(String(InvitationCodeNumber))
+    .update({
+      Used:true
     })
-    return Validate
-  }).then(async (Value)=>{
-    if(Value == 1){
-      navigation.navigate('RegisterScreen2', {
-        InvitationCode: InvitationCode,
-        Gender:Gender
-      })
-    } else if (Value == 0){
-      Alert.alert("존재하지 않는 초대코드입니다.")
-    } else if (Value == 2){
-      Alert.alert("이미 사용된 초대코드입니다")
-    } 
   })
-
-
 }
 
-const RegisterInputGenerater = (props:any) => {
-  return (
-    <View style={styles.InputBox}>
-      <Text style={styles.text}>{props.Name}</Text>
-      <TextInput
-        value={props.value}
-        style={styles.input}
-        onChangeText={value => {
-          props.StateChange(value);
-        }}
-        // autoCapitalize={props.autoCapitalize}
-        // autoCapitalize='none'
-        autoCorrect={props.autoCorrect}>
-        </TextInput>
-      <View style={styles.UnderLine} />
-    </View>
-  );
-};
+const UpdateInvitationCodeToFriend = (Number:number) => {
+  firestore()
+  .collection("InvitationCodeList")
+  .doc(String(Number))
+  .update({
+    InvitationCodeToFriend:''
+  })
 
-
-
-const TossReigsterScreen = ({route}: RegisterScreenProps) => {
-  const [BorderBottomColor, setBorderBottomColor] = useState('lightgray');
-
-  const [TextInputInvitationCode , setTextInputInvitationCode] = useState("AHfPqWM0")
-  const navigation = useNavigation();
-  const {width, height} = Dimensions.get('window')
   
-  const TextInputStyle = StyleSheet.create({
+}
+
+const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
+  const {InvitationCode} = route.params
+  const {Gender} = route.params
+  const {PkNumber} = route.params
+
+  // console.log(InvitationCode)
+
+  const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
+  const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
+
+  const [TextInputEmail , setTextInputEmail] = useState("")
+  const [TextInputPassword , setTextInputPassword] = useState("")
+  
+  const TextInputStyle =  (BorderBottomColor:any) =>  StyleSheet.create({
     TextInput: {
       width: '100%',
       height: '50%',
@@ -294,42 +169,66 @@ const TossReigsterScreen = ({route}: RegisterScreenProps) => {
       borderBottomWidth: 1,
       fontSize:18,
       fontWeight: '600',
-      color:'black',
-      backgroundColor:'skyblue'
+      color:'black'
     },
     ViewStyle:{
       width: '100%',
-      height: '40%',
-      marginTop: '5%',
-      display: 'flex',
-      justifyContent: 'center',
+        height: '40%',
+        marginTop: '5%',
+        display: 'flex',
+        justifyContent: 'center',
     }
   })
 
-  const InvitationCode = () => (
+  const EmailTextInput = () => (
     <View
-      style={TextInputStyle.ViewStyle}>
+      style={TextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
         }}>
-        초대코드 입력
+        이메일 입력
       </Text>
       <TextInput
-        style={
-          TextInputStyle.TextInput
-        }
-        placeholder="초대코드를 입력해주세요"
+        style={TextInputStyle(BorderBottomColor2).TextInput}
+        placeholder="가입하신 이메일을 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
-          setBorderBottomColor('#0064FF');
+          setBorderBottomColor2('#0064FF');
         }}
         onEndEditing={() => {
-          setBorderBottomColor('lightgray');
+          setBorderBottomColor2('lightgray');
         }}
-        value={TextInputInvitationCode}
+        value={TextInputEmail}
         onChangeText={value => {
-          setTextInputInvitationCode(value);
+          setTextInputEmail(value);
+        }}
+      />
+    </View>
+  );
+
+  const PasswordTextInput = () => (
+    <View
+    style={TextInputStyle(null).ViewStyle}>
+      <Text
+        style={{
+          color: 'lightgray',
+        }}>
+        비밀번호 입력
+      </Text>
+      <TextInput
+        style={TextInputStyle(BorderBottomColor3).TextInput}
+        placeholder="비밀번호를 입력해주세요"
+        placeholderTextColor={'lightgray'}
+        onFocus={() => {
+          setBorderBottomColor3('#0064FF');
+        }}
+        onEndEditing={() => {
+          setBorderBottomColor3('lightgray');
+        }}
+        value={TextInputPassword}
+        onChangeText={value => {
+          setTextInputPassword(value);
         }}
       />
     </View>
@@ -346,6 +245,7 @@ const TossReigsterScreen = ({route}: RegisterScreenProps) => {
         style={{
           width: '90%',
           height: '100%',
+          // backgroundColor: 'red',
           marginLeft: '5%',
         }}>
         <View
@@ -363,23 +263,23 @@ const TossReigsterScreen = ({route}: RegisterScreenProps) => {
               fontWeight: 'bold',
               color:'black'
             }}>
-            초대받은 번호로 등록을 시작해주세요
+            회원가입을 시작해주세요
           </Text>
         </View>
         <View
           style={{
             height: '50%',
             width: '100%',
-            // backgroundColor:'red'
           }}>
-          {InvitationCode()}
+          {EmailTextInput()}
+          {PasswordTextInput()}
         </View>
 
         <View style={styles.CheckBox}>
         <Pressable
           style={styles.CheckBt}
           onPress={() => {
-            ValidateInvitationCode(TextInputInvitationCode, navigation)
+            SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,Gender,InvitationCode)
           }}>
           <Text style={styles.CheckText}>다음</Text>
         </Pressable>
@@ -403,8 +303,7 @@ const styles = StyleSheet.create({
     height:'10%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0064FF',
-    borderRadius:25
+    backgroundColor: '#0064FF'
   },
   CheckText: {
     fontSize: 16,

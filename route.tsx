@@ -5,8 +5,8 @@ import MapScreen from './src/screens/map';
 import TrackUserLocation from './src/screens/map';
 
 import ManToManBoardWriteScreen from './src/screens/ManToManBoardWrite';
+import ValidInvitationCodeScreen from './src/screens/ValidInvitationCode';
 import RegisterScreen from './src/screens/Register';
-import RegisterScreen2 from './src/screens/Register2';
 import TossLogin from './src/screens/Login';
 
 import IndicatorScreen from './src/screens/Indicator';
@@ -53,13 +53,13 @@ const Routes = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="RegisterScreen"
-          component={RegisterScreen}
+          name="ValidInvitationCodeScreen"
+          component={ValidInvitationCodeScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="RegisterScreen2"
-          component={RegisterScreen2}
+          name="RegisterScreen"
+          component={RegisterScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen

@@ -7,6 +7,14 @@ const styles = StyleSheet.create({
     // marginTop: 100,
     backgroundColor: 'gray',
   },
+  W90ML5: {
+    width: '90%',
+    marginLeft: '5%',
+  },
+  FW500FS14: {
+    fontWeight: '500',
+    fontSize: 14,
+  },
   Marker: {
     width: 30,
     height: 30,

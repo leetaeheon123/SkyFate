@@ -1,6 +1,7 @@
 export type RootStackParamList = {
     InvitationCode: {
         InvitationCode: string
-        Gender:string
+        Gender:string,
+        PkNumber:number
     }
 }

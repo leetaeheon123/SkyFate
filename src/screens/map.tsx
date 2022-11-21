@@ -386,11 +386,11 @@ const UpdateMyLocation = async (userEmail: string ,Memo:string, PeopleNum:Number
 
   let CanPayNum;
   if(CanPayit == 1) {
-    CanPayNum = "O"
-  } else if(CanPayit == 2){
-    CanPayNum = "X"
-  } else {
     CanPayNum = "미정"
+  } else if(CanPayit == 2){
+    CanPayNum = "O"
+  } else if(CanPayit == 3){
+    CanPayNum = "X"
   }
 
 
@@ -540,11 +540,22 @@ const MapScreen = () => {
   const [ PeopleNum, setPeopleNum] = useState(1);
   const [ MoenyRadioBox, setMoneyRadioBox] = useState(0)
 
+
+
   const [second, setSecond] = useState<number>(180);
 
   const ChangeModalVisiable = () => {
     setModalVisiable(previousState => !previousState)
   }
+
+  // const ChangePeopleNum = (Fun:Function) => {
+  //   if(PeopleNum > 0){
+  //     Fun()
+  //   } else {
+
+  //   }
+
+  // }
 
   Counter(
     () => {
@@ -603,14 +614,22 @@ const MapScreen = () => {
     )
   }
 
-  const MinusIcon = <TouchableOpacity style={MapScreenStyles.MinusPeopleNumber}
-  onPress={() => {setPeopleNum(PeopleNum - 1)}}>
-  <AntDesgin name='minus' size={30} color="white"/>
+  const MinusIcon = <TouchableOpacity style={[styles.RowCenter,MapScreenStyles.MinusPeopleNumber]}
+  onPress={() => {
+    if(PeopleNum > 1) {
+      setPeopleNum(PeopleNum - 1)
+    }
+  }}>
+  <AntDesgin name='minus' size={16} color="black"/>
   </TouchableOpacity>
 
-  const PlusIcon = <TouchableOpacity style={MapScreenStyles.MinusPeopleNumber} 
-  onPress={() => {setPeopleNum(PeopleNum + 1)}}>
-  <AntDesgin name='plus' size={30} color="white"/>
+  const PlusIcon = <TouchableOpacity style={MapScreenStyles.PlusPeopleNumber} 
+  onPress={() => {
+    if(PeopleNum < 10) {
+      setPeopleNum(PeopleNum + 1)
+    }
+  }}>
+  <AntDesgin name='plus' size={16} color="black"/>
   </TouchableOpacity>
 
   return (
@@ -623,71 +642,96 @@ const MapScreen = () => {
         <SafeAreaView
           style={MapScreenStyles.Memomodal}
         >
-          <View style={{
-              display:'flex',
-              flexDirection:'row',
-              width:'100%',
-              height:50,
-            }}>
+          <Text style={{color:'white', fontSize:22, fontWeight:'500', marginLeft:'5%', marginBottom:20, marginTop:20}}>나의 상태 설정하기</Text>
+          <View style={[{height:96, }, styles.W90ML5]}>
+            <Text style={[MapScreenStyles.WhiteText, {fontSize:14, fontWeight:'500', marginBottom:8}]}>메모로 상태알리기</Text>
+            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>고객님의 상태, 위치, 정보를 50자 이내로 입력해주세요.</Text>
             <TextInput
               value={Memo}
               onChangeText={(text) => setMemo(text)}
               style={MapScreenStyles.MemoTextInput}>
-            </TextInput>
-
-            <TouchableOpacity 
-            style={[styles.RowCenter,MapScreenStyles.MoneyOption]}
-            onPress={()=>{
-              ChangeModalVisiable()}}
-            >
-              <MaterialIcons name='cancel' color="white" size={30}/>
-            </TouchableOpacity>            
+            </TextInput>    
           </View>
 
-            <View style={MapScreenStyles.PeopleNumOption}>
-              <View style={[styles.Row_OnlyColumnCenter]}>
-                <Icon name='person-add' size={30} color="white"/>
-                <Text style={{color:'white'}}>인원</Text>
-            </View>
-
-              <View style={[{width:'50%',justifyContent:'flex-end'}, styles.Row_OnlyColumnCenter]}>
+          <View style={[styles.W90ML5,{height:96, marginTop:20, marginBottom:20}]}>
+            <Text style={[MapScreenStyles.WhiteText, styles.FW500FS14,{marginBottom:8}]}>인원알려주기</Text>
+            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>몇명이서 오셨나요?</Text>
+            <View style={[MapScreenStyles.PeopleNumOption, styles.Row_OnlyColumnCenter, ]}>
+                <Text style={[styles.WhiteColor, styles.FW500FS14, {marginLeft:'5%'}]}>인원</Text>
+                <View style={[styles.Row_OnlyColumnCenter, {width:'30%', justifyContent:'space-between', marginRight:'5%'}]}>
                 {MinusIcon}
-                <View style={[styles.RowCenter,{width:'30%', height:'100%'}]}>
-                  <Text style={[styles.WhiteColor,MapScreenStyles.TotalPeopleNum]}>{PeopleNum}</Text>
-                </View>
+                  <Text style={[styles.WhiteColor,MapScreenStyles.TotalPeopleNum]}>{PeopleNum}명</Text>
                 {PlusIcon}
               </View>
-            </View>
-            
-            <View style={[styles.RowCenter, MapScreenStyles.MoneyOptionView]}>
-              <TouchableOpacity 
+            </View>    
+          </View>
+
+          <View style={[{height:110, marginBottom:10}, styles.W90ML5]}>
+            <Text style={[MapScreenStyles.WhiteText, {fontSize:14, fontWeight:'500', marginBottom:8}]}>비용 나눠 내기</Text>
+            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>만남 후 비용을 나눠서 지불할 생각이 있으신가요?</Text>
+            <View style={[styles.Row_OnlyColumnCenter, MapScreenStyles.MoneyOptionView, {marginTop:10}]}>
+   
+            <TouchableOpacity 
               onPress={()=>{setMoneyRadioBox(1)}}
               style={MoenyRadioBox == 1 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
               >
-                <MaterialIcons name='attach-money' size={50} color="white"/>
+                <Text style={[{color:'#202124'}]}>보고결정</Text>
               </TouchableOpacity>
               <TouchableOpacity 
               onPress={()=>{setMoneyRadioBox(2)}}
               style={MoenyRadioBox == 2 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
               >
-                <MaterialIcons name='money-off' size={50} color="white" />
+   
+                <Text style={[MapScreenStyles.WhiteText, {color:'#606060'}]}>생각있음</Text>
               </TouchableOpacity>
 
+              <TouchableOpacity 
+              onPress={()=>{setMoneyRadioBox(3)}}
+              style={MoenyRadioBox == 3 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
+              >
+                <Text style={{color:'#202124'}}>생각없음</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity 
-            style={[styles.RowCenter,MapScreenStyles.CheckBoxView]}
+          </View> 
             
-            onPress={()=>{
-              ShowMyLocation()
+
+
+            <View style={[styles.Row_OnlyColumnCenter]}>
+
+              <TouchableOpacity 
+              style={[styles.RowCenter,MapScreenStyles.CancelBoxView]}
               
-              // PushAxios()
+              onPress={()=>{
+                ChangeModalVisiable()
+              }}
+              > 
+                <Text>취소</Text>
             
-            }}
-            >
-              <AntDesgin name='checksquareo' color="white" size={30}/>
+              </TouchableOpacity>
 
-            </TouchableOpacity>
+
+              {Memo != '' && MoenyRadioBox != 0
+              ?
+              <TouchableOpacity 
+              style={[styles.RowCenter,MapScreenStyles.CheckBoxView, {backgroundColor:'#28FF98'}]}
+              onPress={()=>{
+                ShowMyLocation()
+              }}
+              > 
+                <Text>완료</Text>
+            
+              </TouchableOpacity>
+              :
+              <View 
+              style={[styles.RowCenter,MapScreenStyles.CheckBoxView , {backgroundColor:'#565656'}]}
+              > 
+                <Text>완료</Text>
+            
+              </View>
+              }
+              
+            
+            </View>
 
           
         </SafeAreaView>
@@ -706,7 +750,7 @@ const MapScreen = () => {
           loadingEnabled={true}
           userInterfaceStyle="light"
           minZoomLevel={10}
-          maxZoomLevel={16}
+          maxZoomLevel={17}
           >
           {GpsOn == true  && ProfileImageUrlisLoading == false? 
           <Marker
@@ -785,43 +829,54 @@ const MapScreen = () => {
       )}
   
       {myContext.userGender == "Grils" ? 
-      <SafeAreaView style={{position:'absolute', left:'5%', top:'5%'}}>
-        {/* 리팩토링 필요 */}
-        {GpsOn == false ? 
-        <Text style={{color:'#202632', fontWeight:'600',fontSize:22}}>위치 Off!
-        </Text>
-        : <Text style={{color:'red', fontWeight:'600',fontSize:22}}>위치 On!
-        </Text>}
+      <SafeAreaView style={[styles.Row_OnlyColumnCenter,MapScreenStyles.TopView]}>
+          <Text style={{color:'white', fontWeight:'500', fontSize:14}}>나의위치 표시하기</Text>
 
-        {GpsOn == false ? 
-        <Text style={{color:'#202632', fontSize:22, fontWeight:'600'}}>
-        {Math.floor(second / 60)} : {second % 60}
-        </Text>
-        :  <Text style={{color:'red', fontSize:22, fontWeight:'600'}}>
-        {Math.floor(second / 60)} : {second % 60}
-        </Text>}
-        
-       
-      </SafeAreaView> 
-      : null}
+          {GpsOn == false ? 
+          <Text style={{color:'#9F9F9F', fontSize:16, fontWeight:'500'}}>
+          {Math.floor(second / 60)} : {second % 60}
+          </Text>
+          :  <Text style={{color:'#28FF98', fontSize:16, fontWeight:'500'}}>
+          {Math.floor(second / 60)} : {second % 60}
+          </Text>}
+          {GpsOn == false ? 
+          
+          <View style={[styles.NoFlexDirectionCenter,{width:38, height:22, 
+            backgroundColor:'#B4B4B4', borderRadius:4}]}>
+            <Text style={{fontWeight:'500', fontSize:14}}>ON</Text>
+          </View>
+          :<View style={[styles.NoFlexDirectionCenter,{width:33, height:22, 
+            backgroundColor:'#28FF98', borderRadius:4}]}>
+            <Text style={{fontWeight:'500', fontSize:14}}>ON</Text>
+          </View>}
+
+          
+
+      </SafeAreaView>
+      :null}
+
+      
       <View style={[
         styles.NoFlexDirectionCenter,
         MapScreenStyles.ChangeProfileView]}>
         <TouchableOpacity 
         style={[{
           backgroundColor:'#202632',
-          // backgroundColor:'red',
           borderRadius:25,
-          width:30,
-          height:30
-          // Frist
         },styles.NoFlexDirectionCenter]}
         onPress={()=>{
-          RemoveIdentityToken()
+          // RemoveIdentityToken()
           // forceUpdate()r
-          // ChangeMyProfileImage(myContext.userEmail)
+          ChangeMyProfileImage(myContext.userEmail)
         }}>
+          {ProfileImageUrlisLoading == false ?  
+            <Image 
+            source={{uri:myContext.ProfileImageUrl}}
+            style={{width: 43, height: 43, borderRadius:35}}
+            />:
           <Icon name='person' size={26} color='white'/>
+          }
+
         </TouchableOpacity>
       </View> 
         
@@ -934,68 +989,73 @@ const TrackUserLocation = () => {
   );
 };
 
+let {height} = Dimensions.get('window')
+height = Math.ceil(height)
+console.log(height)
 
+let NS = height * 0.57
+let NS2 = height * 0.7
 const MapScreenStyles = StyleSheet.create({
+  TopView: {position:'absolute', left:'5%', top:'6%', width:'68%', height:46,
+  backgroundColor:'#606060', borderRadius:6, justifyContent:'space-around'},
   button: {
     borderRadius: 20,
     padding: 10,
     elevation: 2
   },
   Memomodal: {
-    height:'30%',
-    // flex:1,
+    // height:NS,
+    // height:533,
+    height:NS2,
+    top:'14%',
     width:'90%',
     position:'absolute',
-    // marginTop:'80%',
     backgroundColor:'black',
-    top:'30%',
+    // top:'21.5%',
     left:'5%',
-    borderRadius:25,
-    // borderTopStartRadius:25,
-    // borderTopEndRadius:25
+    borderRadius:14,
     display:'flex',
     flexDirection:'column',
-    justifyContent:'space-around'
+    // justifyContent:'space-around'
   },
   MinusPeopleNumber : {
-    width:35,
-    height:35,
-    borderRadius:25,
-    borderColor:'white',
-    borderWidth:1,
-    // backgroundColor:'blue'
-    display:'flex',
-    justifyContent:'center',
-    alignItems:'center',
-    flexDirection:'row'
+    width:18,
+    height:18,
+    backgroundColor:'#565656',
+  },
+
+  PlusPeopleNumber : {
+    width:18,
+    height:18,
+    backgroundColor:'white',
   },
   
   TotalPeopleNum : {
-    marginHorizontal:10,
-    fontSize:20,
+    fontSize:14,
+    fontWeight:'bold'
   },
 
-  MoneyIconBox: {
-    borderRadius:10,
-    marginRight:30
-  },
+  MoneyIconBox: [{
+    width:63,
+    height:30,
+    borderRadius:4,
+    backgroundColor:'#3E3E3E',
+  }, styles.NoFlexDirectionCenter],
 
-  SelectedMoneyIconBox: {
-    backgroundColor:'#2DB400',
-    borderRadius:10,
-    marginRight:30
-  },
+  SelectedMoneyIconBox: [{
+    backgroundColor:'#28FF98',
+    width:63,
+    height:30,
+    borderRadius:4,
+
+  }, styles.NoFlexDirectionCenter],
 
   MemoTextInput: {
-    width: '70%',
-    height: 50,
-    backgroundColor: 'gray',
-    borderWidth: 2,
-    borderStyle: 'solid',
-    borderColor: 'lightgray',
-    borderRadius: 10,
-    marginLeft: '5%',
-    padding: 10,
+    width: '100%',
+    height: 46,
+    backgroundColor: '#3E3E3E',
+    borderRadius: 6,
+    padding: 15,
   },
 
   MoneyOption :{
@@ -1010,45 +1070,55 @@ const MapScreenStyles = StyleSheet.create({
   },
 
   PeopleNumOption: {
-    width:'90%',
-    height:50,
-    marginLeft:'5%',
+    width:'100%',
     display:'flex',
     flexDirection:'row',
+    justifyContent:'space-between',
+    height: 46,
+    backgroundColor: '#3E3E3E',
+    borderRadius: 6,
+  },
+
+  MoneyOptionView: {
+    // height:'25%',
+    width:'100%',
     justifyContent:'space-between'
   },
   
-  MoneyOptionView: {
-    marginLeft:'5%',
-    height:'25%',
-    width:'90%'
-  },
-  
   CheckBoxView :{
-    height: 50,
-    width:'90%',
-    borderWidth:2,
-    borderStyle:'solid',
-    borderColor:'lightgray',
-    borderRadius:10,
-    backgroundColor:'red',
-    // marginLeft:'42.5%',
+    height: 46,
+    width:'42.5%',
+    borderRadius:6,
+    marginLeft:'5%'
+    
+  },
+
+  CancelBoxView :{
+    height: 46,
+    width:'42.5%',
+    borderRadius:6,
+    backgroundColor:'#F5F5F5',
     marginLeft:'5%'
   },
   ChangeProfileView : {
-    width:'10%',
-    height:'5%',
-    borderRadius:5,
+    // width:'10%',
+    // height:'5%',
+    width:46,
+    height:46,
+    borderRadius:50,
     position:'absolute',
-    left:'88%',
-    top:'12%',
+    // left:'88%',
+    right:'7%',
+    top:'6%',
     // 11/08) 여기는 젤리처럼 그레디언트 컬러 필요함.
     // backgroundColor:'#0064FF',
-    backgroundColor:'#202632',
+    // backgroundColor:'#202632',
     // backgroundColor:'#4EB789',
     // phonering 보라
     // backgroundColor:'#6E01EF',
-
+    borderWidth:3,
+    borderColor:'#202124',
+    borderStyle:'solid'
     
   },
 
@@ -1059,7 +1129,7 @@ const MapScreenStyles = StyleSheet.create({
     backgroundColor:'#202124',
     position:'absolute',
     left:'5%',
-    bottom:'10%',
+    bottom:'6%',
     borderRadius:10
   },
 
@@ -1077,6 +1147,10 @@ const MapScreenStyles = StyleSheet.create({
     borderWidth: 3,
     borderColor: 'black',
   },
+
+  WhiteText: {
+    color:'white',
+  }
 
 });
 

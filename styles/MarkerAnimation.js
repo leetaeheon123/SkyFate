@@ -1,8 +1,8 @@
 import {StyleSheet} from 'react-native';
-// const COLOR = '#6E01EF';
-const COLOR = 'skyblue';
+const COLOR = '#6E01EF';
+// const COLOR = 'skyblue';
 
-const SIZE = 50;
+const SIZE = 100;
 
 const MarkerAnimationStyles = StyleSheet.create({
   container: {
@@ -11,19 +11,24 @@ const MarkerAnimationStyles = StyleSheet.create({
     alignItems: 'center',
   },
   dot: {
-    height: SIZE,
-    width: SIZE,
-    borderRadius: SIZE / 2,
-    backgroundColor: COLOR,
+    // height: SIZE,
+    // width: SIZE,
+    // borderRadius: SIZE / 2,
+
+    height: 80,
+    width: 80,
+    borderRadius: 40,
+
+    // backgroundColor: COLOR,
   },
   center: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   Image: {
-    width: SIZE,
-    height: SIZE,
-    borderRadius: SIZE / 2,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
 });
 
