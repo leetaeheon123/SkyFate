@@ -12,8 +12,9 @@ import {
   StyleSheet,
   Platform,
   Alert,
-  TouchableOpacity
-} from 'react-native';
+  TouchableOpacity,
+  ScrollView
+} from 'react-native';1
 
 import styles from '../../styles/ManToManBoard'
 import Icon from "react-native-vector-icons/Ionicons"
@@ -45,7 +46,7 @@ import MarkerAnimationStyles from "../../styles/MarkerAnimation"
 import Ring from './Ring';
 
 import AsyncStorage from '@react-native-community/async-storage';
-
+import * as Progress from 'react-native-progress';
 interface ILocation {
   latitude: number;
   longitude: number;
@@ -202,11 +203,11 @@ const RequestLocationPermissionsAndroid = async () => {
   }
 }
 
-const GetLocationPermission = () => {
+const GetLocationPermission = async () => {
   if (Platform.OS === 'ios') {
-    Geolocation.requestAuthorization('always');
+    await Geolocation.requestAuthorization('always');
   } else {
-    RequestLocationPermissionsAndroid()
+    await RequestLocationPermissionsAndroid()
     // PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
   }
 } 
@@ -231,6 +232,45 @@ function Counter(callback:Function, delay:number | null, Reset:Function) {
     }
   }, [delay]);
 }
+
+
+const ManLocationUpdate = async () => {
+  const userEmail = await AsyncStorage.getItem('IdentityToken');
+  const ProfileImageUrl = await AsyncStorage.getItem('ProfileImageUrl');
+
+  let ReplaceUserEmail = userEmail.replace('.com','')
+
+  let id = setInterval(()=>{
+    const EpochTime = +new Date()
+    Geolocation.getCurrentPosition(
+      (position) => {
+        const {latitude, longitude} = position.coords;
+          reference
+          .ref(`/ManLocation/${ReplaceUserEmail}`)
+          .update({
+            latitude: latitude,
+            longitude: longitude,
+            ProfileImageUrl: ProfileImageUrl,
+            TimeStamp: EpochTime
+
+          })
+          .then(() => DeleteMyLocation(ReplaceUserEmail, 1));
+        
+      },
+      (error) => {
+          // See error code charts below.
+          console.log(error.code, error.message);
+      },
+      { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
+    );
+
+  }, 10000)
+
+
+  return id
+}
+
+
 
 const FirebaseInput = (userEmail:string, StorageUrl:string) => {
 
@@ -329,38 +369,52 @@ const ChangeMyProfileImage = async (userEmail:string) => {
 }
 
 const GetLocation = (setLocation:Function) => {
-  Geolocation.getCurrentPosition(
-    (position) => {
-      const {latitude, longitude} = position.coords;
-      setLocation({
-        latitude,
-        longitude,
-      })
-    },
-    (error) => {
-        // See error code charts below.
-        console.log(error.code, error.message);
-    },
-    { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
-);
+  return new Promise((resolve, reject) => {
+    Geolocation.getCurrentPosition(
+      async (position) => {
+        const {latitude, longitude} = position.coords;
+        await setLocation({
+          latitude,
+          longitude,
+        })
+        resolve(null)
+      },
+      (error) => {
+          // See error code charts below.
+          console.log(error.code, error.message);
+          reject()
+      },
+      { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
+  );
+  })
+  
 }
 
-const DeleteMyLocation = (userEmail:string) => {
-  setTimeout(()=>{
-    reference.ref(`/Location/${userEmail}`).remove()
+const GetLocation2 = () =>{
+  return (
+    Geolocation.getCurrentPosition(
+      async (position) => {
+        const {latitude, longitude} = position.coords;
+        
+      },
+      (error) => {
+          // See error code charts below.
+          console.log(error.code, error.message);
+      },
+      { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
+  )
+}
 
-    // 1. 사용자가 10초 간격으로  switch를 on - off - 10초 후 - on - off 10초 후 - on을 눌렀다고 가정해보자
-    // 처음 on은 누른 후 20초후에 자신의 위치가 실시간으로 db에 저장되고. 원래라면 1분 후에 자신의 위치가 지워져야 정상이다.
-    // 하지만 처음 off를 눌렀을 때 걸린 settimeout때문에 40초 뒤에 자신의 위치가 삭제된다. 어떻게 해결할까? 
+const DeleteMyLocation = (userEmail:string, Gender:number) => {
 
-    // 1. ui에 1분 타이머를 걸어놔서 사용자가 on off를 계속 누르지 않도록 유도한다
-    // 2. 기술적으로 40초가 아닌 1분후에 삭제되도록 만든다 -> 지금 드는 생각으론 cleartimeout?을 사용해보는게 어떨가 
-
-    // 이부분 로직은 파이어베이스 단에서 처리하도록 
-
-    // console.log('Hello')
-
-  }, 180000)
+  if(Gender == 1){
+    console.log("Man")
+  }else if(Gender ==2){
+    setTimeout(()=>{
+      reference.ref(`/Location/${userEmail}`).remove()
+    }, 180000)
+  }
+ 
 }
 
 const getProfileImageUrl = async (userEmail:string) => {
@@ -382,9 +436,8 @@ const UpdateMyLocation = async (userEmail: string ,Memo:string, PeopleNum:Number
   location:any) => {
 
   const ProfileImageUrl = await getProfileImageUrl(userEmail)
-  // console.log("UpdateMyLocation",ProfileImageUrl)
 
-  let CanPayNum;
+  let CanPayNum:string
   if(CanPayit == 1) {
     CanPayNum = "미정"
   } else if(CanPayit == 2){
@@ -398,28 +451,36 @@ const UpdateMyLocation = async (userEmail: string ,Memo:string, PeopleNum:Number
     Memo = "."
   }
 
-  
-
   const EpochTime = +new Date()
   let ReplaceUserEmail = userEmail.replace('.com','')
-
-  reference
-  .ref(`/Location/${ReplaceUserEmail}`)
-  .update({
-    latitude: location.latitude,
-    longitude: location.longitude,
-    Memo: Memo,
-    CanPayit: CanPayNum,
-    PeopleNum: PeopleNum,
-    ProfileImageUrl: ProfileImageUrl,
-    TimeStamp: EpochTime
-    
-  })
-  .then(() => DeleteMyLocation(ReplaceUserEmail));
-
-
   // 현재 위치를 db에 업데이트시키는 코드 
+
+  Geolocation.getCurrentPosition(
+    (position) => {
+      const {latitude, longitude} = position.coords;
+        reference
+        .ref(`/Location/${ReplaceUserEmail}`)
+        .update({
+          latitude: latitude,
+          longitude: longitude,
+          Memo: Memo,
+          CanPayit: CanPayNum,
+          PeopleNum: PeopleNum,
+          ProfileImageUrl: ProfileImageUrl,
+          TimeStamp: EpochTime
+
+        })
+        .then(() => DeleteMyLocation(ReplaceUserEmail, 2));
+    },
+    (error) => {
+        // See error code charts below.
+        console.log(error.code, error.message);
+    },
+    { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
+  );
+
 }
+
 
 const CheckIdentityToken = async () => {
 let id = await AsyncStorage.getItem('IdentityToken');
@@ -476,7 +537,33 @@ const AndroidPushNoti = () => {
   );
 }
 
+const UpdateMyLocationWatch = (setLocation:Function) => {
+  const _watchId = Geolocation.watchPosition(
+    position => {
+      const {latitude, longitude} = position.coords;
+      setLocation({latitude, longitude});
+    },
+    error => {
+      console.log(error);
+    },
+    {
+      enableHighAccuracy: true,
+      distanceFilter: 0,
+      interval: 5000,
+      fastestInterval: 2000,
+    },
+  );
+
+  return () => {
+    if (_watchId) {
+      Geolocation.clearWatch(_watchId);
+    }
+  };
+}
+
 const MapScreen = () => {
+
+  console.log("Render")
 
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
   const myContext = useContext(AppContext);
@@ -517,16 +604,38 @@ const MapScreen = () => {
   }
 
   useEffect(() => {
-    // 현재위치를 state화
-    GetLocation(setLocation)
     // 로케이션 위치 가져오는 권한설정
-    GetLocationPermission()
-    // 푸쉬알림 권한설정 
-    requestPushNotificationPermission()
 
-    SaveEmailInDevice(myContext)
-    SaveProfileImageUrlInDevice(myContext)
-    SaveGenderInDevice(myContext)
+    // 현재위치를 state화
+
+
+
+
+    // 푸쉬알림 권한설정 
+
+    async function SaveInDevice() { 
+      // const data = await fetchUser(userId);
+
+      await GetLocationPermission()
+      await requestPushNotificationPermission()
+      UpdateMyLocationWatch(setLocation)
+    
+      // await GetLocation(setLocation)
+      console.log("0")
+
+      await SaveEmailInDevice(myContext)
+      console.log("1")
+
+      await SaveProfileImageUrlInDevice(myContext)
+      console.log("2")
+
+      await SaveGenderInDevice(myContext)
+      console.log("3")
+      ManLocationUpdate()
+
+    }
+
+    SaveInDevice(); 
 
     fcmService.register(onRegister, onNotification,onOpenNotification);
     localNotificationService.configure(onOpenNotification);
@@ -536,6 +645,8 @@ const MapScreen = () => {
   const [ GpsOn, setGpsOn] = useState(false);
 
   const [ ModalVisiable, setModalVisiable] = useState(false);
+  const [ ProfileModalVisiable, setProfileModalVisiable] = useState(false);
+
   const [ Memo, setMemo] = useState("");
   const [ PeopleNum, setPeopleNum] = useState(1);
   const [ MoenyRadioBox, setMoneyRadioBox] = useState(0)
@@ -543,6 +654,7 @@ const MapScreen = () => {
 
 
   const [second, setSecond] = useState<number>(180);
+  const {width} = Dimensions.get('window')
 
   const ChangeModalVisiable = () => {
     setModalVisiable(previousState => !previousState)
@@ -557,18 +669,20 @@ const MapScreen = () => {
 
   // }
 
-  Counter(
-    () => {
-      if(GpsOn == true) {
-        setSecond(second - 1);
-      } 
-    },
-    second >= 1 ? 1000 : null,
-    ()=>{
-      setSecond(180)
-      setGpsOn(false)
-    }
-  );
+  // Counter(
+  //   () => {
+  //     if(GpsOn == true) {
+  //       setSecond(second - 1);
+  //     } 
+  //   },
+  //   second >= 1 ? 1000 : null,
+  //   ()=>{
+  //     setSecond(180)
+  //     setGpsOn(false)
+  //   }
+  // );
+
+
 
   const ShowMyLocation = () => {
     const date = new Date()
@@ -587,10 +701,10 @@ const MapScreen = () => {
   }
   const {data, isLoading, refetch} = useQuery("QueryLocation", Get_Query_AllLocation)
 
-  useEffect(()=>{
-    refetch
+  // useEffect(()=>{
+  //   refetch
     
-  }, [updatenum])
+  // }, [updatenum])
 
   const {data:itaewon_HotPlaceList, isLoading:itaewon_HotPlaceListisLoading} = useQuery("itaewon_HotPlaceList", Get_itaewon_HotPlaceList)
   const {data:ProfileImageUrl, isLoading:ProfileImageUrlisLoading} = useQuery(["ProfileImageUrl", myContext.userEmail], Get_ProfileImageUrl)
@@ -632,8 +746,103 @@ const MapScreen = () => {
   <AntDesgin name='plus' size={16} color="black"/>
   </TouchableOpacity>
 
+  const ProfileImage = () => {
+    return (
+      <Image 
+      source={{uri:myContext.ProfileImageUrl}}
+      style={{width: 100, height: 100, borderRadius:10}}
+      />
+    )
+  }
+
+  const PersonIcon = () => {
+    return (
+      <Icon name='person' size={26} color='white'/>
+    )
+  }
+
+  const TextHello = () => {
+    return (
+      <Text style={{color:'white'}}>Hello</Text>
+    )
+  }
+  const FiveTextHello = () => {
+    return (
+      <>
+      {TextHello()}
+      {TextHello()}
+      {TextHello()}
+      {TextHello()}
+      {TextHello()}
+    </>
+    )
+  }
+
+  const FFiveTextHello = () => {
+    return (
+      <>
+      {FiveTextHello()}
+      {FiveTextHello()}
+      {FiveTextHello()}
+      {FiveTextHello()}
+      {FiveTextHello()}
+    </>
+    )
+  }
+
+  
   return (
     <View style={{width:'100%', height:'100%'}}>
+      <Modal
+        animationType='slide'
+        visible={ProfileModalVisiable}
+        transparent={true}
+        >
+          <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
+            <ScrollView style={MapScreenStyles.ProfileModalScrollView}>
+              <TouchableOpacity
+                style={{
+                  width:100,
+                  height:100
+                }}
+              onPress={()=>{
+                console.log("ss")
+              }}>
+              {ProfileImageUrlisLoading == false ? 
+                ProfileImage() 
+                :PersonIcon()}
+
+              </TouchableOpacity>
+              <Text style={{color:'white', fontSize:22, fontWeight:'600'}}>내 등급</Text>
+              <Text style={{color:'white', marginLeft:'50%'}}>50%</Text>
+              <Progress.Bar progress={0.5} width={width*0.9}
+                // indeterminate={true}
+                color={'skyblue'}
+                // unfilledColor={'black'}
+                borderWidth={1}
+                // borderColor="red"
+                height={8}
+                borderRadius={15}
+              />
+              <Button title="X"
+                onPress={()=>{
+                  setProfileModalVisiable(false)
+                }}
+              ></Button>
+              {FFiveTextHello()}
+              {FFiveTextHello()}
+              
+
+
+              
+
+            </ScrollView>
+         
+      
+
+          </SafeAreaView>
+
+      </Modal>
       <Modal 
         animationType="slide"
         transparent={true}
@@ -784,6 +993,7 @@ const MapScreen = () => {
                 longitude: data.longitude
               }}
               title={data?.Memo}
+              tracksViewChanges={false}
               description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
             >
               <View>
@@ -866,8 +1076,9 @@ const MapScreen = () => {
         },styles.NoFlexDirectionCenter]}
         onPress={()=>{
           // RemoveIdentityToken()
-          // forceUpdate()r
-          ChangeMyProfileImage(myContext.userEmail)
+          // forceUpdate()
+          setProfileModalVisiable(!ProfileModalVisiable)
+          // ChangeMyProfileImage(myContext.userEmail)
         }}>
           {ProfileImageUrlisLoading == false ?  
             <Image 
@@ -996,6 +1207,17 @@ console.log(height)
 let NS = height * 0.57
 let NS2 = height * 0.7
 const MapScreenStyles = StyleSheet.create({
+  ProfileModalParent: {
+    height:'95%', width:'100%', 
+    backgroundColor:'black',
+    top:'5%',
+    borderTopLeftRadius:15,
+    borderTopRightRadius:15
+  },
+  ProfileModalScrollView:{
+    width:'90%',
+    marginLeft:'5%'
+  },
   TopView: {position:'absolute', left:'5%', top:'6%', width:'68%', height:46,
   backgroundColor:'#606060', borderRadius:6, justifyContent:'space-around'},
   button: {

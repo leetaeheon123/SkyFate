@@ -5,6 +5,7 @@ import {QueryClient, QueryClientProvider} from 'react-query';
 import {View, Text, SafeAreaView} from 'react-native';
 
 import AppContext from './src/UsefulFunctions/Appcontext';
+import { NativeBaseProvider } from 'native-base';
 
 const queryClient = new QueryClient();
 
@@ -39,7 +40,9 @@ const App = () => {
   <AppContext.Provider value={userSettings}>
     <QueryClientProvider client={queryClient}>
         <NavigationContainer>
-          <Routes></Routes>
+          <NativeBaseProvider>
+            <Routes></Routes>
+          </NativeBaseProvider>
         </NavigationContainer>
     </QueryClientProvider>
   </AppContext.Provider>

@@ -21,6 +21,10 @@ import TestGifScreen from './TestGif';
 import ImageUploadSample from './src/screens/ImageUploadSample';
 import PhoneRing from './src/screens/PhoneRing';
 
+import CertificationTestScreen from './src/screens/CertificationTest';
+import CertificationScreen from './src/screens/Certification';
+import CertificationResultScreen from './src/screens/CertificationResult';
+
 import {RootStackParamList} from './src/screens/RootStackParamList';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -62,6 +66,22 @@ const Routes = () => {
           component={RegisterScreen}
           options={{headerShown: false}}
         />
+        <Stack.Screen
+          name="CertificationTestScreen"
+          component={CertificationTestScreen}
+          options={{headerShown: false}}
+        />
+         <Stack.Screen
+          name="CertificationScreen"
+          component={CertificationScreen}
+          options={{headerShown: false}}
+        />
+         <Stack.Screen
+          name="CertificationResultScreen"
+          component={CertificationResultScreen}
+          options={{headerShown: false}}
+        />
+        
         <Stack.Screen
           name="LoginScreen"
           component={TossLogin}
