@@ -26,26 +26,24 @@ import CertificationScreen from './src/screens/Certification';
 import CertificationResultScreen from './src/screens/CertificationResult';
 
 import {RootStackParamList} from './src/screens/RootStackParamList';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+
+import BottomTabScreen from './bottomstack'
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const BottomTab = createMaterialBottomTabNavigator();
 
 const Routes = () => {
   // 성별 가져오는 코드 필요합니다 - 2022 10 09 오후1시.
-  let a = 2;
 
-  if (a == 1) {
     return (
-      <Stack.Navigator initialRouteName="">
-        <Stack.Screen
-          name="TrackUserLocation"
-          component={TrackUserLocation}
+
+      <Stack.Navigator initialRouteName="IndicatorScreen">
+         <Stack.Screen
+          name="BottomTabScreen"
+          component={BottomTabScreen}
           options={{headerShown: false}}
         />
-      </Stack.Navigator>
-    );
-  } else if (a == 2) {
-    return (
-      <Stack.Navigator initialRouteName="IndicatorScreen">
         <Stack.Screen
           name="ImageUploadSample"
           component={ImageUploadSample}
@@ -87,11 +85,11 @@ const Routes = () => {
           component={TossLogin}
           options={{headerShown: false}}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="MapScreen"
           component={MapScreen}
           options={{headerShown: false}}
-        />
+        /> */}
         <Stack.Screen
           name="ManToManBoardScreen"
           component={ManToManBoardScreen}
@@ -127,8 +125,8 @@ const Routes = () => {
           options={{headerShown: false}}
         />
       </Stack.Navigator>
+
     );
-  }
 };
 
 export default Routes;

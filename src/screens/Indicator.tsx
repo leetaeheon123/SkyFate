@@ -10,7 +10,7 @@ async function _bootstrapAsync(navigation:any) {
   // screen will be unmounted and thrown away.
 
   // 원래는 LoginScreen이 아니라 ValidInvitationCodeScreen
-  navigation.navigate(userToken ? 'MapScreen' : 'ValidInvitationCodeScreen');
+  navigation.navigate(userToken ? 'BottomTabScreen' : 'ValidInvitationCodeScreen');
 }
 
 function IndicatorScreen() {
