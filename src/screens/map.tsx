@@ -47,6 +47,9 @@ import Ring from './Ring';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import * as Progress from 'react-native-progress';
+import { useNavigation } from '@react-navigation/native';
+import database from '@react-native-firebase/database';
+
 interface ILocation {
   latitude: number;
   longitude: number;
@@ -96,13 +99,31 @@ const Get_Query_AllLocation = () => {
     .then(snapshot => {
 
       let val = snapshot.val()
-      // console.log("Get_Query_AllLocation_val",val)
-      // if(val == false) {
-        // val = [{}]
-      // }
       const target = Object.values(val)
       return target
     }).then((AllLocationData)=>{
+      // console.log("Get_Query_AllLocation")
+
+      return AllLocationData
+    })
+  )
+ 
+};
+
+const Get_MansLocations = () => {
+  const databaseDirectory = `/ManLocation`;
+  return (
+    reference
+    .ref(databaseDirectory)
+    .once('value')
+    .then(snapshot => {
+
+      let val = snapshot.val()
+      const target = Object.values(val)
+      return target
+    }).then((AllLocationData)=>{
+      console.log("AllLocationData In Get_MansLocations:", AllLocationData)
+
       return AllLocationData
     })
   )
@@ -245,6 +266,7 @@ const ManLocationUpdate = async () => {
     Geolocation.getCurrentPosition(
       (position) => {
         const {latitude, longitude} = position.coords;
+        console.log("ManLocationForeGroundUpdate")
           reference
           .ref(`/ManLocation/${ReplaceUserEmail}`)
           .update({
@@ -254,8 +276,6 @@ const ManLocationUpdate = async () => {
             TimeStamp: EpochTime
 
           })
-          .then(() => DeleteMyLocation(ReplaceUserEmail, 1));
-        
       },
       (error) => {
           // See error code charts below.
@@ -264,7 +284,7 @@ const ManLocationUpdate = async () => {
       { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
     );
 
-  }, 10000)
+  }, 20000)
 
 
   return id
@@ -344,6 +364,15 @@ const GetGender = async (userEmail:string) => {
  
 }
 
+const GetUserData = () => {
+  const Result = firestore()
+  .collection(`UserList`)
+  .doc(`8269apk@naver.com`)
+  .get()
+
+  console.log("GetUserData:" , Result)
+}
+
 const saveProfileImageUrlInDevice = (StorageUrl:string)=>{
   AsyncStorage.setItem("ProfileImageUrl", StorageUrl);
 
@@ -381,40 +410,27 @@ const GetLocation = (setLocation:Function) => {
       },
       (error) => {
           // See error code charts below.
-          console.log(error.code, error.message);
-          reject()
+        console.log(error.code, error.message);
+        reject()
       },
       { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
-  );
-  })
+);
+})
   
 }
 
-const GetLocation2 = () =>{
-  return (
-    Geolocation.getCurrentPosition(
-      async (position) => {
-        const {latitude, longitude} = position.coords;
-        
-      },
-      (error) => {
-          // See error code charts below.
-          console.log(error.code, error.message);
-      },
-      { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
-  )
-}
 
 const DeleteMyLocation = (userEmail:string, Gender:number) => {
 
-  if(Gender == 1){
-    console.log("Man")
-  }else if(Gender ==2){
+  if(Gender ==2){
     setTimeout(()=>{
       reference.ref(`/Location/${userEmail}`).remove()
     }, 180000)
   }
- 
+  // } else if(Gender == 1){
+  //   console.log("Man")
+  // }
+
 }
 
 const getProfileImageUrl = async (userEmail:string) => {
@@ -487,6 +503,14 @@ let id = await AsyncStorage.getItem('IdentityToken');
   let id2 = await AsyncStorage.getItem("ProfileImageUrl");
 
   console.log(id, id2)
+
+}
+
+const logout = (navigation:any) => {
+  RemoveIdentityToken()
+  
+  navigation.navigate('ValidInvitationCodeScreen')
+
 }
 const RemoveIdentityToken = async () => {
   AsyncStorage.removeItem('IdentityToken');
@@ -525,6 +549,18 @@ const SaveGenderInDevice = async (myContext:any) => {
   myContext.setUserGender(Gender)
 }
 
+const SaveGenderInDevicePromise = async () => {
+  return (
+    new Promise(async (resolve, reject) => {
+      const userEmail = await AsyncStorage.getItem('IdentityToken');
+      const Gender = await GetGender(userEmail)
+      resolve(Gender)
+    })
+
+  )
+
+}
+
 const AndroidPushNoti = () => {
   console.log("AndroidPushNoti")
   
@@ -537,18 +573,22 @@ const AndroidPushNoti = () => {
   );
 }
 
+// 여자이면 남자위치데이터 불러와서 지도에 보여주는 로직 추가하기 
+// 자주 바뀌는 데이터이므로 State화 하기 
+
 const UpdateMyLocationWatch = (setLocation:Function) => {
   const _watchId = Geolocation.watchPosition(
     position => {
       const {latitude, longitude} = position.coords;
       setLocation({latitude, longitude});
+      console.log("state location change")
     },
     error => {
       console.log(error);
     },
     {
       enableHighAccuracy: true,
-      distanceFilter: 0,
+      distanceFilter: 3,
       interval: 5000,
       fastestInterval: 2000,
     },
@@ -564,6 +604,8 @@ const UpdateMyLocationWatch = (setLocation:Function) => {
 const MapScreen = () => {
 
   console.log("Render")
+
+  const navigation = useNavigation()
 
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
   const myContext = useContext(AppContext);
@@ -604,23 +646,16 @@ const MapScreen = () => {
   }
 
   useEffect(() => {
-    // 로케이션 위치 가져오는 권한설정
-
-    // 현재위치를 state화
-
-
-
-
-    // 푸쉬알림 권한설정 
-
     async function SaveInDevice() { 
-      // const data = await fetchUser(userId);
-
+      // 로케이션 위치 가져오는 권한설정
       await GetLocationPermission()
+      // 푸쉬알림 권한설정 
       await requestPushNotificationPermission()
-      UpdateMyLocationWatch(setLocation)
+      await GetLocation(setLocation)
+      // 현재위치를 state화 &추적
+
+      // UpdateMyLocationWatch(setLocation)
     
-      // await GetLocation(setLocation)
       console.log("0")
 
       await SaveEmailInDevice(myContext)
@@ -630,8 +665,16 @@ const MapScreen = () => {
       console.log("2")
 
       await SaveGenderInDevice(myContext)
-      console.log("3")
-      ManLocationUpdate()
+
+      SaveGenderInDevicePromise().then((data)=>{
+        console.log("Gender Data InSaveGenderInDevicePromise:", data)
+        if(data == "Man"){
+          ManLocationUpdate()
+        }
+      })
+
+      
+
 
     }
 
@@ -639,6 +682,26 @@ const MapScreen = () => {
 
     fcmService.register(onRegister, onNotification,onOpenNotification);
     localNotificationService.configure(onOpenNotification);
+
+    const onChildAdd = database()
+      .ref('/Location')
+      .on('child_added', snapshot => {
+        GrilsLocationsrefetch()
+      });
+
+      const ManonChildAdd = database()
+      .ref('/ManLocation')
+      .on('child_added', snapshot => {
+        MansLocationsretech()
+      });
+
+
+    
+    // Stop listening for updates when no longer required
+    return () => {
+      database().ref('/Location').off('child_added', onChildAdd);
+      database().ref('/ManLocation').off('child_added', ManonChildAdd);
+    }
 
   }, []);
 
@@ -669,18 +732,18 @@ const MapScreen = () => {
 
   // }
 
-  // Counter(
-  //   () => {
-  //     if(GpsOn == true) {
-  //       setSecond(second - 1);
-  //     } 
-  //   },
-  //   second >= 1 ? 1000 : null,
-  //   ()=>{
-  //     setSecond(180)
-  //     setGpsOn(false)
-  //   }
-  // );
+  Counter(
+    () => {
+      if(GpsOn == true) {
+        setSecond(second - 1);
+      } 
+    },
+    second >= 1 ? 1000 : null,
+    ()=>{
+      setSecond(180)
+      setGpsOn(false)
+    }
+  );
 
 
 
@@ -699,11 +762,13 @@ const MapScreen = () => {
     }
  
   }
-  const {data, isLoading, refetch} = useQuery("QueryLocation", Get_Query_AllLocation)
+  const {data, isLoading, refetch:GrilsLocationsrefetch} = useQuery("QueryLocation", Get_Query_AllLocation)
+
+  const {data:MansLocations, isLoading:isLoadingMansLocations, refetch:MansLocationsretech} = useQuery("MansLocationsUseQuery", Get_MansLocations)
+  
 
   // useEffect(()=>{
-  //   refetch
-    
+  //   refetch()
   // }, [updatenum])
 
   const {data:itaewon_HotPlaceList, isLoading:itaewon_HotPlaceListisLoading} = useQuery("itaewon_HotPlaceList", Get_itaewon_HotPlaceList)
@@ -757,7 +822,7 @@ const MapScreen = () => {
 
   const PersonIcon = () => {
     return (
-      <Icon name='person' size={26} color='white'/>
+      <Icon name='person' size={26} color='red'/>
     )
   }
 
@@ -803,14 +868,17 @@ const MapScreen = () => {
               <TouchableOpacity
                 style={{
                   width:100,
-                  height:100
+                  height:100,
+                  backgroundColor:'white'
                 }}
               onPress={()=>{
-                console.log("ss")
+                ChangeMyProfileImage(myContext.userEmail)
               }}>
-              {ProfileImageUrlisLoading == false ? 
+              {ProfileImageUrlisLoading == false ?
                 ProfileImage() 
-                :PersonIcon()}
+                :
+                PersonIcon()
+              }
 
               </TouchableOpacity>
               <Text style={{color:'white', fontSize:22, fontWeight:'600'}}>내 등급</Text>
@@ -829,11 +897,18 @@ const MapScreen = () => {
                   setProfileModalVisiable(false)
                 }}
               ></Button>
-              {FFiveTextHello()}
-              {FFiveTextHello()}
-              
 
+              {FFiveTextHello()}
 
+              <Text style={[styles.WhiteColor]}>{location?.latitude}</Text>
+              <Text style={[styles.WhiteColor]}>{location?.longitude}</Text>
+
+              <Button title="로그아웃 하기" color={'red'}
+                onPress={()=>{
+                  logout(navigation)
+                }}
+              ></Button>
+             
               
 
             </ScrollView>
@@ -884,21 +959,21 @@ const MapScreen = () => {
               onPress={()=>{setMoneyRadioBox(1)}}
               style={MoenyRadioBox == 1 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
               >
-                <Text style={[{color:'#202124'}]}>보고결정</Text>
+                <Text style={MoenyRadioBox == 1 ?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>보고결정</Text>
               </TouchableOpacity>
               <TouchableOpacity 
               onPress={()=>{setMoneyRadioBox(2)}}
               style={MoenyRadioBox == 2 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
               >
    
-                <Text style={[MapScreenStyles.WhiteText, {color:'#606060'}]}>생각있음</Text>
+                <Text style={MoenyRadioBox == 2 ?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600' }}>생각있음</Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
               onPress={()=>{setMoneyRadioBox(3)}}
               style={MoenyRadioBox == 3 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
               >
-                <Text style={{color:'#202124'}}>생각없음</Text>
+                <Text style={MoenyRadioBox == 3?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>생각있음</Text>
               </TouchableOpacity>
             </View>
           </View> 
@@ -1009,6 +1084,31 @@ const MapScreen = () => {
           })
           : null}
 
+          {isLoadingMansLocations == false ?
+           MansLocations.map((MansData,index)=>{
+            return(
+            <Marker
+              key={MansData.latitude}
+              coordinate={{
+                latitude: MansData.latitude,
+                longitude: MansData.longitude
+              }}
+              tracksViewChanges={false}
+            >
+              <View>
+                <Image 
+                  source={{uri:MansData.ProfileImageUrl}}
+                  style={MapScreenStyles.GrilsMarker}
+                  resizeMode="cover"
+                />
+              </View>
+            </Marker>
+            )
+          })
+          :null}
+
+
+
           {itaewon_HotPlaceListisLoading == false ? 
           itaewon_HotPlaceList?.map((data,index)=>{
             return(
@@ -1019,6 +1119,8 @@ const MapScreen = () => {
                   longitude: data.longitude
                 }}
                 title={data.Title}
+                tracksViewChanges={false}
+
               >
                 <View>
                   <Image 
@@ -1037,6 +1139,10 @@ const MapScreen = () => {
           
         </MapView>
       )}
+
+
+
+     
   
       {myContext.userGender == "Grils" ? 
       <SafeAreaView style={[styles.Row_OnlyColumnCenter,MapScreenStyles.TopView]}>
@@ -1078,7 +1184,6 @@ const MapScreen = () => {
           // RemoveIdentityToken()
           // forceUpdate()
           setProfileModalVisiable(!ProfileModalVisiable)
-          // ChangeMyProfileImage(myContext.userEmail)
         }}>
           {ProfileImageUrlisLoading == false ?  
             <Image 
@@ -1096,12 +1201,26 @@ const MapScreen = () => {
        <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}
         onPress={()=> {
           // AndroidPushNoti()
-        ChangeModalVisiable()
+          // ChangeModalVisiable()
+
+          GrilsLocationsrefetch()
+          // forceUpdate()
+
         }}
        >
         <Text style={{color:'white'}}>시작하기</Text>
+        
       </TouchableOpacity>
       : null}
+
+      {/* {location && (
+        <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}>
+          <Text style={{color:'white'}}>{location.latitude}</Text>
+          <Text style={{color:'white'}}>{location.longitude}</Text>
+        </TouchableOpacity>
+      )} */}
+
+
     </View>
   );
 };  
@@ -1127,7 +1246,7 @@ const TrackUserLocation = () => {
       },
       {
         enableHighAccuracy: true,
-        distanceFilter: 3,
+        distanceFilter: 100,
         interval: 5000,
         fastestInterval: 2000,
       },
@@ -1377,4 +1496,6 @@ const MapScreenStyles = StyleSheet.create({
 });
 
 export default codePush(MapScreen);
+
+
 

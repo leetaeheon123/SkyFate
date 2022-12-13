@@ -12,9 +12,10 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {login, getProfile} from '@react-native-seoul/kakao-login';
 import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
 import firestore from '@react-native-firebase/firestore';
-
+import styles from '../../styles/ManToManBoard';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from './RootStackParamList';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">
 
@@ -129,6 +130,7 @@ const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
 
   let Valid = ValidInvitationCodeLength(InvitationCode)
   if(Valid == false){
+    Alert.alert("초대코드를 다시한번 확인해주세요")
     return
   }
 
@@ -167,7 +169,7 @@ const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
     return Obj
   }).then(async (Obj)=>{
     if(Obj.Valid == 1){
-      navigation.navigate('RegisterScreen', {
+      navigation.navigate('CertificationScreen', {
         InvitationCode: InvitationCode,
         Gender:Gender,
         PkNumber: Obj.PkNumber
@@ -268,11 +270,11 @@ const ValidateInvitationCodeCase2 = (InvitationCode:string, navigation:any) => {
 
 const RegisterInputGenerater = (props:any) => {
   return (
-    <View style={styles.InputBox}>
-      <Text style={styles.text}>{props.Name}</Text>
+    <View style={InvitationCodeStyles.InputBox}>
+      <Text style={InvitationCodeStyles.text}>{props.Name}</Text>
       <TextInput
         value={props.value}
-        style={styles.input}
+        style={InvitationCodeStyles.input}
         onChangeText={value => {
           props.StateChange(value);
         }}
@@ -280,7 +282,7 @@ const RegisterInputGenerater = (props:any) => {
         // autoCapitalize='none'
         autoCorrect={props.autoCorrect}>
         </TextInput>
-      <View style={styles.UnderLine} />
+      <View style={InvitationCodeStyles.UnderLine} />
     </View>
   );
 };
@@ -303,7 +305,7 @@ const ValidInvitationCodeScreen = ({route}: RegisterScreenProps) => {
       fontSize:18,
       fontWeight: '600',
       color:'black',
-      backgroundColor:'skyblue'
+      // backgroundColor:'skyblue'
     },
     ViewStyle:{
       width: '100%',
@@ -355,6 +357,7 @@ const ValidInvitationCodeScreen = ({route}: RegisterScreenProps) => {
           width: '90%',
           height: '100%',
           marginLeft: '5%',
+          // backgroundColor:'red'
         }}>
         <View
           style={{
@@ -363,6 +366,7 @@ const ValidInvitationCodeScreen = ({route}: RegisterScreenProps) => {
             // backgroundColor: 'skyblue',
             display: 'flex',
             justifyContent: 'flex-end',
+
             
           }}>
           <Text
@@ -378,20 +382,42 @@ const ValidInvitationCodeScreen = ({route}: RegisterScreenProps) => {
           style={{
             height: '50%',
             width: '100%',
-            // backgroundColor:'red'
+            // backgroundColor:'gray'
           }}>
           {InvitationCode()}
         </View>
 
-        <View style={styles.CheckBox}>
+        <View style={InvitationCodeStyles.CheckBox}>
         <Pressable
-          style={styles.CheckBt}
+          style={InvitationCodeStyles.CheckBt}
           onPress={() => {
             ValidateInvitationCode(TextInputInvitationCode, navigation)
           }}>
-          <Text style={styles.CheckText}>다음</Text>
+          <Text style={InvitationCodeStyles.CheckText}>다음</Text>
         </Pressable>
+
+
       </View>
+
+      <View style={[{
+        position:'absolute',
+        bottom:'3%',
+        width:'100%'
+      }]}>
+       <Pressable
+          style={[styles.RowCenter]}
+          onPress={() => {
+            navigation.navigate('LoginScreen')
+          }}>
+          <Text>이미 계정이 있습니다 ></Text>
+
+        </Pressable>
+
+      </View>
+
+     
+
+     
      
       </View>
     </SafeAreaView>
@@ -399,7 +425,7 @@ const ValidInvitationCodeScreen = ({route}: RegisterScreenProps) => {
 };
 
 
-const styles = StyleSheet.create({
+const InvitationCodeStyles = StyleSheet.create({
   NotMyCellPhoneText: {
     fontSize: 22,
     color: 'gray',
@@ -409,6 +435,8 @@ const styles = StyleSheet.create({
   CheckBox: {
     width:'100%',
     height:'10%',
+    position:'absolute',
+    bottom:'8%',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#0064FF',

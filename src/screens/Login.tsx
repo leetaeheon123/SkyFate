@@ -49,8 +49,8 @@ const TossLogin = () => {
   const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
   const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
 
-  const [TextInputEmail , setTextInputEmail] = useState("8269apk@naver.com")
-  const [TextInputPassword , setTextInputPassword] = useState("123456")
+  const [TextInputEmail , setTextInputEmail] = useState("")
+  const [TextInputPassword , setTextInputPassword] = useState("")
 
   const navigation = useNavigation()
   
@@ -196,7 +196,9 @@ const styles = StyleSheet.create({
     height:'10%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0064FF'
+    backgroundColor: '#0064FF',
+    borderRadius:25
+
   },
   CheckText: {
     fontSize: 16,

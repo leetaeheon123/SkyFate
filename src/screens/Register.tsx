@@ -9,12 +9,10 @@ import firestore from '@react-native-firebase/firestore';
 import {NativeStackScreenProps} from "@react-navigation/native-stack"
 import { RootStackParamList } from './RootStackParamList';
 
-export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">;
+export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCodeSet">;
 
 
 async function RegisterIdentityToken(IdentityToken:any, navigation:any,BasicImageUrl:any) {
-
-  
   try {
     await AsyncStorage.setItem('IdentityToken', IdentityToken);
     await AsyncStorage.setItem("ProfileImageUrl", BasicImageUrl);
@@ -23,29 +21,6 @@ async function RegisterIdentityToken(IdentityToken:any, navigation:any,BasicImag
   } catch (error) {
     console.log('IdentityToken 저장 중 오류:', error);
     // Error saving data
-  }
-}
-
-
-const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:string) => {
-
-  try {
-    const result = await signIn({email: Email, password:InvitationCode})
-    // console.log(result)
-    let uid = result.user.email
-    RegisterIdentityToken(uid, navigation)
-
-  } 
-  catch (error) {
-    if(error.code === "auth/wrong-password") {
-      Alert.alert("이메일은 존재하나 비밀번호가 다릅니다.")
-      //  == 추천인 코드가 다른상황 
-    }
-    if(error.code === "auth/user-not-found") {
-      Alert.alert("해당 이메일이 없습니다. 다시한번 이메일을 확인해주세요")
-      // 추천인 코드는 있으나, 
-    }
-    
   }
 }
 
@@ -152,6 +127,10 @@ const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
   const {InvitationCode} = route.params
   const {Gender} = route.params
   const {PkNumber} = route.params
+  const {imp_uid} = route.params
+
+  console.log('imp_uid', imp_uid)
+
 
   // console.log(InvitationCode)
 
@@ -191,7 +170,7 @@ const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
       </Text>
       <TextInput
         style={TextInputStyle(BorderBottomColor2).TextInput}
-        placeholder="가입하신 이메일을 입력해주세요"
+        placeholder="가입하실 이메일을 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
           setBorderBottomColor2('#0064FF');
@@ -271,6 +250,7 @@ const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
             height: '50%',
             width: '100%',
           }}>
+            <Text></Text>
           {EmailTextInput()}
           {PasswordTextInput()}
         </View>
@@ -279,7 +259,7 @@ const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
         <Pressable
           style={styles.CheckBt}
           onPress={() => {
-            SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,Gender,InvitationCode)
+            SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,Gender,InvitationCode, PkNumber)
           }}>
           <Text style={styles.CheckText}>다음</Text>
         </Pressable>
@@ -303,7 +283,9 @@ const styles = StyleSheet.create({
     height:'10%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0064FF'
+    backgroundColor: '#0064FF',
+    borderRadius:25
+
   },
   CheckText: {
     fontSize: 16,

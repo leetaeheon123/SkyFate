@@ -9,7 +9,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type Props = NativeStackScreenProps<RootStackParamListN, 'Certification'>;
 
 function Certification({ route, navigation }: Props) {
-  const params = route.params?.params;
+  const params = route.params;
+
+  console.log(params)
   const tierCode = route.params?.tierCode;
   const userCode = getUserCode('danal', tierCode, 'certification');
   const M_REDIRECT_URL = "http://detectchangingwebview/iamport/rn";
@@ -36,7 +38,10 @@ function Certification({ route, navigation }: Props) {
           }
         }
         callback={(response) =>
-          navigation.replace('CertificationResultScreen', response)
+          navigation.replace('CertificationResultScreen', {
+            'Certification':response,
+            'InvitationCodeSet':params
+          })
         }
       />
     </SafeAreaView>
