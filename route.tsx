@@ -7,7 +7,7 @@ import TrackUserLocation from './src/screens/map';
 import ManToManBoardWriteScreen from './src/screens/ManToManBoardWrite';
 import ValidInvitationCodeScreen from './src/screens/ValidInvitationCode';
 import RegisterScreen from './src/screens/Register';
-import TossLogin from './src/screens/Login';
+import LoginScreen from './src/screens/Login';
 
 import IndicatorScreen from './src/screens/Indicator';
 
@@ -17,11 +17,9 @@ import AnimationTestScreen from './src/screens/AnimationTest';
 import AnimationTestScreen2 from './src/screens/AnimationTest2';
 import TestScreen from './src/screens/Test';
 
-import TestGifScreen from './TestGif';
 import ImageUploadSample from './src/screens/ImageUploadSample';
 import PhoneRing from './src/screens/PhoneRing';
 
-import CertificationTestScreen from './src/screens/CertificationTest';
 import CertificationScreen from './src/screens/Certification';
 import CertificationResultScreen from './src/screens/CertificationResult';
 
@@ -31,9 +29,10 @@ import { createMaterialBottomTabNavigator } from '@react-navigation/material-bot
 import BottomTabScreen from './bottomstack'
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-const BottomTab = createMaterialBottomTabNavigator();
 
-const Routes = () => {
+const Routes = (props:any) => {
+
+
   // 성별 가져오는 코드 필요합니다 - 2022 10 09 오후1시.
 
     return (
@@ -64,11 +63,7 @@ const Routes = () => {
           component={RegisterScreen}
           options={{headerShown: false}}
         />
-        <Stack.Screen
-          name="CertificationTestScreen"
-          component={CertificationTestScreen}
-          options={{headerShown: false}}
-        />
+       
          <Stack.Screen
           name="CertificationScreen"
           component={CertificationScreen}
@@ -82,14 +77,10 @@ const Routes = () => {
         
         <Stack.Screen
           name="LoginScreen"
-          component={TossLogin}
+          component={LoginScreen}
           options={{headerShown: false}}
         />
-        {/* <Stack.Screen
-          name="MapScreen"
-          component={MapScreen}
-          options={{headerShown: false}}
-        /> */}
+        
         <Stack.Screen
           name="ManToManBoardScreen"
           component={ManToManBoardScreen}

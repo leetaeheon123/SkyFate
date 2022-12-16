@@ -1,46 +1,60 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
 
-import auth from '@react-native-firebase/auth';
-import AsyncStorage from '@react-native-community/async-storage';
 import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
 import firestore from '@react-native-firebase/firestore';
 
 import {NativeStackScreenProps} from "@react-navigation/native-stack"
 import { RootStackParamList } from './RootStackParamList';
 
+import { RegisterUserData } from "../UsefulFunctions/SaveUserDataInDevice"
+import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
+
+import AppContext from "../UsefulFunctions/Appcontext"
+import axios from 'axios';
+import qs from 'qs'
+
+
 export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCodeSet">;
+const SBConnect = async (SendBird:any, UserEmail:string, NickName:string) => {
+  SendBird.connect(UserEmail, (user:any, err:any) => {
+    console.log('In Sendbird.connect CallbackFunction User:', user);
+    // 에러가 존재하지 않으면
+    if (!err) {
+      // 유저 닉네임 중복 방지
+      if (user.nickname !== NickName) {
+        SendBird.updateCurrentUserInfo(
+          NickName,
+          'https://blog.kakaocdn.net/dn/tEMUl/btrDc6957nj/NwJoDw0EOapJNDSNRNZK8K/img.jpg',
+          (user:any, err:any) => {
+            console.log('In sendbird.updateCurrentUserInfo User:', user);
+            if (!err) {
+            } else {
+              Alert.alert(`에러가 난 이유 : ${err.message}`)
+            }
+          },
+        );
+      } 
+    } else {
+      Alert.alert(`에러가 난 이유 : ${err.message}`)
+    }
+  });
+};
 
-
-async function RegisterIdentityToken(IdentityToken:any, navigation:any,BasicImageUrl:any) {
-  try {
-    await AsyncStorage.setItem('IdentityToken', IdentityToken);
-    await AsyncStorage.setItem("ProfileImageUrl", BasicImageUrl);
-    
-    navigation.navigate('MapScreen');
-  } catch (error) {
-    console.log('IdentityToken 저장 중 오류:', error);
-    // Error saving data
-  }
-}
-
-const SignUpWithEmail = async (navigation:any, Email:string, Password:string , Gender:string, InvitationCode:string, PkNumber:number) => {
+const SignUpWithEmail = async (navigation:any, Email:string, Password:string , Gender:number, InvitationCode:string, PkNumber:number
+  ,NickName:string, SendBird:any) => {
   let BasicImageUrl = BasicImage(Gender)
-  let GenderNumber = ParseIntGender(Gender)
   
   try {
     const result = await signUp({email: Email, password:Password})
     Alert.alert("회원가입 완료")
     // await InvitationCodeToFriend를 서버로부터 가져오는 함수 
-    let UserEmail = result.user.email
-    RegisterIdentityToken(UserEmail, navigation,BasicImageUrl)
-    await SignUpFirestore(Email,GenderNumber, BasicImageUrl, InvitationCode,PkNumber)
-    ChangeUsedInvitationCode(InvitationCode)
-
-    // InvitationCodeList/{Number} Document에다가 InvitationCodeToFriend 추가하는 로직이 필요
-
-    // UpdateInvitationCodeToFriend를 업데이트해주는 코드 
-    UpdateInvitationCodeToFriend(PkNumber)
+    let UserEmail:string = result.user.email
+    await SignUpFirestore(UserEmail,Gender, BasicImageUrl, InvitationCode,PkNumber,NickName)
+    
+    await RegisterUserData(UserEmail, navigation)
+    await SBConnect(SendBird, UserEmail, NickName)
+    UpdateInvitationCodeToFriend(InvitationCode)
   } 
   catch (error) {
     if (error.code === 'auth/email-already-in-use') {
@@ -60,85 +74,73 @@ const SignUpWithEmail = async (navigation:any, Email:string, Password:string , G
 }
 
 const SignUpFirestore = async (Email:string,GenderNumber:number, BasicImageUrl:any, InvitationCode:string,
-  PkNumber:number) => {
+  PkNumber:number,NickName:String) => {
 
 
   firestore().collection("UserList").doc(Email).set({
+    UserEmail:Email,
     Gender:GenderNumber,
     ProfileImageUrl:BasicImageUrl,
     InvitationCode: InvitationCode,
-    PkNumber: PkNumber
+    PkNumber: PkNumber,
+    NickName:NickName
   })
 }
 
-const BasicImage = (Gender:string) => {
-  if(Gender =="M"){
+const BasicImage = (Gender:number) => {
+  if(Gender == 1){
     return "https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FMans%2FBasicSetting%2FBasicSettingM.jpeg?alt=media&token=1e7d09a6-81e7-42bf-a01c-ad36fab58069"
-  }else if(Gender == "G"){
+  }else if(Gender == 2){
     return "https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FGrils%2FBasicSetting%2FBasicSetting.jpeg?alt=media&token=fd69ef3f-cde5-4a36-a657-765f8ba9d42d"
   }
   return ""
 }
 
-const ParseIntGender = (Gender:string) => {
-  if(Gender == "M") {
-    return 1
-  } else if( Gender == "G"){
-    return 2
-  } 
-  return 0 
-}
 
-const ChangeUsedInvitationCode = (InvitationCode:string) => {
-  firestore()
-  .collection("InvitationCodeList")
-  .where('InvitationCode', '==', InvitationCode)
-  .get()
-  .then((querySnapshot)=>{
-    let InvitationCodeNumber
-    querySnapshot.forEach((doc) => {
-      InvitationCodeNumber = doc.data().Number
-      console.log(doc.id, "=>", InvitationCodeNumber);
-    });
 
-    return InvitationCodeNumber
-  }).then((InvitationCodeNumber)=>{
-    firestore()
-    .collection("InvitationCodeList")
-    .doc(String(InvitationCodeNumber))
-    .update({
-      Used:true
+const UpdateInvitationCodeToFriend = (InvitationCode:string) => {
+ 
+  fetch('http:/13.124.209.97/invitation/InvitationCode', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: qs.stringify({
+      'InvitationCode': `${InvitationCode}`
     })
-  })
-}
-
-const UpdateInvitationCodeToFriend = (Number:number) => {
-  firestore()
-  .collection("InvitationCodeList")
-  .doc(String(Number))
-  .update({
-    InvitationCodeToFriend:''
-  })
-
   
-}
+  });
 
-const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
+}
+ 
+    
+
+
+const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
   const {InvitationCode} = route.params
   const {Gender} = route.params
+  const GenderNumber = Number(Gender)
   const {PkNumber} = route.params
   const {imp_uid} = route.params
 
   console.log('imp_uid', imp_uid)
+
+  const SendBird = useContext(AppContext)
+
+  console.log(SendBird)
+
 
 
   // console.log(InvitationCode)
 
   const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
   const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
+  const [NickNameBorderBottomColor, setNickNameBorderBottomColor] = useState('lightgray');
 
-  const [TextInputEmail , setTextInputEmail] = useState("")
-  const [TextInputPassword , setTextInputPassword] = useState("")
+  const [TextInputEmail , setTextInputEmail] = useState("8269apk9@naver.com")
+  const [TextInputPassword , setTextInputPassword] = useState("123456")
+  const [NickName , setNickName] = useState("Taeheon9")
+
   
   const TextInputStyle =  (BorderBottomColor:any) =>  StyleSheet.create({
     TextInput: {
@@ -152,7 +154,7 @@ const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
     },
     ViewStyle:{
       width: '100%',
-        height: '40%',
+        height: '25%',
         marginTop: '5%',
         display: 'flex',
         justifyContent: 'center',
@@ -213,6 +215,33 @@ const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
     </View>
   );
 
+  const NickNameTextInput = () => (
+    <View
+      style={TextInputStyle(null).ViewStyle}>
+      <Text
+        style={{
+          color: 'lightgray',
+        }}>
+        닉네임 입력
+      </Text>
+      <TextInput
+        style={TextInputStyle(NickNameBorderBottomColor).TextInput}
+        placeholder="닉네임을 입력해주세요"
+        placeholderTextColor={'lightgray'}
+        onFocus={() => {
+          setNickNameBorderBottomColor('#0064FF');
+        }}
+        onEndEditing={() => {
+          setNickNameBorderBottomColor('lightgray');
+        }}
+        value={NickName}
+        onChangeText={value => {
+          setNickName(value);
+        }}
+      />
+    </View>
+  );
+
   return (
     <SafeAreaView
       style={{
@@ -250,18 +279,23 @@ const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
             height: '50%',
             width: '100%',
           }}>
-            <Text></Text>
           {EmailTextInput()}
           {PasswordTextInput()}
+          {NickNameTextInput()}
         </View>
+       
 
-        <View style={styles.CheckBox}>
+        <View style={LoginAndReigsterStyles.CheckBox}>
         <Pressable
-          style={styles.CheckBt}
+          style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
-            SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,Gender,InvitationCode, PkNumber)
+            if(NickName != "") {
+              SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,GenderNumber,InvitationCode, PkNumber, NickName, SendBird)
+            } else {
+              Alert.alert("닉네임을 입력해주세요")
+            }
           }}>
-          <Text style={styles.CheckText}>다음</Text>
+          <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
         </Pressable>
       </View>
      
@@ -271,75 +305,8 @@ const TossReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
 };
 
 
-const styles = StyleSheet.create({
-  NotMyCellPhoneText: {
-    fontSize: 22,
-    color: 'gray',
-    marginTop: 10,
-    // backgroundColor: 'black'
-  },
-  CheckBox: {
-    width:'100%',
-    height:'10%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0064FF',
-    borderRadius:25
 
-  },
-  CheckText: {
-    fontSize: 16,
-    color: 'white',
-  },
-  CheckBt: {
-    width: '90%',
-    height: 55,
-    borderRadius: 11,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '##0064FF',
-  },
-  Container: {
-    flex: 10,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    // justifyContent: 'center'
-  },
-  Container_NextBUtton: {
-    justifyContent: 'flex-end',
-  },
-  input: {
-    height: 40,
-    width: '100%',
-    fontsize: 22,
-    marginTop: 2,
-  },
-  UnderLine: {
-    height: 1,
-    width: '100%',
-    alignItems: 'center',
-    backgroundColor: 'blue',
-  },
-  text: {
-    // backgroundColor: 'blue'
-    padding: 1,
-    color: 'blue',
-  },
-  InputBox: {
-    // alignItems: 'flex-start',
-    width: '90%',
-    marginBottom: 15,
-    // backgroundColor: 'gray'
-  },
-  NotificationTextView: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: 'black',
-  },
-  
-});
-
-export default TossReigsterScreen;
+export default ReigsterScreen;
 
 
 // function RegisterScreen() {

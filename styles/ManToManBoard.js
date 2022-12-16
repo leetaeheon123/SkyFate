@@ -1,5 +1,5 @@
 import {StyleSheet} from 'react-native';
-const styles = StyleSheet.create({
+styles = StyleSheet.create({
   centeredView: {
     flex: 1,
     // justifyContent: "center",

@@ -21,11 +21,6 @@ const GetGenderAndGetAge = async (imp_uid:string) => {
 }
 
 const GotoRegisterScreen = async (navigation:any, imp_uid:string, InvitationCodeSet:Object) =>{
-  console.log(imp_uid, InvitationCodeSet)
-
-  const DS = {InvitationCodeSet, imp_uid}
-
-  console.log('DS',DS)
 
   navigation.navigate('RegisterScreen', InvitationCodeSet)
 }

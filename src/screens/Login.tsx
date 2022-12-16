@@ -1,36 +1,23 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
 
-import auth from '@react-native-firebase/auth';
-import AsyncStorage from '@react-native-community/async-storage';
 import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
-import firestore from '@react-native-firebase/firestore';
 
 import {NativeStackScreenProps} from "@react-navigation/native-stack"
 import { RootStackParamList } from './RootStackParamList';
-import { useNavigation } from '@react-navigation/native';
+import AppContext from '../UsefulFunctions/Appcontext'
+
+import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
+import { RegisterUserData } from "../UsefulFunctions/SaveUserDataInDevice"
 
 export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">;
-
-
-async function RegisterIdentityToken(IdentityToken:any, navigation:any) {
-  try {
-    await AsyncStorage.setItem('IdentityToken', IdentityToken);
-    navigation.navigate('MapScreen');
-  } catch (error) {
-    console.log('IdentityToken 저장 중 오류:', error);
-    // Error saving data
-  }
-}
 
 const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:string) => {
 
   try {
     const result = await signIn({email: Email, password:InvitationCode})
-    // console.log(result)
-    let uid = result.user.email
-    RegisterIdentityToken(uid, navigation)
-
+    let UserEmail = result.user.email
+    RegisterUserData(UserEmail, navigation)
   } 
   catch (error) {
     if(error.code === "auth/wrong-password") {
@@ -45,14 +32,21 @@ const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:strin
   }
 }
 
-const TossLogin = () => {
+const LoginScreen = (props:any) => {
   const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
   const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
 
   const [TextInputEmail , setTextInputEmail] = useState("")
   const [TextInputPassword , setTextInputPassword] = useState("")
+  
+  const GlobalSendbird = useContext(AppContext);
+  const sendbird = GlobalSendbird.sendbird
 
-  const navigation = useNavigation()
+  const navigation = props.navigation
+
+  console.log(sendbird)
+
+  // const navigation = useNavigation()
   
   const TextInputStyle =  (BorderBottomColor:any) =>  StyleSheet.create({
     TextInput: {
@@ -127,6 +121,40 @@ const TossLogin = () => {
     </View>
   );
 
+  const connect = () => {
+
+        sendbird.connect(TextInputEmail, (user:any, err:any) => {
+          console.log('In Sendbird.connect CallbackFunction User:', user);
+          // 에러가 존재하지 않으면
+          if (!err) {
+            // 유저 닉네임 중복 방지
+            if (user.nickname !== state.nickname) {
+              sendbird.updateCurrentUserInfo(
+                state.nickname,
+                'https://blog.kakaocdn.net/dn/tEMUl/btrDc6957nj/NwJoDw0EOapJNDSNRNZK8K/img.jpg',
+                (user, err) => {
+                  console.log('In sendbird.updateCurrentUserInfo User:', user);
+                  dispatch({type: 'end-connection'});
+                  if (!err) {
+                    start(user);
+                  } else {
+                    showError(err.message);
+                  }
+                },
+              );
+            } else {
+              dispatch({type: 'end-connection'});
+
+              start(user);
+            }
+          } else {
+            dispatch({type: 'end-connection'});
+            showError(err.message);
+          }
+        });
+      
+  };
+
   return (
     <SafeAreaView
       style={{
@@ -168,13 +196,13 @@ const TossLogin = () => {
           {PasswordTextInput()}
         </View>
 
-        <View style={styles.CheckBox}>
+        <View style={LoginAndReigsterStyles.CheckBox}>
         <Pressable
-          style={styles.CheckBt}
+          style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
             LoginWithEmail(navigation, TextInputEmail, TextInputPassword)
           }}>
-          <Text style={styles.CheckText}>다음</Text>
+          <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
         </Pressable>
       </View>
      
@@ -184,72 +212,5 @@ const TossLogin = () => {
 };
 
 
-const styles = StyleSheet.create({
-  NotMyCellPhoneText: {
-    fontSize: 22,
-    color: 'gray',
-    marginTop: 10,
-    // backgroundColor: 'black'
-  },
-  CheckBox: {
-    width:'100%',
-    height:'10%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0064FF',
-    borderRadius:25
 
-  },
-  CheckText: {
-    fontSize: 16,
-    color: 'white',
-  },
-  CheckBt: {
-    width: '90%',
-    height: 55,
-    borderRadius: 11,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '##0064FF',
-  },
-  Container: {
-    flex: 10,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    // justifyContent: 'center'
-  },
-  Container_NextBUtton: {
-    justifyContent: 'flex-end',
-  },
-  input: {
-    height: 40,
-    width: '100%',
-    fontsize: 22,
-    marginTop: 2,
-  },
-  UnderLine: {
-    height: 1,
-    width: '100%',
-    alignItems: 'center',
-    backgroundColor: 'blue',
-  },
-  text: {
-    // backgroundColor: 'blue'
-    padding: 1,
-    color: 'blue',
-  },
-  InputBox: {
-    // alignItems: 'flex-start',
-    width: '90%',
-    marginBottom: 15,
-    // backgroundColor: 'gray'
-  },
-  NotificationTextView: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: 'black',
-  },
-  
-});
-
-export default TossLogin;
+export default LoginScreen;

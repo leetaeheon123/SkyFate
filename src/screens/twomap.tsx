@@ -13,8 +13,9 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
-  ScrollView
-} from 'react-native';1
+  ScrollView,
+  Switch
+} from 'react-native';
 
 import styles from '../../styles/ManToManBoard'
 import Icon from "react-native-vector-icons/Ionicons"
@@ -28,22 +29,21 @@ import {firebase} from '@react-native-firebase/database';
 import Geolocation from 'react-native-geolocation-service';
 
 import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import AppContext from '../UsefulFunctions/Appcontext'
-
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 import firestore from '@react-native-firebase/firestore';
 import AntDesgin from "react-native-vector-icons/AntDesign"
 
 import messaging from '@react-native-firebase/messaging';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
 import {fcmService} from "../UsefulFunctions/push.fcm"
 import {localNotificationService} from "../UsefulFunctions/push.noti"
 import axios from 'axios';
 
+import { MapScreenStyles } from '../../styles/MapScreen';
 import MarkerAnimationStyles from "../../styles/MarkerAnimation"
 import Ring from './Ring';
+
+import { Get_itaewon_HotPlaceList } from '../UsefulFunctions/HotPlaceList';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import * as Progress from 'react-native-progress';
@@ -90,8 +90,8 @@ async function GetFCMToken() {
   // console.log("APNSToken:",token)
 }
 
-const Get_Query_AllLocation = () => {
-  const databaseDirectory = `/Location`;
+const Get_GtoGLocations = () => {
+  const databaseDirectory = `/GtoGLocations`;
   return (
     reference
     .ref(databaseDirectory)
@@ -110,193 +110,13 @@ const Get_Query_AllLocation = () => {
  
 };
 
-const Get_MansLocations = () => {
-  const databaseDirectory = `/ManLocation`;
-  return (
-    reference
-    .ref(databaseDirectory)
-    .once('value')
-    .then(snapshot => {
-
-      let val = snapshot.val()
-      const target = Object.values(val)
-      return target
-    }).then((AllLocationData)=>{
-      console.log("AllLocationData In Get_MansLocations:", AllLocationData)
-
-      return AllLocationData
-    })
-  )
- 
-};
-
-const Get_GrilsLocations = (setGrilsLocations:Function) => {
-  const databaseDirectory = `/Location`;
-  return (
-    reference
-    .ref(databaseDirectory)
-    .once('value')
-    .then(snapshot => {
-
-      let val = snapshot.val()
-      const target = Object.values(val)
-      return target
-    }).then((AllLocationData)=>{
-      setGrilsLocations(AllLocationData)
-    })
-  )
- 
-};
-
-const Get_itaewon_HotPlaceList = () => {
-  const databaseDirectory = `/HotPlaceList/itaewon`;
-  return (
-    reference
-    .ref(databaseDirectory)
-    .once('value')
-    .then(snapshot => {
-
-      let val = snapshot.val()
-      const target = Object.values(val)
-      return target
-    }).then((AllLocationData)=>{
-      return AllLocationData
-    })
-  )
- 
-};
 
 
-const Get_itaewon_HotPlaceList_useEffect = async (setitaewon_HotPlaceList:Function) => {
-  const databaseDirectory = `/HotPlaceList/itaewon`;
-  return (
-    await reference
-    .ref(databaseDirectory)
-    .once('value')
-    .then(snapshot => {
-
-      let val = snapshot.val()
-      const target = Object.values(val)
-      return target
-    }).then((AllHPLocations)=>{
-      setitaewon_HotPlaceList(AllHPLocations)
-    })
-  )
- 
-};
-
-const Get_ProfileImageUrl = (userEmail:string) => {
-  let ProfileImageUrl = ""
-  let uM = userEmail.queryKey[1]
-  return (
-    firestore()
-    .collection(`UserList`)
-    .doc(uM)
-    .get()
-    .then(doc => {
-      // console.log("Get_ProfileImageUrl",doc.data()?.ProfileImageUrl)
-      let PfIU = doc.data()?.ProfileImageUrl
-      return PfIU
-    }).then((ProfileImageUrl)=>{
-      return ProfileImageUrl
-    })
-  )
-}
-
-// ManToManBoard에서 글 리스트 가져오는 코드 
-
-const RequestLocationPermissionsAndroid = async () => {
-  try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      {
-        'title': 'Example App',
-        'message': 'Example App access to your location '
-      }
-    )
-    if(granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log("you can use the location")
-    } else {
-      console.log("Location Permission denied")
-    }
-  } catch(err) {
-    console.log(err)
-  }
-}
-
-const GetLocationPermission = async () => {
-  if (Platform.OS === 'ios') {
-    await Geolocation.requestAuthorization('always');
-  } else {
-    await RequestLocationPermissionsAndroid()
-    // PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
-  }
-} 
-
-function Counter(callback:Function, delay:number | null, Reset:Function) {
-  const savedCallback = useRef();
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  });
-
-  useEffect(() => {
-    function tick() {
-      savedCallback.current();
-    }
-
-    if (delay !== null) {
-      let id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    } else if(delay == null) {
-      Reset()
-    }
-  }, [delay]);
-}
-
-
-const ManLocationUpdate = async () => {
-  const userEmail = await AsyncStorage.getItem('IdentityToken');
-  const ProfileImageUrl = await AsyncStorage.getItem('ProfileImageUrl');
-
-  let ReplaceUserEmail = userEmail.replace('.com','')
-
-  let id = setInterval(()=>{
-    const EpochTime = +new Date()
-    Geolocation.getCurrentPosition(
-      (position) => {
-        const {latitude, longitude} = position.coords;
-        console.log("ManLocationForeGroundUpdate")
-          reference
-          .ref(`/ManLocation/${ReplaceUserEmail}`)
-          .update({
-            latitude: latitude,
-            longitude: longitude,
-            ProfileImageUrl: ProfileImageUrl,
-            TimeStamp: EpochTime
-
-          })
-      },
-      (error) => {
-          // See error code charts below.
-          console.log(error.code, error.message);
-      },
-      { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
-    );
-
-  }, 20000)
-
-
-  return id
-}
-
-
-
-const FirebaseInput = (userEmail:string, StorageUrl:string) => {
+const FirebaseInput = (UserEmail:string, StorageUrl:string) => {
 
   firestore()
   .collection(`UserList`)
-  .doc(userEmail)
+  .doc(UserEmail)
   .update({
     ProfileImageUrl:StorageUrl,
   })
@@ -337,8 +157,8 @@ const ImagePicker = (fun:Function) => {
     })
 }
 
-const PutInStorage = async (LocalImagePath:any, userEmail:string, Gender:any) => {
-  const DBUrl = `/ProfileImage/${Gender}/${userEmail}`
+const PutInStorage = async (LocalImagePath:any, UserEmail:string, Gender:any) => {
+  const DBUrl = `/ProfileImage/${Gender}/${UserEmail}`
   // console.log("DBUrl:" , DBUrl)
   const reference = storage().ref(`${DBUrl}/ProfileImage`)
   // console.log("LocalImagePath",LocalImagePath)
@@ -347,51 +167,22 @@ const PutInStorage = async (LocalImagePath:any, userEmail:string, Gender:any) =>
   return StorageUrl
 }
 
-const GetGender = async (userEmail:string) => {
-  const Result = await firestore()
-  .collection(`UserList`)
-  .doc(`${userEmail}`)
-  .get()
-
-  Result:Array
-  const Gender = Result.data().Gender
-  
-  if(Gender == 1){
-    return "Man"
-  } else if(Gender ==2){
-    return "Grils"
-  }
- 
-}
-
-const GetUserData = () => {
-  const Result = firestore()
-  .collection(`UserList`)
-  .doc(`8269apk@naver.com`)
-  .get()
-
-  console.log("GetUserData:" , Result)
-}
-
 const saveProfileImageUrlInDevice = (StorageUrl:string)=>{
   AsyncStorage.setItem("ProfileImageUrl", StorageUrl);
 
 }
 
-const ChangeMyProfileImage = async (userEmail:string) => {
+const ChangeMyProfileImage = async (UserEmail:string, Gender:number) => {
 
   let fun = async (LocalImagePath:string) => {
 
-    const Gender = await GetGender(userEmail)
-
     let StorageUrl:string = ""
-    await PutInStorage(LocalImagePath,userEmail,Gender).then((doc)=>{
+    await PutInStorage(LocalImagePath,UserEmail,Gender).then((doc)=>{
       StorageUrl = doc
     })
    
-    saveProfileImageUrlInDevice(StorageUrl)
     
-    FirebaseInput(userEmail, StorageUrl)
+    FirebaseInput(UserEmail, StorageUrl)
   }
 
   ImagePicker(fun)
@@ -418,196 +209,27 @@ const GetLocation = (setLocation:Function) => {
 })
   
 }
-
-
-const DeleteMyLocation = (userEmail:string, Gender:number) => {
-
-  if(Gender ==2){
-    setTimeout(()=>{
-      reference.ref(`/Location/${userEmail}`).remove()
-    }, 180000)
-  }
-  // } else if(Gender == 1){
-  //   console.log("Man")
-  // }
-
-}
-
-const getProfileImageUrl = async (userEmail:string) => {
-
-  let ProfileImageUrl = ""
-
-  await firestore()
-  .collection(`UserList`)
-  .doc(userEmail)
-  .get()
-  .then((doc) => {
-    ProfileImageUrl = doc.data().ProfileImageUrl
-  });
-
-  return ProfileImageUrl
-}
-
-const UpdateMyLocation = async (userEmail: string ,Memo:string, PeopleNum:Number,CanPayit:Number,
-  location:any) => {
-
-  const ProfileImageUrl = await getProfileImageUrl(userEmail)
-
-  let CanPayNum:string
-  if(CanPayit == 1) {
-    CanPayNum = "미정"
-  } else if(CanPayit == 2){
-    CanPayNum = "O"
-  } else if(CanPayit == 3){
-    CanPayNum = "X"
-  }
-
-
-  if(Memo == "") {
-    Memo = "."
-  }
-
-  const EpochTime = +new Date()
-  let ReplaceUserEmail = userEmail.replace('.com','')
-  // 현재 위치를 db에 업데이트시키는 코드 
-
-  Geolocation.getCurrentPosition(
-    (position) => {
-      const {latitude, longitude} = position.coords;
-        reference
-        .ref(`/Location/${ReplaceUserEmail}`)
-        .update({
-          latitude: latitude,
-          longitude: longitude,
-          Memo: Memo,
-          CanPayit: CanPayNum,
-          PeopleNum: PeopleNum,
-          ProfileImageUrl: ProfileImageUrl,
-          TimeStamp: EpochTime
-
-        })
-        .then(() => DeleteMyLocation(ReplaceUserEmail, 2));
-    },
-    (error) => {
-        // See error code charts below.
-        console.log(error.code, error.message);
-    },
-    { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
-  );
-
-}
-
-
-const CheckIdentityToken = async () => {
-let id = await AsyncStorage.getItem('IdentityToken');
-  let id2 = await AsyncStorage.getItem("ProfileImageUrl");
-
-  console.log(id, id2)
-
-}
-
 const logout = (navigation:any) => {
   RemoveIdentityToken()
-  
   navigation.navigate('ValidInvitationCodeScreen')
 
 }
 const RemoveIdentityToken = async () => {
   AsyncStorage.removeItem('IdentityToken');
-  
-
 }
-// foreground에서 푸쉬알림 보기 테스트 
-function SendPushNotificationInforeground() {
-  PushNotificationIOS.addNotificationRequest({
-    id:"123",
-    title:"hello",
-    body:"hi",
-    subtitle:"hh",
-  });
-
-}
-
-const SaveEmailInDevice = async (myContext: any) => {
-  const userEmail = await AsyncStorage.getItem('IdentityToken');
-  // console.log("asyncemail -> mycontext")
-  myContext.setUserEmail(userEmail)
-}
-
-const SaveProfileImageUrlInDevice = async (myContext:any) => {
-  const ProfileImageUrl = await AsyncStorage.getItem('ProfileImageUrl');
-  // console.log("SaveProfileImageUrlInDevice",ProfileImageUrl)
-  // console.log("asyncprofileImageUrl -> mycontext")
-
-  myContext.setProfileImageUrl(ProfileImageUrl)
-
-}
-
-const SaveGenderInDevice = async (myContext:any) => {
-  const userEmail = await AsyncStorage.getItem('IdentityToken');
-  const Gender = await GetGender(userEmail)
-  myContext.setUserGender(Gender)
-}
-
-const SaveGenderInDevicePromise = async () => {
-  return (
-    new Promise(async (resolve, reject) => {
-      const userEmail = await AsyncStorage.getItem('IdentityToken');
-      const Gender = await GetGender(userEmail)
-      resolve(Gender)
-    })
-
-  )
-
-}
-
-const AndroidPushNoti = () => {
-  console.log("AndroidPushNoti")
-  
-  localNotificationService.showNotification(
-    1,
-    "title",
-    "body",
-    {},
-    {}
-  );
-}
-
-// 여자이면 남자위치데이터 불러와서 지도에 보여주는 로직 추가하기 
 // 자주 바뀌는 데이터이므로 State화 하기 
 
-const UpdateMyLocationWatch = (setLocation:Function) => {
-  const _watchId = Geolocation.watchPosition(
-    position => {
-      const {latitude, longitude} = position.coords;
-      setLocation({latitude, longitude});
-      console.log("state location change")
-    },
-    error => {
-      console.log(error);
-    },
-    {
-      enableHighAccuracy: true,
-      distanceFilter: 3,
-      interval: 5000,
-      fastestInterval: 2000,
-    },
-  );
-
-  return () => {
-    if (_watchId) {
-      Geolocation.clearWatch(_watchId);
-    }
-  };
-}
-
-const TwoMapScreen = () => {
+const TwoMapScreen = (props:any) => {
 
 
   const navigation = useNavigation()
 
+  const UserData = props.route.params
+
+  console.log("UserData:",UserData)
+
+
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
-  const myContext = useContext(AppContext);
 
   const [token, setToken] = useState('');
 
@@ -643,65 +265,72 @@ const TwoMapScreen = () => {
 
   useEffect(() => {
     async function SaveInDevice() { 
-      // 로케이션 위치 가져오는 권한설정
-      await GetLocationPermission()
       // 푸쉬알림 권한설정 
       await requestPushNotificationPermission()
       await GetLocation(setLocation)
       // 현재위치를 state화 &추적
 
       // UpdateMyLocationWatch(setLocation)
-    
-      console.log("0")
-
-      await SaveEmailInDevice(myContext)
-      console.log("1")
-
-      await SaveProfileImageUrlInDevice(myContext)
-      console.log("2")
-
-      await SaveGenderInDevice(myContext)
-
-      SaveGenderInDevicePromise().then((data)=>{
-        console.log("Gender Data InSaveGenderInDevicePromise:", data)
-        if(data == "Man"){
-          ManLocationUpdate()
-        }
-      })
-
-      
-
-
     }
 
     SaveInDevice(); 
 
-    fcmService.register(onRegister, onNotification,onOpenNotification);
-    localNotificationService.configure(onOpenNotification);
-
-    const onChildAdd = database()
-      .ref('/Location')
+    const onChildAddInGtoG = database()
+      .ref('/GtoGLocations')
       .on('child_added', snapshot => {
-        GrilsLocationsrefetch()
+        GtoGLocationsRefetch()
       });
 
-      const ManonChildAdd = database()
-      .ref('/ManLocation')
-      .on('child_added', snapshot => {
-        MansLocationsretech()
-      });
-
-
-    
     // Stop listening for updates when no longer required
     return () => {
-      database().ref('/Location').off('child_added', onChildAdd);
-      database().ref('/ManLocation').off('child_added', ManonChildAdd);
+      database().ref('/GtoGLocations').off('child_added', onChildAddInGtoG);
     }
 
   }, []);
 
   const [ GpsOn, setGpsOn] = useState(false);
+
+  function UpdateMyLocationForGtoG(){
+
+    let ReplaceUserEmail = UserData.UserEmail.replace('.com','')
+    const EpochTime = +new Date()
+
+    Geolocation.getCurrentPosition(
+      (position) => {
+        const {latitude, longitude} = position.coords;
+        console.log("MyLocationUpdateforGtoG In ForeGround")
+          reference
+          .ref(`/GtoGLocations/${ReplaceUserEmail}`)
+          .update({
+            latitude: latitude,
+            longitude: longitude,
+            ProfileImageUrl: UserData.ProfileImageUrl,
+            TimeStamp: EpochTime
+          })
+      },
+      (error) => {
+          // See error code charts below.
+          console.log(error.code, error.message);
+      },
+      { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
+    );
+
+  }
+
+  useEffect(()=>{
+   
+    if(GpsOn == true){
+      let Interval = setInterval(
+        UpdateMyLocationForGtoG, 
+      20000)
+      return () => {
+        clearInterval(Interval)
+      }
+    } 
+  }, [GpsOn])
+
+  const GpsSwitch = () => setGpsOn(previousState => !previousState);
+
 
   const [ ModalVisiable, setModalVisiable] = useState(false);
   const [ ProfileModalVisiable, setProfileModalVisiable] = useState(false);
@@ -710,38 +339,11 @@ const TwoMapScreen = () => {
   const [ PeopleNum, setPeopleNum] = useState(1);
   const [ MoenyRadioBox, setMoneyRadioBox] = useState(0)
 
-
-
-  const [second, setSecond] = useState<number>(180);
   const {width} = Dimensions.get('window')
 
   const ChangeModalVisiable = () => {
     setModalVisiable(previousState => !previousState)
   }
-
-  // const ChangePeopleNum = (Fun:Function) => {
-  //   if(PeopleNum > 0){
-  //     Fun()
-  //   } else {
-
-  //   }
-
-  // }
-
-  Counter(
-    () => {
-      if(GpsOn == true) {
-        setSecond(second - 1);
-      } 
-    },
-    second >= 1 ? 1000 : null,
-    ()=>{
-      setSecond(180)
-      setGpsOn(false)
-    }
-  );
-
-
 
   const ShowMyLocation = () => {
     const date = new Date()
@@ -750,7 +352,7 @@ const TwoMapScreen = () => {
     console.log(day)
     // day가 오후 10시 ~ 새벽 7시 
     if(day >= 22 && day <=24 || day >= 1 && day <= 7) {
-        UpdateMyLocation(myContext.userEmail,Memo, PeopleNum, MoenyRadioBox, location)
+        // UpdateMyLocation(UserData.UserEmail,Memo, PeopleNum, MoenyRadioBox, location)
         setGpsOn(true)
         ChangeModalVisiable()
     } else {
@@ -758,17 +360,9 @@ const TwoMapScreen = () => {
     }
  
   }
-  const {data, isLoading, refetch:GrilsLocationsrefetch} = useQuery("QueryLocation", Get_Query_AllLocation)
+  const {data, isLoading, refetch:GtoGLocationsRefetch} = useQuery("GtoGLocations", Get_GtoGLocations)
+  const {data:itaewon_HotPlaceList, isLoading:itaewon_HotPlaceListisLoading} = useQuery("itaewon_HotPlaceList2", Get_itaewon_HotPlaceList)
 
-  const {data:MansLocations, isLoading:isLoadingMansLocations, refetch:MansLocationsretech} = useQuery("MansLocationsUseQuery", Get_MansLocations)
-  
-
-  // useEffect(()=>{
-  //   refetch()
-  // }, [updatenum])
-
-  const {data:itaewon_HotPlaceList, isLoading:itaewon_HotPlaceListisLoading} = useQuery("itaewon_HotPlaceList", Get_itaewon_HotPlaceList)
-  const {data:ProfileImageUrl, isLoading:ProfileImageUrlisLoading} = useQuery(["ProfileImageUrl", myContext.userEmail], Get_ProfileImageUrl)
   const AnimationMarker = (ProfileImageUrl:string) => {
     return (
     <Marker
@@ -810,7 +404,7 @@ const TwoMapScreen = () => {
   const ProfileImage = () => {
     return (
       <Image 
-      source={{uri:myContext.ProfileImageUrl}}
+      source={{uri:UserData.ProfileImageUrl}}
       style={{width: 100, height: 100, borderRadius:10}}
       />
     )
@@ -868,13 +462,11 @@ const TwoMapScreen = () => {
                   backgroundColor:'white'
                 }}
               onPress={()=>{
-                ChangeMyProfileImage(myContext.userEmail)
+                ChangeMyProfileImage(UserData.UserEmail, UserData.Gender)
               }}>
-              {ProfileImageUrlisLoading == false ?
+                {
                 ProfileImage() 
-                :
-                PersonIcon()
-              }
+                }
 
               </TouchableOpacity>
               <Text style={{color:'white', fontSize:22, fontWeight:'600'}}>내 등급</Text>
@@ -1032,7 +624,7 @@ const TwoMapScreen = () => {
           minZoomLevel={10}
           maxZoomLevel={17}
           >
-          {GpsOn == true  && ProfileImageUrlisLoading == false? 
+          {GpsOn == true ?
           <Marker
           coordinate={{
             // latitude: 37.5817005,
@@ -1050,7 +642,7 @@ const TwoMapScreen = () => {
           
           <Image 
             style={MarkerAnimationStyles.Image}
-            source={{uri:ProfileImageUrl}}/>
+            source={{uri:UserData.ProfileImageUrl}}/>
           </View>
           </Marker>
           :null}
@@ -1063,9 +655,14 @@ const TwoMapScreen = () => {
                 latitude: data.latitude,
                 longitude: data.longitude
               }}
-              title={data?.Memo}
+              title={data?.FaceGrade}
               tracksViewChanges={false}
-              description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
+              description={'얼굴: ' + data?.FaceGrade + '점 매너: ' + data?.MannerGrade + "점 사회성: " + data?.SocialGrade +"점 "}
+
+              onPress={()=>{
+                console.log("Hello")
+                setProfileModalVisiable(!ProfileModalVisiable)
+              }}
             >
               <View>
                 <Image 
@@ -1079,31 +676,6 @@ const TwoMapScreen = () => {
             
           })
           : null}
-
-          {isLoadingMansLocations == false ?
-           MansLocations.map((MansData,index)=>{
-            return(
-            <Marker
-              key={MansData.latitude}
-              coordinate={{
-                latitude: MansData.latitude,
-                longitude: MansData.longitude
-              }}
-              tracksViewChanges={false}
-            >
-              <View>
-                <Image 
-                  source={{uri:MansData.ProfileImageUrl}}
-                  style={MapScreenStyles.GrilsMarker}
-                  resizeMode="cover"
-                />
-              </View>
-            </Marker>
-            )
-          })
-          :null}
-
-
 
           {itaewon_HotPlaceListisLoading == false ? 
           itaewon_HotPlaceList?.map((data,index)=>{
@@ -1130,32 +702,23 @@ const TwoMapScreen = () => {
           }) :null}
           
           
-
-          
-          
         </MapView>
       )}
 
-
-
-     
-  
-      {myContext.userGender == "Grils" ? 
+      {UserData.Gender == "2" ? 
       <SafeAreaView style={[styles.Row_OnlyColumnCenter,MapScreenStyles.TopView]}>
           <Text style={{color:'white', fontWeight:'500', fontSize:14}}>나의위치 표시하기</Text>
-
+          <Switch
+          trackColor={{false: '#202124', true: '#202124'}}
+          thumbColor={GpsOn ? '#28FF98' : '#f4f3f4'}
+          ios_backgroundColor="#202124"
+          onValueChange={GpsSwitch}
+          value={GpsOn}
+          />
           {GpsOn == false ? 
-          <Text style={{color:'#9F9F9F', fontSize:16, fontWeight:'500'}}>
-          {Math.floor(second / 60)} : {second % 60}
-          </Text>
-          :  <Text style={{color:'#28FF98', fontSize:16, fontWeight:'500'}}>
-          {Math.floor(second / 60)} : {second % 60}
-          </Text>}
-          {GpsOn == false ? 
-          
           <View style={[styles.NoFlexDirectionCenter,{width:38, height:22, 
             backgroundColor:'#B4B4B4', borderRadius:4}]}>
-            <Text style={{fontWeight:'500', fontSize:14}}>ON</Text>
+            <Text style={{fontWeight:'500', fontSize:14}}>OFF</Text>
           </View>
           :<View style={[styles.NoFlexDirectionCenter,{width:33, height:22, 
             backgroundColor:'#28FF98', borderRadius:4}]}>
@@ -1181,27 +744,18 @@ const TwoMapScreen = () => {
           // forceUpdate()
           setProfileModalVisiable(!ProfileModalVisiable)
         }}>
-          {ProfileImageUrlisLoading == false ?  
-            <Image 
-            source={{uri:myContext.ProfileImageUrl}}
-            style={{width: 43, height: 43, borderRadius:35}}
-            />:
-          <Icon name='person' size={26} color='white'/>
-          }
-
+          <Image 
+          source={{uri:UserData.ProfileImageUrl}}
+          style={{width: 43, height: 43, borderRadius:35}}
+          />
         </TouchableOpacity>
       </View> 
         
 
-      {myContext.userGender == "Grils" ? 
+      {UserData.Gender == 2 ? 
        <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}
         onPress={()=> {
-          // AndroidPushNoti()
-          // ChangeModalVisiable()
-
-          GrilsLocationsrefetch()
-          // forceUpdate()
-
+          ChangeModalVisiable()
         }}
        >
         <Text style={{color:'white'}}>시작하기</Text>
@@ -1221,275 +775,8 @@ const TwoMapScreen = () => {
   );
 };  
 
-// 자신의 위치를 트랙킹해서 맵에 보여주는 컴포넌트
-const TrackUserLocation = () => {
-  const [locations, setLocations] = useState<Array<ILocation>>([]);
-  let _watchId: number;
-
-  //_watchId라는 값에 Geolocation.watchPostion의 반환값을 저장. 
-  // locations state가 변경될때마다 rendering -> 즉 위치변경때마다 화면렌더링을 
-  // 통해 마커로 지도 내 자신의 위치를 추적
 
 
-  useEffect(() => {
-    _watchId = Geolocation.watchPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setLocations([...locations, {latitude, longitude}]);
-      },
-      error => {
-        console.log(error);
-      },
-      {
-        enableHighAccuracy: true,
-        distanceFilter: 100,
-        interval: 5000,
-        fastestInterval: 2000,
-      },
-    );
-  }, [locations]);
-
-  // _watchId가 null이 아니면 clear..?? 
-  // Watch에 대해 더 공부할 필요가 있다. 
-
-  useEffect(() => {
-
-    GetLocationPermission()
-    return () => {
-      if (_watchId !== null) {
-        Geolocation.clearWatch(_watchId);
-      }
-    };
-  }, []);
-
-  return (
-    <View style={{
-      flex:1
-    }}>
-      {locations.length > 0 && (
-        <MapView
-          // {Platform.OS === 'android' ? provider={PROVIDER_GOOGLE} : provider={default}}
-          showsUserLocation
-          // followsUserLocation
-          loadingEnabled
-          style={{flex: 1}}
-          initialRegion={{
-            // latitude: locations[0].latitude,
-            // longitude: locations[0].longitude,
-            latitude: 37.5226,
-            longitude: 127.0280,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}>
-          {locations.map((location: ILocation, index: number) => (
-            <Marker
-            key={`location-${index}`}
-            coordinate={{ 
-              latitude: location.latitude,
-              longitude: location.longitude
-            }}
-            >
-              <View
-              style={{
-                height:35,
-                width:35,
-                borderRadius:50,
-                backgroundColor:'white',
-                display:'flex',
-                justifyContent:'center',
-                alignItems:'center'
-              }}
-              >
-                <Image 
-                  source={{uri:'https://thumb.mt.co.kr/06/2021/04/2021042213221223956_1.jpg/dims/optimize/'}}
-                  style={{width: 30, height: 30
-                  ,borderRadius:35}}
-                  resizeMode="cover"
-                />
-              </View>
-          </Marker>
-          ))}
-        </MapView>
-      )}
-    </View>
-  );
-};
-
-let {height} = Dimensions.get('window')
-height = Math.ceil(height)
-console.log(height)
-
-let NS = height * 0.57
-let NS2 = height * 0.7
-const MapScreenStyles = StyleSheet.create({
-  ProfileModalParent: {
-    height:'95%', width:'100%', 
-    backgroundColor:'black',
-    top:'5%',
-    borderTopLeftRadius:15,
-    borderTopRightRadius:15
-  },
-  ProfileModalScrollView:{
-    width:'90%',
-    marginLeft:'5%'
-  },
-  TopView: {position:'absolute', left:'5%', top:'6%', width:'68%', height:46,
-  backgroundColor:'#606060', borderRadius:6, justifyContent:'space-around'},
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2
-  },
-  Memomodal: {
-    // height:NS,
-    // height:533,
-    height:NS2,
-    top:'14%',
-    width:'90%',
-    position:'absolute',
-    backgroundColor:'black',
-    // top:'21.5%',
-    left:'5%',
-    borderRadius:14,
-    display:'flex',
-    flexDirection:'column',
-    // justifyContent:'space-around'
-  },
-  MinusPeopleNumber : {
-    width:18,
-    height:18,
-    backgroundColor:'#565656',
-  },
-
-  PlusPeopleNumber : {
-    width:18,
-    height:18,
-    backgroundColor:'white',
-  },
-  
-  TotalPeopleNum : {
-    fontSize:14,
-    fontWeight:'bold'
-  },
-
-  MoneyIconBox: [{
-    width:63,
-    height:30,
-    borderRadius:4,
-    backgroundColor:'#3E3E3E',
-  }, styles.NoFlexDirectionCenter],
-
-  SelectedMoneyIconBox: [{
-    backgroundColor:'#28FF98',
-    width:63,
-    height:30,
-    borderRadius:4,
-
-  }, styles.NoFlexDirectionCenter],
-
-  MemoTextInput: {
-    width: '100%',
-    height: 46,
-    backgroundColor: '#3E3E3E',
-    borderRadius: 6,
-    padding: 15,
-  },
-
-  MoneyOption :{
-    height: 50,
-    width:'15%',
-    borderWidth:2,
-    borderStyle:'solid',
-    borderColor:'lightgray',
-    borderRadius:10,
-    backgroundColor:'red',
-    marginLeft:'5%',
-  },
-
-  PeopleNumOption: {
-    width:'100%',
-    display:'flex',
-    flexDirection:'row',
-    justifyContent:'space-between',
-    height: 46,
-    backgroundColor: '#3E3E3E',
-    borderRadius: 6,
-  },
-
-  MoneyOptionView: {
-    // height:'25%',
-    width:'100%',
-    justifyContent:'space-between'
-  },
-  
-  CheckBoxView :{
-    height: 46,
-    width:'42.5%',
-    borderRadius:6,
-    marginLeft:'5%'
-    
-  },
-
-  CancelBoxView :{
-    height: 46,
-    width:'42.5%',
-    borderRadius:6,
-    backgroundColor:'#F5F5F5',
-    marginLeft:'5%'
-  },
-  ChangeProfileView : {
-    // width:'10%',
-    // height:'5%',
-    width:46,
-    height:46,
-    borderRadius:50,
-    position:'absolute',
-    // left:'88%',
-    right:'7%',
-    top:'6%',
-    // 11/08) 여기는 젤리처럼 그레디언트 컬러 필요함.
-    // backgroundColor:'#0064FF',
-    // backgroundColor:'#202632',
-    // backgroundColor:'#4EB789',
-    // phonering 보라
-    // backgroundColor:'#6E01EF',
-    borderWidth:3,
-    borderColor:'#202124',
-    borderStyle:'solid'
-    
-  },
-
-  StartView :{
-    width:'90%',
-    height:50,
-    // backgroundColor:'#202632',
-    backgroundColor:'#202124',
-    position:'absolute',
-    left:'5%',
-    bottom:'6%',
-    borderRadius:10
-  },
-
-  GrilsMarker: {
-    width: 35,
-    height: 35,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  HP_Marker: {
-    width: 45,
-    height: 45,
-    borderRadius: 50,
-    borderWidth: 3,
-    borderColor: 'black',
-  },
-
-  WhiteText: {
-    color:'white',
-  }
-
-});
 
 export default codePush(TwoMapScreen);
 

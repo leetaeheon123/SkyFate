@@ -41,30 +41,6 @@ const GetKaKaoProfile = async navigation => {
   navigation.navigate('BottomTab');
 };
 
-async function RegisterIdentityToken(IdentityToken:any, navigation:any) {
-  try {
-    await AsyncStorage.setItem('IdentityToken', IdentityToken);
-    await AsyncStorage.setItem("ProfileImageUrl", "https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FGrils%2FBasicSetting%2FBasicSetting.jpeg?alt=media&token=fd69ef3f-cde5-4a36-a657-765f8ba9d42d");
-    
-    navigation.navigate('MapScreen');
-  } catch (error) {
-    console.log('IdentityToken 저장 중 오류:', error);
-    // Error saving data
-  }
-}
-
-// function GetIdentityToken(va) {
-//   AsyncStorage.getItem('IdentityToken', (err, result) => {
-//     // console.log(result);
-//     va = result;
-//     console.log('va', va);
-//   });
-
-//   return va;
-
-//   // return value;
-// }
-
 async function onAppleButtonPress(navigation: any) {
   const appleAuthRequestResponse = await appleAuth.performRequest({
     requestedOperation: appleAuth.Operation.LOGIN,
@@ -119,7 +95,7 @@ async function onAppleButtonPress(navigation: any) {
 }
 
 const ValidInvitationCodeLength = (InvitationCode:string) => {
-  if(InvitationCode.length >= 7 && InvitationCode[6] == 'M' || InvitationCode[6] =="G" ) {
+  if(InvitationCode.length ==6 ) {
     return true
   }
 
@@ -133,16 +109,6 @@ const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
     Alert.alert("초대코드를 다시한번 확인해주세요")
     return
   }
-
-  let Gender = InvitationCode[6]
-
-  let DocName = 'InvitationCodeList'
-
-  if(Gender == 'M') {
-    DocName = 'Man' + DocName
-  } else if(Gender == 'G') {
-    DocName = 'Girl' + DocName
-  } 
 
   firestore()
   .collection("InvitationCodeList")
@@ -171,7 +137,6 @@ const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
     if(Obj.Valid == 1){
       navigation.navigate('CertificationScreen', {
         InvitationCode: InvitationCode,
-        Gender:Gender,
         PkNumber: Obj.PkNumber
       })
     } else if (Obj.Valid == 0){
@@ -181,120 +146,13 @@ const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
     } 
   })
 
-  // firestore()
-  // .collection(`Recommendation`)
-  // .doc(DocName)
-  // .get()
-  // .then(doc => {
-  //   let datalist:any[] = doc.data()?.CaseA
-
-  //   let Validate = 0
-  //   datalist.map((data,index)=>{
-  //     console.log(data?.InvitationCode)
-  //     if(InvitationCode == data.InvitationCode && data.Used == false) {
-  //       // 초대코드가 존재한 경우 
-  //       Validate = 1
-  //     } else if(InvitationCode == data.InvitationCode && data.Used == true){
-  //       // 초대코드는 있으나 사용된경우
-  //       Validate = 2
-  //     } 
-  //   })
-  //   return Validate
-  // }).then(async (Value)=>{
-  //   if(Value == 1){
-  //     navigation.navigate('RegisterScreen', {
-  //       InvitationCode: InvitationCode,
-  //       Gender:Gender
-  //     })
-  //   } else if (Value == 0){
-  //     Alert.alert("존재하지 않는 초대코드입니다.")
-  //   } else if (Value == 2){
-  //     Alert.alert("이미 사용된 초대코드입니다")
-  //   } 
-  // })
-
-
 }
 
-const ValidateInvitationCodeCase2 = (InvitationCode:string, navigation:any) => {
-
-  let Valid = ValidInvitationCodeLength(InvitationCode)
-  if(Valid == false){
-    return
-  }
-
-  let Gender = InvitationCode[6]
-
-  let DocName = 'InvitationCodeList'
-
-  if(Gender == 'M') {
-    DocName = 'Man' + DocName
-  } else if(Gender == 'G') {
-    DocName = 'Girl' + DocName
-  } 
-
-  firestore()
-  .collection(`Recommendation`)
-  .doc(DocName)
-  .get()
-  .then(doc => {
-    let datalist:any[] = doc.data()?.CaseA
-
-    let Validate = 0
-    datalist.map((data,index)=>{
-      console.log(data?.InvitationCode)
-      if(InvitationCode == data.InvitationCode && data.Used == false) {
-        // 초대코드가 존재한 경우 
-        Validate = 1
-      } else if(InvitationCode == data.InvitationCode && data.Used == true){
-        // 초대코드는 있으나 사용된경우
-        Validate = 2
-      } 
-    })
-    return Validate
-  }).then(async (Value)=>{
-    if(Value == 1){
-      navigation.navigate('RegisterScreen', {
-        InvitationCode: InvitationCode,
-        Gender:Gender
-      })
-    } else if (Value == 0){
-      Alert.alert("존재하지 않는 초대코드입니다.")
-    } else if (Value == 2){
-      Alert.alert("이미 사용된 초대코드입니다")
-    } 
-  })
-
-
-}
-
-const RegisterInputGenerater = (props:any) => {
-  return (
-    <View style={InvitationCodeStyles.InputBox}>
-      <Text style={InvitationCodeStyles.text}>{props.Name}</Text>
-      <TextInput
-        value={props.value}
-        style={InvitationCodeStyles.input}
-        onChangeText={value => {
-          props.StateChange(value);
-        }}
-        // autoCapitalize={props.autoCapitalize}
-        // autoCapitalize='none'
-        autoCorrect={props.autoCorrect}>
-        </TextInput>
-      <View style={InvitationCodeStyles.UnderLine} />
-    </View>
-  );
-};
-
-
-
-const ValidInvitationCodeScreen = ({route}: RegisterScreenProps) => {
+const ValidInvitationCodeScreen = () => {
   const [BorderBottomColor, setBorderBottomColor] = useState('lightgray');
 
-  const [TextInputInvitationCode , setTextInputInvitationCode] = useState("AHfPqWM0")
+  const [TextInputInvitationCode , setTextInputInvitationCode] = useState("AHfPqW")
   const navigation = useNavigation();
-  const {width, height} = Dimensions.get('window')
   
   const TextInputStyle = StyleSheet.create({
     TextInput: {
@@ -386,6 +244,18 @@ const ValidInvitationCodeScreen = ({route}: RegisterScreenProps) => {
           }}>
           {InvitationCode()}
         </View>
+
+        <Button title="즉시 회원가입으로 이동"
+          onPress={()=>{
+            navigation.navigate("RegisterScreen", {
+              InvitationCode:"AHfPqW",
+              Gender:1,
+              PkNumber:0,
+              imp_uid:""
+            })
+           
+          }}
+        />
 
         <View style={InvitationCodeStyles.CheckBox}>
         <Pressable
@@ -495,64 +365,3 @@ const InvitationCodeStyles = StyleSheet.create({
 });
 
 export default ValidInvitationCodeScreen;
-
-
-// function RegisterScreen() {
-
-//   const KaKaoLoginButton = () => {
-//     return (
-//       <Button 
-//       title="kakao login"
-//       onPress={async () => {
-//         signInWithKakao(navigation);
-//       }}>
-//       </Button>
-//     )
-   
-//   }
-
-//   const AppleLoginButton =  <AppleButton
-//   buttonStyle={AppleButton.Style.BLACK}
-//   buttonType={AppleButton.Type.SIGN_IN}
-//   style={{
-//     width: 160, // You must specify a width
-//     height: 45, // You must specify a height
-//   }}
-//   onPress={() => onAppleButtonPress(navigation)}
-//   />
-
-  
-//   const navigation = useNavigation();
-
-//   const [TextInputEmail , setTextInputEmail] = useState("")
-//   const [TextInputPassword , setTextInputPassword] = useState("")
-
-//   return (
-//     <>
-//       {/* <Button
-//         title="removeItem"
-//         onPress={() => {
-//           RemoveIdentity();
-//         }}></Button> */}
-//       <SafeAreaView>
-//         {/* {Platform.OS === 'android' ? (
-//           KaKaoLoginButton()
-//         ) : (
-//           AppleLoginButton
-//         )} */}
-
-//           <RegisterInputGenerater
-//             Name="Email"
-//             value={TextInputEmail}
-//             StateChange={setTextInputEmail}
-//             autoCapitalize="none"
-//             autoCorrect={false}
-//           />
-
-//         <Button title="직접로그인" onPress={() => {
-//           LoginWithEmail(navigation)
-//         }}></Button>
-//       </SafeAreaView>
-//     </>
-//   );
-// }

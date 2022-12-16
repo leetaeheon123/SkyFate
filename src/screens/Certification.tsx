@@ -16,7 +16,6 @@ function Certification({ route, navigation }: Props) {
   const userCode = getUserCode('danal', tierCode, 'certification');
   const M_REDIRECT_URL = "http://detectchangingwebview/iamport/rn";
 
- 
 
   // console.log(params!)
   // console.log(params)

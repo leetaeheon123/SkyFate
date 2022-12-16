@@ -1,38 +1,61 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, SafeAreaView} from 'react-native';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+
 import AsyncStorage from '@react-native-community/async-storage';
+import BottomTabScreen from '../../bottomstack';
+import ValidInvitationCodeScreen from './ValidInvitationCode';
 
-async function _bootstrapAsync(navigation:any) {
-  const userToken = await AsyncStorage.getItem('IdentityToken');
+const IndicatorScreen = (props:any) => {
 
-  // This will switch to the App screen or Auth screen and this loading
-  // screen will be unmounted and thrown away.
+  const [initialized, setInitialized] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // 원래는 LoginScreen이 아니라 ValidInvitationCodeScreen
-  navigation.navigate(userToken ? 'BottomTabScreen' : 'ValidInvitationCodeScreen');
-}
+  const savedUserKey = 'UserData';
 
-function IndicatorScreen() {
-  const navigation = useNavigation();
+  useEffect(() => {
 
-  useFocusEffect(
-    React.useCallback(() => {
-      _bootstrapAsync(navigation);
+    AsyncStorage.getItem(savedUserKey)
+      .then(user => {
+        //유저가 있는경우에 CurrentUUser에 savedUserKey 키를 통해 구해온값 저장
+        if (user) {
+          setCurrentUser(JSON.parse(user));
+        }
+        // 그다음에 셋이니셜라이즈
+        setInitialized(true);
+      })
+      .catch(err => console.error(err));
+  }, []);
 
-      // Do something when the screen is focused
-      return () => {
-        // alert('Screen was unfocused');
-        // Do something when the screen is unfocused
-        // Useful for cleanup functions
-      };
-    }, []),
-  );
+  useEffect(()=>{
+    console.log(props.route.params)
+    AsyncStorage.getItem(savedUserKey)
+      .then(user => {
+        //유저가 있는경우에 CurrentUUser에 savedUserKey 키를 통해 구해온값 저장
+        if (user) {
+          setCurrentUser(JSON.parse(user));
+        }
+      })
+      .catch(err => console.error(err));
+  }, [props.route.params])
+
 
   return (
-    <SafeAreaView>
-      <ActivityIndicator />
-    </SafeAreaView>
+    <>
+     {initialized ? (
+        // Best Partice?
+        currentUser ? (
+          <BottomTabScreen currentUser={currentUser}/>
+        ) : (
+          <ValidInvitationCodeScreen/>
+        )
+      ) : (
+        <SafeAreaView>
+          <ActivityIndicator />
+        </SafeAreaView>
+      )}
+    
+    </>
+    
   );
 }
 
