@@ -16,6 +16,7 @@ import styles from '../../styles/ManToManBoard';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from './RootStackParamList';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
 
 export type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">
 
@@ -141,8 +142,10 @@ const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
       })
     } else if (Obj.Valid == 0){
       Alert.alert("존재하지 않는 초대코드입니다.")
+      return
     } else if (Obj.Valid == 2){
       Alert.alert("이미 사용된 초대코드입니다")
+      return
     } 
   })
 
@@ -205,28 +208,11 @@ const ValidInvitationCodeScreen = () => {
 
   return (
     <SafeAreaView
-      style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'white',
-      }}>
+      style={LoginAndReigsterStyles.Body}>
       <View
-        style={{
-          width: '90%',
-          height: '100%',
-          marginLeft: '5%',
-          // backgroundColor:'red'
-        }}>
+        style={LoginAndReigsterStyles.Main}>
         <View
-          style={{
-            height: '15%',
-            width: '100%',
-            // backgroundColor: 'skyblue',
-            display: 'flex',
-            justifyContent: 'flex-end',
-
-            
-          }}>
+          style={LoginAndReigsterStyles.Description}>
           <Text
             style={{
               fontSize: 22,
@@ -257,9 +243,15 @@ const ValidInvitationCodeScreen = () => {
           }}
         />
 
-        <View style={InvitationCodeStyles.CheckBox}>
+        <Button title="닉네임 입력창 이동"
+          onPress={()=>{
+            navigation.navigate("NickNameSelectScreen")
+          }}
+        />  
+
+        <View style={LoginAndReigsterStyles.CheckBox}>
         <Pressable
-          style={InvitationCodeStyles.CheckBt}
+          style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
             ValidateInvitationCode(TextInputInvitationCode, navigation)
           }}>
@@ -302,36 +294,9 @@ const InvitationCodeStyles = StyleSheet.create({
     marginTop: 10,
     // backgroundColor: 'black'
   },
-  CheckBox: {
-    width:'100%',
-    height:'10%',
-    position:'absolute',
-    bottom:'8%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0064FF',
-    borderRadius:25
-  },
   CheckText: {
     fontSize: 16,
     color: 'white',
-  },
-  CheckBt: {
-    width: '90%',
-    height: 55,
-    borderRadius: 11,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '##0064FF',
-  },
-  Container: {
-    flex: 10,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    // justifyContent: 'center'
-  },
-  Container_NextBUtton: {
-    justifyContent: 'flex-end',
   },
   input: {
     height: 40,
@@ -339,27 +304,10 @@ const InvitationCodeStyles = StyleSheet.create({
     fontsize: 22,
     marginTop: 2,
   },
-  UnderLine: {
-    height: 1,
-    width: '100%',
-    alignItems: 'center',
-    backgroundColor: 'blue',
-  },
   text: {
     // backgroundColor: 'blue'
     padding: 1,
     color: 'blue',
-  },
-  InputBox: {
-    // alignItems: 'flex-start',
-    width: '90%',
-    marginBottom: 15,
-    // backgroundColor: 'gray'
-  },
-  NotificationTextView: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: 'black',
   },
   
 });

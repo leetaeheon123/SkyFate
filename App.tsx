@@ -9,13 +9,16 @@ import {onRemoteMessage} from './src/utils.js';
 
 import messaging from '@react-native-firebase/messaging';
 
-import AppContext from './src/UsefulFunctions/Appcontext';
+import {AppContext} from './src/UsefulFunctions/Appcontext';
 import { NativeBaseProvider } from 'native-base';
 import SendBird from 'sendbird';
 
 const queryClient = new QueryClient();
 
-const appId = '68EBE580-772D-4BF6-AB5E-0C2AF43EC263';
+// apk8269@gmail -> rendevous 계정
+// const appId = '68EBE580-772D-4BF6-AB5E-0C2AF43EC263';
+const appId = 'B0BDC2B5-FF59-4D00-98C2-BADBAA9215E7';
+
 
 const sendbird = new SendBird({appId});
 
@@ -26,11 +29,9 @@ const initialState = {
 
 const App = () => {
 
-  console.log("SendBird:", initialState)
-
   const savedUserKey = 'UserData';
+
   useEffect(() => {
-    console.log('UseEffect In App.tsx');
     AsyncStorage.getItem(savedUserKey)
       .then(async user => {
         try {

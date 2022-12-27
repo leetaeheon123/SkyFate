@@ -3,7 +3,8 @@ export type RootStackParamList = {
         InvitationCode: string
         Gender:string,
         PkNumber:number,
-        imp_uid:string
+        imp_uid:string,
+        NickName:string
     }
 }
 import type { IMPData } from 'iamport-react-native';

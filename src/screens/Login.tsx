@@ -5,19 +5,66 @@ import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
 
 import {NativeStackScreenProps} from "@react-navigation/native-stack"
 import { RootStackParamList } from './RootStackParamList';
-import AppContext from '../UsefulFunctions/Appcontext'
+import {AppContext} from '../UsefulFunctions/Appcontext'
 
 import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
 import { RegisterUserData } from "../UsefulFunctions/SaveUserDataInDevice"
+import AsyncStorage from '@react-native-community/async-storage';
 
+import { LoginAndRegisterTextInputStyle } from '../../styles/LoginAndRegiser';
 export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">;
 
-const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:string) => {
+const RegisterCurrentUserForSendBirdChat = (user:any) => {
+  const savedUserKey = 'savedUser';
+  // user값을 에이싱크 스토리지에 저장한 뒤, 샌드버드에 알람용 토큰값을 저장함
+  AsyncStorage.setItem(savedUserKey, JSON.stringify(user))
+    .then(async () => {
+      try {
+        setCurrentUser(user);
+        const authorizationStatus = await messaging().requestPermission();
+        if (
+          authorizationStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authorizationStatus === messaging.AuthorizationStatus.PROVISIONAL
+        ) {
+          if (Platform.OS === 'ios') {
+            const token = await messaging().getAPNSToken();
+            // console.log('iostoken', token);
+            sendbird.registerAPNSPushTokenForCurrentUser(token);
+          } else {
+            const token = await messaging().getToken();
+            console.log('aostoken', token);
+
+            sendbird.registerGCMPushTokenForCurrentUser(token);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    })
+    .catch(err => console.error(err));
+};
+const SBConnect = async (SendBird:any, UserEmail:string, navigation:any) => {
+  SendBird.connect(UserEmail, (user:any, err:any) => {
+
+    if(!err){
+      RegisterUserData(UserEmail, navigation, user)
+
+      console.log("SendBird Connect is Success In LoginScreen")
+    } else {
+      console.log("SendBird Connect Failed In LoginScreen And Error Message:", err.message)
+    }
+  });
+};
+
+
+const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:string ,SendBird:Object
+  ) => {
 
   try {
     const result = await signIn({email: Email, password:InvitationCode})
     let UserEmail = result.user.email
-    RegisterUserData(UserEmail, navigation)
+    await SBConnect(SendBird, UserEmail, navigation)
+    // RegisterUserData(UserEmail, navigation)
   } 
   catch (error) {
     if(error.code === "auth/wrong-password") {
@@ -36,40 +83,21 @@ const LoginScreen = (props:any) => {
   const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
   const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
 
-  const [TextInputEmail , setTextInputEmail] = useState("")
-  const [TextInputPassword , setTextInputPassword] = useState("")
+  const [TextInputEmail , setTextInputEmail] = useState("8269apk@naver.com")
+  const [TextInputPassword , setTextInputPassword] = useState("123456")
   
-  const GlobalSendbird = useContext(AppContext);
-  const sendbird = GlobalSendbird.sendbird
+  const Context = useContext(AppContext);
+  const SendBird = Context.sendbird
 
   const navigation = props.navigation
 
-  console.log(sendbird)
-
   // const navigation = useNavigation()
   
-  const TextInputStyle =  (BorderBottomColor:any) =>  StyleSheet.create({
-    TextInput: {
-      width: '100%',
-      height: '50%',
-      borderBottomColor: BorderBottomColor,
-      borderBottomWidth: 1,
-      fontSize:18,
-      fontWeight: '600',
-      color:'black'
-    },
-    ViewStyle:{
-      width: '100%',
-        height: '40%',
-        marginTop: '5%',
-        display: 'flex',
-        justifyContent: 'center',
-    }
-  })
+
 
   const EmailTextInput = () => (
     <View
-      style={TextInputStyle(null).ViewStyle}>
+      style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -77,7 +105,7 @@ const LoginScreen = (props:any) => {
         이메일 입력
       </Text>
       <TextInput
-        style={TextInputStyle(BorderBottomColor2).TextInput}
+        style={LoginAndRegisterTextInputStyle(BorderBottomColor2).TextInput}
         placeholder="가입하신 이메일을 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
@@ -96,7 +124,7 @@ const LoginScreen = (props:any) => {
 
   const PasswordTextInput = () => (
     <View
-    style={TextInputStyle(null).ViewStyle}>
+    style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -104,7 +132,7 @@ const LoginScreen = (props:any) => {
         비밀번호 입력
       </Text>
       <TextInput
-        style={TextInputStyle(BorderBottomColor3).TextInput}
+        style={LoginAndRegisterTextInputStyle(BorderBottomColor3).TextInput}
         placeholder="비밀번호를 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
@@ -121,63 +149,13 @@ const LoginScreen = (props:any) => {
     </View>
   );
 
-  const connect = () => {
-
-        sendbird.connect(TextInputEmail, (user:any, err:any) => {
-          console.log('In Sendbird.connect CallbackFunction User:', user);
-          // 에러가 존재하지 않으면
-          if (!err) {
-            // 유저 닉네임 중복 방지
-            if (user.nickname !== state.nickname) {
-              sendbird.updateCurrentUserInfo(
-                state.nickname,
-                'https://blog.kakaocdn.net/dn/tEMUl/btrDc6957nj/NwJoDw0EOapJNDSNRNZK8K/img.jpg',
-                (user, err) => {
-                  console.log('In sendbird.updateCurrentUserInfo User:', user);
-                  dispatch({type: 'end-connection'});
-                  if (!err) {
-                    start(user);
-                  } else {
-                    showError(err.message);
-                  }
-                },
-              );
-            } else {
-              dispatch({type: 'end-connection'});
-
-              start(user);
-            }
-          } else {
-            dispatch({type: 'end-connection'});
-            showError(err.message);
-          }
-        });
-      
-  };
-
   return (
     <SafeAreaView
-      style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'white',
-      }}>
+      style={LoginAndReigsterStyles.Body}>
       <View
-        style={{
-          width: '90%',
-          height: '100%',
-          // backgroundColor: 'red',
-          marginLeft: '5%',
-        }}>
+        style={LoginAndReigsterStyles.Main}>
         <View
-          style={{
-            height: '15%',
-            width: '100%',
-            // backgroundColor: 'skyblue',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            
-          }}>
+          style={LoginAndReigsterStyles.Description}>
           <Text
             style={{
               fontSize: 22,
@@ -200,7 +178,7 @@ const LoginScreen = (props:any) => {
         <Pressable
           style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
-            LoginWithEmail(navigation, TextInputEmail, TextInputPassword)
+            LoginWithEmail(navigation, TextInputEmail, TextInputPassword,SendBird)
           }}>
           <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
         </Pressable>

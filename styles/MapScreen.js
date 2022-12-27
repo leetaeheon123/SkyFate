@@ -134,13 +134,10 @@ export const MapScreenStyles = StyleSheet.create({
     marginLeft: '5%',
   },
   ChangeProfileView: {
-    // width:'10%',
-    // height:'5%',
     width: 46,
     height: 46,
     borderRadius: 50,
     position: 'absolute',
-    // left:'88%',
     right: '7%',
     top: '6%',
     // 11/08) 여기는 젤리처럼 그레디언트 컬러 필요함.
@@ -152,6 +149,15 @@ export const MapScreenStyles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#202124',
     borderStyle: 'solid',
+  },
+
+  NS: {
+    width: '20%',
+    height: 46,
+    borderRadius: 50,
+    position: 'absolute',
+    right: '7%',
+    top: '6%',
   },
 
   StartView: {

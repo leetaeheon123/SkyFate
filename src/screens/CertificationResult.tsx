@@ -8,17 +8,17 @@ import axios from 'axios';
 
 type Props = NativeStackScreenProps<RootStackParamListN, 'CertificationResult'>;
 
-const GetGenderAndGetAge = async (imp_uid:string) => {
-  await axios.post('http://13.124.209.97/firebase/createPushNotificationToMan', {
-    imp_uid: imp_uid
-  })
-  .then((response) =>{
-    console.log(response);
-  })
-  .catch(function (error) {
-    console.log(error);
-  });
-}
+// const GetGenderAndGetAge = async (imp_uid:string) => {
+//   await axios.post('http://13.124.209.97/firebase/createPushNotificationToMan', {
+//     imp_uid: imp_uid
+//   })
+//   .then((response) =>{
+//     console.log(response);
+//   })
+//   .catch(function (error) {
+//     console.log(error);
+//   });
+// }
 
 const GotoRegisterScreen = async (navigation:any, imp_uid:string, InvitationCodeSet:Object) =>{
 
@@ -56,9 +56,10 @@ function CertificationResult({ route, navigation }: Props) {
   // 미성년자 가입 불가능은 이미 이전 클라이언트에서 처리하였음.
   // 성별,나이를 얻어서 다음 스크린으로 보내기 
 
-  if(isSuccess== true){
-    GetGenderAndGetAge(imp_uid)
-  }
+  // if(isSuccess== true){
+  //   GetGenderAndGetAge(imp_uid)
+  // }
+  
   return (
     <SafeAreaView
       style={{

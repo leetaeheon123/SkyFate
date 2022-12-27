@@ -8,14 +8,15 @@ import {NativeStackScreenProps} from "@react-navigation/native-stack"
 import { RootStackParamList } from './RootStackParamList';
 
 import { RegisterUserData } from "../UsefulFunctions/SaveUserDataInDevice"
-import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
+import { LoginAndRegisterTextInputStyle, LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
 
-import AppContext from "../UsefulFunctions/Appcontext"
+import {AppContext} from "../UsefulFunctions/Appcontext"
 import axios from 'axios';
 import qs from 'qs'
 
 
 export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCodeSet">;
+
 const SBConnect = async (SendBird:any, UserEmail:string, NickName:string) => {
   SendBird.connect(UserEmail, (user:any, err:any) => {
     console.log('In Sendbird.connect CallbackFunction User:', user);
@@ -29,6 +30,7 @@ const SBConnect = async (SendBird:any, UserEmail:string, NickName:string) => {
           (user:any, err:any) => {
             console.log('In sendbird.updateCurrentUserInfo User:', user);
             if (!err) {
+              console.log("Succes connect SendBird In Register SBconnect Function")
             } else {
               Alert.alert(`에러가 난 이유 : ${err.message}`)
             }
@@ -51,10 +53,9 @@ const SignUpWithEmail = async (navigation:any, Email:string, Password:string , G
     // await InvitationCodeToFriend를 서버로부터 가져오는 함수 
     let UserEmail:string = result.user.email
     await SignUpFirestore(UserEmail,Gender, BasicImageUrl, InvitationCode,PkNumber,NickName)
-    
-    await RegisterUserData(UserEmail, navigation)
     await SBConnect(SendBird, UserEmail, NickName)
-    UpdateInvitationCodeToFriend(InvitationCode)
+    await UpdateInvitationCodeToFriend(InvitationCode)
+    await RegisterUserData(UserEmail, navigation)
   } 
   catch (error) {
     if (error.code === 'auth/email-already-in-use') {
@@ -69,7 +70,7 @@ const SignUpWithEmail = async (navigation:any, Email:string, Password:string , G
       Alert.alert('비밀번호가 6자리 이상이여야 합니다.')
 
     }
-    console.log(error.code) 
+    console.log("error In SignUp:", error) 
   }
 }
 
@@ -83,7 +84,11 @@ const SignUpFirestore = async (Email:string,GenderNumber:number, BasicImageUrl:a
     ProfileImageUrl:BasicImageUrl,
     InvitationCode: InvitationCode,
     PkNumber: PkNumber,
-    NickName:NickName
+    NickName:NickName,
+    Grade:0,
+    TensionGrade:0,
+    MannerGrade:0,
+    SocialGrade:0
   })
 }
 
@@ -98,7 +103,7 @@ const BasicImage = (Gender:number) => {
 
 
 
-const UpdateInvitationCodeToFriend = (InvitationCode:string) => {
+const UpdateInvitationCodeToFriend = async (InvitationCode:string) => {
  
   fetch('http:/13.124.209.97/invitation/InvitationCode', {
     method: 'POST',
@@ -109,7 +114,10 @@ const UpdateInvitationCodeToFriend = (InvitationCode:string) => {
       'InvitationCode': `${InvitationCode}`
     })
   
-  });
+  }).then((Result)=>{
+    console.log("Result In UpdateInvitationCodeToFriend Function:", Result)
+
+  })
 
 }
  
@@ -119,15 +127,21 @@ const UpdateInvitationCodeToFriend = (InvitationCode:string) => {
 const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
   const {InvitationCode} = route.params
   const {Gender} = route.params
+  const {NickName} = route.params
+
+
   const GenderNumber = Number(Gender)
   const {PkNumber} = route.params
   const {imp_uid} = route.params
 
-  console.log('imp_uid', imp_uid)
+  console.log("Gender In RegisterScreen:",Gender)
+  console.log("InvitationCode In RegisterScreen:",InvitationCode)
+  console.log("PkNumber In RegisterScreen:",PkNumber)
+  console.log('imp_uid In RegisterScreen', imp_uid)
 
-  const SendBird = useContext(AppContext)
-
-  console.log(SendBird)
+  const Context = useContext(AppContext)
+  const SendBird = Context.sendbird
+  // console.log("SendBird In RegisterScreen:", SendBird)
 
 
 
@@ -135,35 +149,15 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
 
   const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
   const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
-  const [NickNameBorderBottomColor, setNickNameBorderBottomColor] = useState('lightgray');
 
   const [TextInputEmail , setTextInputEmail] = useState("8269apk9@naver.com")
   const [TextInputPassword , setTextInputPassword] = useState("123456")
-  const [NickName , setNickName] = useState("Taeheon9")
 
-  
-  const TextInputStyle =  (BorderBottomColor:any) =>  StyleSheet.create({
-    TextInput: {
-      width: '100%',
-      height: '50%',
-      borderBottomColor: BorderBottomColor,
-      borderBottomWidth: 1,
-      fontSize:18,
-      fontWeight: '600',
-      color:'black'
-    },
-    ViewStyle:{
-      width: '100%',
-        height: '25%',
-        marginTop: '5%',
-        display: 'flex',
-        justifyContent: 'center',
-    }
-  })
+
 
   const EmailTextInput = () => (
     <View
-      style={TextInputStyle(null).ViewStyle}>
+      style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -171,7 +165,7 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
         이메일 입력
       </Text>
       <TextInput
-        style={TextInputStyle(BorderBottomColor2).TextInput}
+        style={LoginAndRegisterTextInputStyle(BorderBottomColor2).TextInput}
         placeholder="가입하실 이메일을 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
@@ -190,7 +184,7 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
 
   const PasswordTextInput = () => (
     <View
-    style={TextInputStyle(null).ViewStyle}>
+    style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -198,7 +192,7 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
         비밀번호 입력
       </Text>
       <TextInput
-        style={TextInputStyle(BorderBottomColor3).TextInput}
+        style={LoginAndRegisterTextInputStyle(BorderBottomColor3).TextInput}
         placeholder="비밀번호를 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
@@ -215,56 +209,15 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
     </View>
   );
 
-  const NickNameTextInput = () => (
-    <View
-      style={TextInputStyle(null).ViewStyle}>
-      <Text
-        style={{
-          color: 'lightgray',
-        }}>
-        닉네임 입력
-      </Text>
-      <TextInput
-        style={TextInputStyle(NickNameBorderBottomColor).TextInput}
-        placeholder="닉네임을 입력해주세요"
-        placeholderTextColor={'lightgray'}
-        onFocus={() => {
-          setNickNameBorderBottomColor('#0064FF');
-        }}
-        onEndEditing={() => {
-          setNickNameBorderBottomColor('lightgray');
-        }}
-        value={NickName}
-        onChangeText={value => {
-          setNickName(value);
-        }}
-      />
-    </View>
-  );
+
 
   return (
     <SafeAreaView
-      style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'white',
-      }}>
+      style={LoginAndReigsterStyles.Body}>
       <View
-        style={{
-          width: '90%',
-          height: '100%',
-          // backgroundColor: 'red',
-          marginLeft: '5%',
-        }}>
+        style={LoginAndReigsterStyles.Main}>
         <View
-          style={{
-            height: '15%',
-            width: '100%',
-            // backgroundColor: 'skyblue',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            
-          }}>
+          style={LoginAndReigsterStyles.Description}>
           <Text
             style={{
               fontSize: 22,
@@ -281,7 +234,6 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
           }}>
           {EmailTextInput()}
           {PasswordTextInput()}
-          {NickNameTextInput()}
         </View>
        
 
@@ -289,11 +241,7 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
         <Pressable
           style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
-            if(NickName != "") {
               SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,GenderNumber,InvitationCode, PkNumber, NickName, SendBird)
-            } else {
-              Alert.alert("닉네임을 입력해주세요")
-            }
           }}>
           <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
         </Pressable>

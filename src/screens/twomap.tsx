@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef, useContext, useCallback} from 'react';
+import React, {useEffect, useState, useRef, useContext, useReducer} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -14,8 +14,11 @@ import {
   Alert,
   TouchableOpacity,
   ScrollView,
-  Switch
-} from 'react-native';
+  Switch,
+  AppState,
+  FlatList,
+  RefreshControl
+} from 'react-native'
 
 import styles from '../../styles/ManToManBoard'
 import Icon from "react-native-vector-icons/Ionicons"
@@ -49,7 +52,13 @@ import AsyncStorage from '@react-native-community/async-storage';
 import * as Progress from 'react-native-progress';
 import { useNavigation } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
+import { AppContext } from '../UsefulFunctions/Appcontext';
 
+import { channelsReducer } from '../reducer/channels';
+import Channel from '../component/channel';
+
+
+import { isEmptyObj } from '../UsefulFunctions/isEmptyObj';
 interface ILocation {
   latitude: number;
   longitude: number;
@@ -224,9 +233,52 @@ const TwoMapScreen = (props:any) => {
 
   const navigation = useNavigation()
 
-  const UserData = props.route.params
+  const UserData = props.route.params.CurrentUser
+  
+  const Context = useContext(AppContext)
+  const SendBird = Context.sendbird
 
-  console.log("UserData:",UserData)
+  // console.log("UserData:",UserData)
+  // console.log("SendBird In TwoMapScreen", SendBird )
+  const [query, setQuery] = useState(null);
+  const [ProfileForGtoG, setProfileForGtoG] = useState({})
+
+  const [ShowProfileForGtoGMatching , setShowProfileForGtoGMatching] = useState(false)
+  const SwitchShowProfileModal = ()=>{
+    setShowProfileForGtoGMatching(!ShowProfileForGtoGMatching)
+  }
+
+  const [state, dispatch] = useReducer(channelsReducer, {
+    SendBird,
+    UserData,
+    channels: [],
+    channelMap: {},
+    loading: false,
+    empty: '',
+    error: null,
+  });
+
+  const Stateize = async (Grade:Number, MannerGrade:Number, SocialGrade:Number,
+     TensionGrade:Number, ProfileImageUrl:string,UserEmail:string) => {
+    setProfileForGtoG({
+      Grade:Grade,
+      MannerGrade:MannerGrade,
+      SocialGrade:SocialGrade,
+      TensionGrade: TensionGrade,
+      ProfileImageUrl: ProfileImageUrl,
+      UserEmail:UserEmail
+    })
+  }
+
+  const ShowProfileModal = async (Grade:Number, MannerGrade:Number, 
+    SocialGrade:Number, TensionGrade:Number, ProfileImageUrl:string,
+    UserEmail:string) => {
+    await Stateize(Grade, MannerGrade, SocialGrade, TensionGrade, ProfileImageUrl, UserEmail)
+    console.log("ProfileForGtoG In TwoMapScreen:",ProfileForGtoG)
+
+    SwitchShowProfileModal()
+  }
+ 
 
 
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
@@ -274,6 +326,8 @@ const TwoMapScreen = (props:any) => {
     }
 
     SaveInDevice(); 
+    console.log("SendBird.currentUser In TwoMapScreen:",SendBird.currentUser)
+
 
     const onChildAddInGtoG = database()
       .ref('/GtoGLocations')
@@ -281,12 +335,151 @@ const TwoMapScreen = (props:any) => {
         GtoGLocationsRefetch()
       });
 
+      SendBird.addConnectionHandler('channels', connectionHandler);
+      SendBird.addChannelHandler('channels', channelHandler);
+  
+  
+      // const unsubscribe = AppState.addEventListener('change', handleStateChange)
+  
+      if (!SendBird.currentUser) {
+        // userId를 커낵트시킨 뒤
+        SendBird.connect(UserData.UserEmail, (_:any, err:Error) => {
+          if (!err) {
+            // 에러가 없으면 리프레쉬부분을 실행
+            refresh();
+          } else {
+            // 에러 발생시 리덕스를 통해 로딩 끝남을 알리고, 에러메세지를 보냄
+            Alert.alert("Connection failed. Please check the network status.")
+          }
+        });
+      } else {
+        // 샌드버드에 등록된 유저값이 존재하면 리프래쉬!
+        refresh();
+      }
+
+
     // Stop listening for updates when no longer required
     return () => {
+      SendBird.removeConnectionHandler('channels');
+      SendBird.removeChannelHandler('channels');
+      // unsubscribe.remove();
       database().ref('/GtoGLocations').off('child_added', onChildAddInGtoG);
     }
 
   }, []);
+
+  const connectionHandler = new SendBird.ConnectionHandler();
+
+  connectionHandler.onReconnectStarted = () => {
+    dispatch({
+      type: 'error',
+      payload: {
+        error: 'Connecting..',
+      },
+    });
+  };
+  connectionHandler.onReconnectSucceeded = () => {
+    dispatch({type: 'error', payload: {error: null}});
+    refresh();
+
+   //  handleNotificationAction(
+   //    navigation,
+   //    sendbird,
+   //    currentUser,
+   //    'channels',
+   //  ).catch(err => console.error(err));
+  };
+  connectionHandler.onReconnectFailed = () => {
+    dispatch({
+      type: 'error',
+      payload: {
+        error: 'Connection failed. Please check the network status.',
+      },
+    });
+  };
+
+  /// on channel event
+  const channelHandler = new SendBird.ChannelHandler();
+  channelHandler.onUserJoined = (channel, user) => {
+    if (user.userId === SendBird.currentUser.userId) {
+      dispatch({type: 'join-channel', payload: {channel}});
+    }
+  };
+  channelHandler.onUserLeft = (channel, user) => {
+    if (user.userId === SendBird.currentUser.userId) {
+      dispatch({type: 'leave-channel', payload: {channel}});
+    }
+  };
+  channelHandler.onChannelChanged = channel => {
+    dispatch({type: 'update-channel', payload: {channel}});
+  };
+  channelHandler.onChannelDeleted = channel => {
+    dispatch({type: 'delete-channel', payload: {channel}});
+  };
+
+  useEffect(() => {
+    if (query) {
+      next();
+    }
+  }, [query]);
+
+  const refresh = () => {
+    // state값에 sendbird.groupchannel. 그룹채널리스트 만들기 쿼리를 실행한 뒤 리턴값을 state에 저장
+    console.log(
+      'createMyGroupChannelListQuery:',
+      SendBird.GroupChannel.createMyGroupChannelListQuery(),
+    );
+    setQuery(SendBird.GroupChannel.createMyGroupChannelListQuery());
+  };
+
+  const next = () => {
+    // query.hasNext가 존재할 때
+    console.log('query.hasNext', query.hasNext);
+    if (query.hasNext) {
+      query.limit = 20;
+      query.next((fetchedChannels:any, err:Error) => {
+        console.log(
+          "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
+          fetchedChannels,
+        );
+        if (!err) {
+          dispatch({
+            type: 'fetch-channels',
+            payload: {channels: fetchedChannels},
+          });
+        } else {
+          dispatch({
+            type: 'error',
+            payload: {
+              error: 'Failed to get the channels.',
+            },
+          });
+        }
+      });
+    }
+  };
+
+  const handleStateChange = (newState:any)=> {
+    // ios - active - inactive
+    // aos - active - background니
+    // active를 기준으로 나눠주면 나누면 두 운영체제 모두 포함하는 코드가 된다.
+    console.log('handleStateChange');
+    if (newState === 'active') {
+      SendBird.setForegroundState();
+    } else {
+      SendBird.setBackgroundState();
+    }
+  };
+
+  const chat = (channel:any) => {
+    setProfileModalVisiable(!ProfileModalVisiable)
+    navigation.navigate('ChatScreen', {
+      channel,
+      UserData,
+    });
+
+  };
+
 
   const [ GpsOn, setGpsOn] = useState(false);
 
@@ -305,7 +498,11 @@ const TwoMapScreen = (props:any) => {
             latitude: latitude,
             longitude: longitude,
             ProfileImageUrl: UserData.ProfileImageUrl,
-            TimeStamp: EpochTime
+            TimeStamp: EpochTime,
+            Grade:UserData.Grade,
+            MannerGrade:UserData.MannerGrade,
+            SocialGrade:UserData.SocialGrade,
+            TensionGrade:UserData.TensionGrade
           })
       },
       (error) => {
@@ -363,6 +560,9 @@ const TwoMapScreen = (props:any) => {
   const {data, isLoading, refetch:GtoGLocationsRefetch} = useQuery("GtoGLocations", Get_GtoGLocations)
   const {data:itaewon_HotPlaceList, isLoading:itaewon_HotPlaceListisLoading} = useQuery("itaewon_HotPlaceList2", Get_itaewon_HotPlaceList)
 
+
+
+  
   const AnimationMarker = (ProfileImageUrl:string) => {
     return (
     <Marker
@@ -410,12 +610,6 @@ const TwoMapScreen = (props:any) => {
     )
   }
 
-  const PersonIcon = () => {
-    return (
-      <Icon name='person' size={26} color='red'/>
-    )
-  }
-
   const TextHello = () => {
     return (
       <Text style={{color:'white'}}>Hello</Text>
@@ -445,6 +639,92 @@ const TwoMapScreen = (props:any) => {
     )
   }
 
+
+  
+
+  const StartChatingBetweenGirls = () => {
+    console.log("StartChatingBetweenGirls In TwoMapScreen")
+    let params = new SendBird.GroupChannelParams();
+    {isEmptyObj(ProfileForGtoG) ? null
+    :
+    params.addUserIds([`${ProfileForGtoG.UserEmail}`, `${UserData.UserEmail}`]);
+    params.coverUrl = ProfileForGtoG.ProfileImageUrl
+    params.name = "TestName"
+    params.operatorUserIds =  [`${ProfileForGtoG.UserEmail}`],
+    params.isDistinct =  true,
+    params.isPublic = false;
+
+    SendBird.GroupChannel.createChannel(params, function(groupChannel:any, error:Error) {
+      if (error) {
+        console.log(error)
+          // Handle error.
+      }
+  
+      // A group channel with detailed configuration is successfully created.
+      // By using groupChannel.url, groupChannel.members, groupChannel.data, groupChannel.customType, and so on,
+      // you can access the result object from Sendbird server to check your GroupChannelParams configuration.
+      const channelUrl = groupChannel.url;
+    })
+    }
+   
+  }
+
+  const ModalGen = (Num:number) => {
+    return ( 
+    <Modal 
+    animationType="slide"
+    transparent={true}
+    visible={ShowProfileForGtoGMatching}
+  >
+    <SafeAreaView
+      style={MapScreenStyles.Memomodal}
+    >
+      <Text style={{color:'white', fontSize:22, fontWeight:'500', marginLeft:'5%', marginBottom:20, marginTop:20}}>나의 상태 설정하기</Text>
+      <View style={[styles.W90ML5]}>
+        <Image 
+          source={{uri:ProfileForGtoG?.ProfileImageUrl}}
+          style={{width: 43, height: 43}}
+        />
+        <Text style={MapScreenStyles.WhiteText}>HB:{ProfileForGtoG?.Grade}점</Text>
+        <Text style={MapScreenStyles.WhiteText}>Tesnion:{ProfileForGtoG?.TensionGrade}점</Text>
+        <Text style={MapScreenStyles.WhiteText}>사회성:{ProfileForGtoG?.SocialGrade}점</Text>
+        <Text style={MapScreenStyles.WhiteText}>매너:{ProfileForGtoG?.MannerGrade}점</Text>
+
+      </View>
+
+        <View style={[styles.Row_OnlyColumnCenter]}>
+
+          <TouchableOpacity 
+          style={[styles.RowCenter,MapScreenStyles.CancelBoxView]}
+          
+          onPress={()=>{
+            SwitchShowProfileModal()
+          }}
+          > 
+            <Text>취소</Text>
+        
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+          style={[styles.RowCenter,MapScreenStyles.CheckBoxView, {backgroundColor:'#28FF98'}]}
+          onPress={()=>{
+            StartChatingBetweenGirls()
+          }}
+          > 
+            <Text>채팅하기</Text>
+        
+          </TouchableOpacity>
+          
+        
+        </View>
+
+      
+    </SafeAreaView>
+
+    </Modal>
+    )
+  }
+
   
   return (
     <View style={{width:'100%', height:'100%'}}>
@@ -454,6 +734,41 @@ const TwoMapScreen = (props:any) => {
         transparent={true}
         >
           <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
+          <FlatList
+                data={state.channels}
+                renderItem={({item}) => (
+                  <Channel
+                    key={item.url}
+                    channel={item}
+                    sendbird={SendBird}
+                    onPress={channel => chat(channel)}
+                  />
+                )}
+                keyExtractor={item => item.url}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={state.loading}
+                    colors={['#742ddd']}
+                    tintColor={'#742ddd'}
+                    onRefresh={refresh}
+                  />
+                }
+                contentContainerStyle={{flexGrow: 1}}
+                // ListHeaderComponent={
+                //   state.error && (
+                //     <View style={style.errorContainer}>
+                //       <Text style={style.error}>{state.error}</Text>
+                //     </View>
+                //   )
+                // }
+                // ListEmptyComponent={
+                //   <View style={style.emptyContainer}>
+                //     <Text style={style.empty}>{state.empty}</Text>
+                //   </View>
+                // }
+                onEndReached={() => next()}
+                onEndReachedThreshold={0.5}
+              />
             <ScrollView style={MapScreenStyles.ProfileModalScrollView}>
               <TouchableOpacity
                 style={{
@@ -506,109 +821,9 @@ const TwoMapScreen = (props:any) => {
           </SafeAreaView>
 
       </Modal>
-      <Modal 
-        animationType="slide"
-        transparent={true}
-        visible={ModalVisiable}
-      >
-        <SafeAreaView
-          style={MapScreenStyles.Memomodal}
-        >
-          <Text style={{color:'white', fontSize:22, fontWeight:'500', marginLeft:'5%', marginBottom:20, marginTop:20}}>나의 상태 설정하기</Text>
-          <View style={[{height:96, }, styles.W90ML5]}>
-            <Text style={[MapScreenStyles.WhiteText, {fontSize:14, fontWeight:'500', marginBottom:8}]}>메모로 상태알리기</Text>
-            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>고객님의 상태, 위치, 정보를 50자 이내로 입력해주세요.</Text>
-            <TextInput
-              value={Memo}
-              onChangeText={(text) => setMemo(text)}
-              style={MapScreenStyles.MemoTextInput}>
-            </TextInput>    
-          </View>
+      {ModalGen(10)}
 
-          <View style={[styles.W90ML5,{height:96, marginTop:20, marginBottom:20}]}>
-            <Text style={[MapScreenStyles.WhiteText, styles.FW500FS14,{marginBottom:8}]}>인원알려주기</Text>
-            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>몇명이서 오셨나요?</Text>
-            <View style={[MapScreenStyles.PeopleNumOption, styles.Row_OnlyColumnCenter, ]}>
-                <Text style={[styles.WhiteColor, styles.FW500FS14, {marginLeft:'5%'}]}>인원</Text>
-                <View style={[styles.Row_OnlyColumnCenter, {width:'30%', justifyContent:'space-between', marginRight:'5%'}]}>
-                {MinusIcon}
-                  <Text style={[styles.WhiteColor,MapScreenStyles.TotalPeopleNum]}>{PeopleNum}명</Text>
-                {PlusIcon}
-              </View>
-            </View>    
-          </View>
-
-          <View style={[{height:110, marginBottom:10}, styles.W90ML5]}>
-            <Text style={[MapScreenStyles.WhiteText, {fontSize:14, fontWeight:'500', marginBottom:8}]}>비용 나눠 내기</Text>
-            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>만남 후 비용을 나눠서 지불할 생각이 있으신가요?</Text>
-            <View style={[styles.Row_OnlyColumnCenter, MapScreenStyles.MoneyOptionView, {marginTop:10}]}>
-   
-            <TouchableOpacity 
-              onPress={()=>{setMoneyRadioBox(1)}}
-              style={MoenyRadioBox == 1 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
-              >
-                <Text style={MoenyRadioBox == 1 ?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>보고결정</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-              onPress={()=>{setMoneyRadioBox(2)}}
-              style={MoenyRadioBox == 2 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
-              >
-   
-                <Text style={MoenyRadioBox == 2 ?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600' }}>생각있음</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-              onPress={()=>{setMoneyRadioBox(3)}}
-              style={MoenyRadioBox == 3 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
-              >
-                <Text style={MoenyRadioBox == 3?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>생각있음</Text>
-              </TouchableOpacity>
-            </View>
-          </View> 
-            
-
-
-            <View style={[styles.Row_OnlyColumnCenter]}>
-
-              <TouchableOpacity 
-              style={[styles.RowCenter,MapScreenStyles.CancelBoxView]}
-              
-              onPress={()=>{
-                ChangeModalVisiable()
-              }}
-              > 
-                <Text>취소</Text>
-            
-              </TouchableOpacity>
-
-
-              {Memo != '' && MoenyRadioBox != 0
-              ?
-              <TouchableOpacity 
-              style={[styles.RowCenter,MapScreenStyles.CheckBoxView, {backgroundColor:'#28FF98'}]}
-              onPress={()=>{
-                ShowMyLocation()
-              }}
-              > 
-                <Text>완료</Text>
-            
-              </TouchableOpacity>
-              :
-              <View 
-              style={[styles.RowCenter,MapScreenStyles.CheckBoxView , {backgroundColor:'#565656'}]}
-              > 
-                <Text>완료</Text>
-            
-              </View>
-              }
-              
-            
-            </View>
-
-          
-        </SafeAreaView>
-
-      </Modal>
+      
       {location && (
         <MapView
           style={{width:'100%', height:'100%'}}
@@ -657,11 +872,12 @@ const TwoMapScreen = (props:any) => {
               }}
               title={data?.FaceGrade}
               tracksViewChanges={false}
-              description={'얼굴: ' + data?.FaceGrade + '점 매너: ' + data?.MannerGrade + "점 사회성: " + data?.SocialGrade +"점 "}
+              description={'얼굴: ' + data?.Grade + '점 매너: ' + data?.MannerGrade + "점 사회성: " + data?.SocialGrade +"점 "}
 
               onPress={()=>{
-                console.log("Hello")
-                setProfileModalVisiable(!ProfileModalVisiable)
+                ShowProfileModal(data.Grade, data.MannerGrade,
+                  data.SocialGrade, data.TensionGrade, data.ProfileImageUrl,
+                  data.UserEmail)
               }}
             >
               <View>
@@ -755,7 +971,7 @@ const TwoMapScreen = (props:any) => {
       {UserData.Gender == 2 ? 
        <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}
         onPress={()=> {
-          ChangeModalVisiable()
+          SwitchShowProfileModal()
         }}
        >
         <Text style={{color:'white'}}>시작하기</Text>

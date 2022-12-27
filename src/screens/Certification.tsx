@@ -8,27 +8,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParamListN, 'Certification'>;
 
-function Certification({ route, navigation }: Props) {
-  const params = route.params;
+function CertificationScreen({ route, navigation }: Props) {
+  const params = route.params?.params;
 
   console.log(params)
   const tierCode = route.params?.tierCode;
   const userCode = getUserCode('danal', tierCode, 'certification');
-  const M_REDIRECT_URL = "http://detectchangingwebview/iamport/rn";
-
+  console.log("userCode In CertificationScreen:", userCode)
+  console.log("tierCode In CertificationScreen:", tierCode)
 
   // console.log(params!)
   // console.log(params)
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: 'center' }}>
       <IMP.Certification
-        userCode={userCode}
-        tierCode={tierCode}
+        // userCode={userCode}
+        userCode={"imp14466268"}
+        // tierCode={tierCode}
         // data={params!}
         data={
           {
             "carrier": "", 
-            "company": "아임포트", 
+            "company": "랑데부", 
             "m_redirect_url": "http://detectchangingwebview/iamport/rn", 
             "merchant_uid": `mid_${new Date().getTime()}`, 
             "min_age": "20", 
@@ -47,4 +48,4 @@ function Certification({ route, navigation }: Props) {
   );
 }
 
-export default Certification;
+export default CertificationScreen;

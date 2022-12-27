@@ -1,9 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {ActivityIndicator, SafeAreaView} from 'react-native';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import BottomTabScreen from '../../bottomstack';
 import ValidInvitationCodeScreen from './ValidInvitationCode';
+
+import {AppContext} from "../UsefulFunctions/Appcontext"
 
 const IndicatorScreen = (props:any) => {
 
@@ -12,8 +14,10 @@ const IndicatorScreen = (props:any) => {
 
   const savedUserKey = 'UserData';
 
-  useEffect(() => {
+  const Context = useContext(AppContext)
+  const SendBird = Context.sendbird
 
+  useEffect(() => {
     AsyncStorage.getItem(savedUserKey)
       .then(user => {
         //유저가 있는경우에 CurrentUUser에 savedUserKey 키를 통해 구해온값 저장
@@ -27,11 +31,12 @@ const IndicatorScreen = (props:any) => {
   }, []);
 
   useEffect(()=>{
-    console.log(props.route.params)
+    console.log("params In Indicator Screen: ",props.route.params)
     AsyncStorage.getItem(savedUserKey)
       .then(user => {
         //유저가 있는경우에 CurrentUUser에 savedUserKey 키를 통해 구해온값 저장
         if (user) {
+          
           setCurrentUser(JSON.parse(user));
         }
       })
@@ -44,7 +49,7 @@ const IndicatorScreen = (props:any) => {
      {initialized ? (
         // Best Partice?
         currentUser ? (
-          <BottomTabScreen currentUser={currentUser}/>
+          <BottomTabScreen currentUser={currentUser} SendBird={SendBird}/>
         ) : (
           <ValidInvitationCodeScreen/>
         )
@@ -52,7 +57,7 @@ const IndicatorScreen = (props:any) => {
         <SafeAreaView>
           <ActivityIndicator />
         </SafeAreaView>
-      )}
+      )} 
     
     </>
     

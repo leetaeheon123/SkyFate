@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef, useContext, useCallback} from 'react';
+import React, {useEffect, useState, useRef, useContext, useReducer} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -13,13 +13,15 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  AppState,
+  FlatList,
+  RefreshControl
 } from 'react-native';
 
 import { MapScreenStyles } from '../../styles/MapScreen';
 
 import styles from '../../styles/ManToManBoard'
-import Icon from "react-native-vector-icons/Ionicons"
 import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage'
 
@@ -30,10 +32,9 @@ import {firebase} from '@react-native-firebase/database';
 import Geolocation from 'react-native-geolocation-service';
 
 import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import AppContext from '../UsefulFunctions/Appcontext'
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-
+import Feather from 'react-native-vector-icons/Feather'
 import firestore from '@react-native-firebase/firestore';
 import AntDesgin from "react-native-vector-icons/AntDesign"
 
@@ -53,6 +54,13 @@ import { useNavigation } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import { Get_itaewon_HotPlaceList } from '../UsefulFunctions/HotPlaceList';
 import { SaveUserDataInDevice } from '../UsefulFunctions/SaveUserDataInDevice';
+
+import { AppContext } from '../UsefulFunctions/Appcontext';
+
+import {channelsReducer} from '../reducer/channels';
+import Channel from '../component/channel';
+import { withAppContext } from '../contextReducer';
+import { isEmptyObj } from '../UsefulFunctions/isEmptyObj';
 
 interface ILocation {
   latitude: number;
@@ -75,23 +83,6 @@ const PushAxios = () => {
   .catch(function (error) {
     console.log(error);
   });
-}
-
-async function requestPushNotificationPermission() {
-  const authStatus = await messaging().requestPermission();
-  const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-  if (enabled) {
-    // console.log('Authorization status:', authStatus);
-  }
-}
-
-async function GetFCMToken() {
-  const token = await messaging().getAPNSToken()
-
-  // console.log("APNSToken:",token)
 }
 
 const Get_Query_AllLocation = () => {
@@ -220,7 +211,6 @@ function Counter(callback:Function, delay:number | null, Reset:Function) {
     }
   }, [delay]);
 }
-
 
 const ManLocationUpdate = async (UserEmail:string, ProfileImageUrl:string) => {
   let ReplaceUserEmail = UserEmail.replace('.com','')
@@ -377,25 +367,9 @@ const DeleteMyLocation = (UserEmail:string, Gender:number) => {
 
 }
 
-const getProfileImageUrl = async (UserEmail:string) => {
-
-  let ProfileImageUrl = ""
-
-  await firestore()
-  .collection(`UserList`)
-  .doc(UserEmail)
-  .get()
-  .then((doc) => {
-    ProfileImageUrl = doc.data().ProfileImageUrl
-  });
-
-  return ProfileImageUrl
-}
-
 const UpdateMyLocation = async (UserEmail: string ,Memo:string, PeopleNum:Number,CanPayit:Number,
-  location:any) => {
+  ProfileImageUrl:any) => {
 
-  const ProfileImageUrl = await getProfileImageUrl(UserEmail)
 
   let CanPayNum:string
   if(CanPayit == 1) {
@@ -427,7 +401,8 @@ const UpdateMyLocation = async (UserEmail: string ,Memo:string, PeopleNum:Number
           CanPayit: CanPayNum,
           PeopleNum: PeopleNum,
           ProfileImageUrl: ProfileImageUrl,
-          TimeStamp: EpochTime
+          TimeStamp: EpochTime,
+          UserEmail: UserEmail
 
         })
         .then(() => DeleteMyLocation(ReplaceUserEmail, 2));
@@ -440,9 +415,9 @@ const UpdateMyLocation = async (UserEmail: string ,Memo:string, PeopleNum:Number
   );
 
 }
-const logout = (navigation:any) => {
+const logout = (navigation:any, SendBird:any) => {
   RemoveIdentityToken()
-  
+  SendBird.disconnect()
   navigation.navigate('ValidInvitationCodeScreen')
 
 }
@@ -501,12 +476,76 @@ const UpdateMyLocationWatch = (setLocation:Function) => {
   };
 }
 
+
+
 const MapScreen = (props:any) => {
 
-  const UserData = props.route.params
+  const UserData = props.route.params.CurrentUser
   const navigation = useNavigation()
 
+  const Context = useContext(AppContext)
+  const SendBird = Context.sendbird
+
+
+
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
+  
+  const [InvitationCodeToFriend, setInvitationCodeToFriend] = useState([]);
+  
+  const GetInvitationToFriendCode = async (PkNumber:string) => {
+    firestore().collection(`InvitationCodeList`).doc(String(PkNumber))
+    .get().then(async (doc)=>{
+      const Result = doc.data()
+      const InvitationCodeToFriend = Result?.InvitationCodeToFriend
+
+      let Array:Array<Object> = [
+      ]
+      await firestore().collection('InvitationCodeList')
+      .where('InvitationCode', '==', InvitationCodeToFriend[0])
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc)=>{
+          let Obj = {
+            InvitationCode: InvitationCodeToFriend[0],
+            Used: doc.data().Used
+          }
+          Array.push(Obj)
+        })
+      })
+
+      await firestore().collection('InvitationCodeList')
+      .where('InvitationCode', '==', InvitationCodeToFriend[1])
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc)=>{
+          let Obj = {
+            InvitationCode: InvitationCodeToFriend[1],
+            Used: doc.data().Used
+          }
+
+          Array.push(Obj)
+        })
+      })
+      return Array
+    }).then((InvitationCodeToFriend)=>{
+      console.log(InvitationCodeToFriend)
+
+      setInvitationCodeToFriend(InvitationCodeToFriend)
+    })
+}
+
+
+  const [query, setQuery] = useState(null);
+
+  const [state, dispatch] = useReducer(channelsReducer, {
+    SendBird,
+    UserData,
+    channels: [],
+    channelMap: {},
+    loading: false,
+    empty: '',
+    error: null,
+  });
 
   const [token, setToken] = useState('');
 
@@ -545,18 +584,19 @@ const MapScreen = (props:any) => {
     async function SaveInDevice() { 
       // 로케이션 위치 가져오는 권한설정
       await GetLocationPermission()
-      // 푸쉬알림 권한설정 
-      await requestPushNotificationPermission()
       await GetLocation(setLocation)
       // 현재위치를 state화 &추적
 
       // UpdateMyLocationWatch(setLocation)
       if(UserData.Gender == "1"){
-        ManLocationUpdate(UserData.UserEmail, UserData.ProfileImageUrl)
+        let Result = ManLocationUpdate(UserData.UserEmail, UserData.ProfileImageUrl)
+        return Result
       }
+      await GetInvitationToFriendCode(UserData.PkNumber)
+
     }
 
-    SaveInDevice(); 
+    let Result = SaveInDevice(); 
 
     fcmService.register(onRegister, onNotification,onOpenNotification);
     localNotificationService.configure(onOpenNotification);
@@ -567,26 +607,178 @@ const MapScreen = (props:any) => {
         GrilsLocationsrefetch()
       });
 
-      const ManonChildAdd = database()
-      .ref('/ManLocation')
-      .on('child_added', snapshot => {
-        MansLocationsretech()
+    const ManonChildAdd = database()
+    .ref('/ManLocation')
+    .on('child_added', snapshot => {
+      MansLocationsretech()
+    });
+
+      // console.log("AppState In MapScreen:", AppState.currentState)
+      // console.log("appState.current", appState.current);
+
+    // const subscription = AppState.addEventListener("change", (nextAppState) => {
+    //   if (
+    //     appState.current.match(/inactive|background/) &&
+    //     nextAppState === "active"
+    //   ) {
+    //     // console.log("appState.current2",appState.current)
+    //     console.log("App has come to the foreground!");
+    //   } else if(appState.current.match(/active/) && nextAppState === "background") {
+    //     console.log("App has come to the background")
+    //     // SendBird.disconnect()
+    //   }
+    //     appState.current = nextAppState;
+    //     console.log("AppState", nextAppState);
+
+    //   })
+
+    SendBird.addConnectionHandler('channels', connectionHandler);
+    SendBird.addChannelHandler('channels', channelHandler);
+
+
+    // const unsubscribe = AppState.addEventListener('change', handleStateChange)
+
+    if (!SendBird.currentUser) {
+      // userId를 커낵트시킨 뒤
+      SendBird.connect(UserData.UserEmail, (_:any, err:Error) => {
+        if (!err) {
+          // 에러가 없으면 리프레쉬부분을 실행
+          refresh();
+        } else {
+          // 에러 발생시 리덕스를 통해 로딩 끝남을 알리고, 에러메세지를 보냄
+          Alert.alert("Connection failed. Please check the network status.")
+        }
       });
+    } else {
+      // 샌드버드에 등록된 유저값이 존재하면 리프래쉬!
+      refresh();
+    }
 
-
-    
     // Stop listening for updates when no longer required
     return () => {
       database().ref('/Location').off('child_added', onChildAdd);
       database().ref('/ManLocation').off('child_added', ManonChildAdd);
+      // clearInterval(Result)
+      SendBird.removeConnectionHandler('channels');
+      SendBird.removeChannelHandler('channels');
+      // unsubscribe.remove();
+      // subscription.remove();
+
     }
 
   }, []);
+
+  useEffect(() => {
+    if (query) {
+      next();
+    }
+  }, [query]);
+
+   /// on connection event
+   const connectionHandler = new SendBird.ConnectionHandler();
+
+   connectionHandler.onReconnectStarted = () => {
+     dispatch({
+       type: 'error',
+       payload: {
+         error: 'Connecting..',
+       },
+     });
+   };
+   connectionHandler.onReconnectSucceeded = () => {
+     dispatch({type: 'error', payload: {error: null}});
+     refresh();
+ 
+    //  handleNotificationAction(
+    //    navigation,
+    //    sendbird,
+    //    currentUser,
+    //    'channels',
+    //  ).catch(err => console.error(err));
+   };
+   connectionHandler.onReconnectFailed = () => {
+     dispatch({
+       type: 'error',
+       payload: {
+         error: 'Connection failed. Please check the network status.',
+       },
+     });
+   };
+ 
+   /// on channel event
+   const channelHandler = new SendBird.ChannelHandler();
+   channelHandler.onUserJoined = (channel, user) => {
+     if (user.userId === SendBird.currentUser.userId) {
+       dispatch({type: 'join-channel', payload: {channel}});
+     }
+   };
+   channelHandler.onUserLeft = (channel, user) => {
+     if (user.userId === SendBird.currentUser.userId) {
+       dispatch({type: 'leave-channel', payload: {channel}});
+     }
+   };
+   channelHandler.onChannelChanged = channel => {
+     dispatch({type: 'update-channel', payload: {channel}});
+   };
+   channelHandler.onChannelDeleted = channel => {
+     dispatch({type: 'delete-channel', payload: {channel}});
+   };
+
+  const handleStateChange = (newState:any)=> {
+    // ios - active - inactive
+    // aos - active - background니
+    // active를 기준으로 나눠주면 나누면 두 운영체제 모두 포함하는 코드가 된다.
+    console.log('handleStateChange');
+    if (newState === 'active') {
+      SendBird.setForegroundState();
+    } else {
+      SendBird.setBackgroundState();
+    }
+  };
+
+  const refresh = () => {
+    // state값에 sendbird.groupchannel. 그룹채널리스트 만들기 쿼리를 실행한 뒤 리턴값을 state에 저장
+    console.log(
+      'createMyGroupChannelListQuery:',
+      SendBird.GroupChannel.createMyGroupChannelListQuery(),
+    );
+    setQuery(SendBird.GroupChannel.createMyGroupChannelListQuery());
+  };
+
+  const next = () => {
+    // query.hasNext가 존재할 때
+    console.log('query.hasNext', query.hasNext);
+    if (query.hasNext) {
+      query.limit = 20;
+      query.next((fetchedChannels:any, err:Error) => {
+        console.log(
+          "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
+          fetchedChannels,
+        );
+        if (!err) {
+          dispatch({
+            type: 'fetch-channels',
+            payload: {channels: fetchedChannels},
+          });
+        } else {
+          dispatch({
+            type: 'error',
+            payload: {
+              error: 'Failed to get the channels.',
+            },
+          });
+        }
+      });
+    }
+  };
+
 
   const [ GpsOn, setGpsOn] = useState(false);
 
   const [ ModalVisiable, setModalVisiable] = useState(false);
   const [ ProfileModalVisiable, setProfileModalVisiable] = useState(false);
+  const [ ShowUserModal, setShowUserModal] = useState(false);
+  const [ProfileForGtoM, setProfileForGtoM] = useState({})
 
   const [ Memo, setMemo] = useState("");
   const [ PeopleNum, setPeopleNum] = useState(1);
@@ -621,7 +813,7 @@ const MapScreen = (props:any) => {
     console.log(day)
     // day가 오후 10시 ~ 새벽 7시 
     if(day >= 22 && day <=24 || day >= 1 && day <= 7) {
-        UpdateMyLocation(UserData.UserEmail,Memo, PeopleNum, MoenyRadioBox, location)
+        UpdateMyLocation(UserData.UserEmail,Memo, PeopleNum, MoenyRadioBox, UserData.ProfileImageUrl)
         setGpsOn(true)
         ChangeModalVisiable()
     } else {
@@ -629,6 +821,70 @@ const MapScreen = (props:any) => {
     }
  
   }
+
+  const SwitchShowUserModal = ()=>{
+    setShowUserModal(!ShowUserModal)
+  }
+
+  const Stateize = async (ProfileImageUrl:string , UserEmail:string,
+    Memo:string, PeopleNum:number, CanPayit:string) => {
+   setProfileForGtoM({
+     ProfileImageUrl: ProfileImageUrl,
+     UserEmail:UserEmail,
+     Memo:Memo,
+     PeopleNum:PeopleNum,
+     CanPayit:CanPayit
+   })
+ }
+  const GirlMarkerOnPress = async (ProfileImageUrl:string , UserEmail:string,
+    Memo:string, PeopleNum:number, CanPayit:string) => {
+
+    console.log(Memo, PeopleNum, CanPayit)
+
+    await Stateize(ProfileImageUrl, UserEmail, Memo, PeopleNum, CanPayit)
+    SwitchShowUserModal()
+  }
+
+  const CreateChating = () => {
+    console.log("StartChatingBetweenGirls In TwoMapScreen")
+    let params = new SendBird.GroupChannelParams();
+    {isEmptyObj(ProfileForGtoM) ? null
+    :
+    params.addUserIds([`${ProfileForGtoM.UserEmail}`, `${UserData.UserEmail}`]);
+    params.coverUrl = ProfileForGtoM.ProfileImageUrl
+    params.name = "TestName"
+    params.operatorUserIds =  [`${ProfileForGtoM.UserEmail}`],
+    params.isDistinct =  true,
+    params.isPublic = false;
+
+    SendBird.GroupChannel.createChannel(params, function(groupChannel:any, error:Error) {
+      if (error) {
+        console.log(error)
+          // Handle error.
+      } else if (!error){
+        SwitchShowUserModal()
+        chat(groupChannel)
+        console.log("groupChannel In CreateChating Function In MapScreen:",groupChannel)
+      }
+  
+    })
+    }
+   
+  }
+
+
+  const chat = (channel:any) => {
+
+    setProfileModalVisiable(false)
+    navigation.navigate('ChatScreen', {
+      channel,
+      UserData,
+    });
+
+  };
+
+  
+
   const {data, isLoading, refetch:GrilsLocationsrefetch} = useQuery("QueryLocation", Get_Query_AllLocation)
 
   const {data:MansLocations, isLoading:isLoadingMansLocations, refetch:MansLocationsretech} = useQuery("MansLocationsUseQuery", Get_MansLocations)
@@ -684,33 +940,63 @@ const MapScreen = (props:any) => {
     )
   }
 
-  const TextHello = () => {
-    return (
-      <Text style={{color:'white'}}>Hello</Text>
-    )
-  }
-  const FiveTextHello = () => {
-    return (
-      <>
-      {TextHello()}
-      {TextHello()}
-      {TextHello()}
-      {TextHello()}
-      {TextHello()}
-    </>
-    )
-  }
-
-  const FFiveTextHello = () => {
-    return (
-      <>
-      {FiveTextHello()}
-      {FiveTextHello()}
-      {FiveTextHello()}
-      {FiveTextHello()}
-      {FiveTextHello()}
-    </>
-    )
+  const ShowUserModalGen = () => {
+    return ( 
+      <Modal 
+      animationType="slide"
+      transparent={true}
+      visible={ShowUserModal}
+    >
+      <SafeAreaView
+        style={MapScreenStyles.Memomodal}
+      >
+        <Text style={{color:'white', fontSize:22, fontWeight:'500', marginLeft:'5%', marginBottom:20, marginTop:20}}>나의 상태 설정하기</Text>
+        <View style={[styles.W90ML5]}>
+          <Image 
+            source={{uri:ProfileForGtoM?.ProfileImageUrl}}
+            style={{width: 43, height: 43}}
+          />
+          {ProfileForGtoM.Memo != undefined ?
+          <>
+             <Text style={MapScreenStyles.WhiteText}>메모:{ProfileForGtoM?.Memo}</Text>
+             <Text style={MapScreenStyles.WhiteText}>인원수:{ProfileForGtoM?.PeopleNum}명</Text>
+             <Text style={MapScreenStyles.WhiteText}>지불여수:{ProfileForGtoM?.CanPayit}</Text>
+          </>
+          :null}
+       
+        </View>
+  
+          <View style={[styles.Row_OnlyColumnCenter]}>
+  
+            <TouchableOpacity 
+            style={[styles.RowCenter,MapScreenStyles.CancelBoxView]}
+            
+            onPress={()=>{
+              SwitchShowUserModal()
+            }}
+            > 
+              <Text>취소</Text>
+          
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+            style={[styles.RowCenter,MapScreenStyles.CheckBoxView, {backgroundColor:'#28FF98'}]}
+            onPress={()=>{
+              CreateChating()
+            }}
+            > 
+              <Text>채팅하기</Text>
+          
+            </TouchableOpacity>
+            
+          
+          </View>
+  
+        
+      </SafeAreaView>
+  
+      </Modal>
+      )
   }
 
   
@@ -722,7 +1008,8 @@ const MapScreen = (props:any) => {
         transparent={true}
         >
           <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
-            <ScrollView style={MapScreenStyles.ProfileModalScrollView}>
+
+            <View style={MapScreenStyles.ProfileModalScrollView}>
               <TouchableOpacity
                 style={{
                   width:100,
@@ -750,27 +1037,68 @@ const MapScreen = (props:any) => {
                 onPress={()=>{
                   setProfileModalVisiable(false)
                 }}
-              ></Button>
+              />
+            <FlatList
+                data={state.channels}
+                renderItem={({item}) => (
+                  <Channel
+                    key={item.url}
+                    channel={item}
+                    sendbird={SendBird}
+                    onPress={channel => chat(channel)}
+                  />
+                )}
+                keyExtractor={item => item.url}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={state.loading}
+                    colors={['#742ddd']}
+                    tintColor={'#742ddd'}
+                    onRefresh={refresh}
+                  />
+                }
+                contentContainerStyle={{flexGrow: 1}}
+                // ListHeaderComponent={
+                //   state.error && (
+                //     <View style={style.errorContainer}>
+                //       <Text style={style.error}>{state.error}</Text>
+                //     </View>
+                //   )
+                // }
+                // ListEmptyComponent={
+                //   <View style={style.emptyContainer}>
+                //     <Text style={style.empty}>{state.empty}</Text>
+                //   </View>
+                // }
+                onEndReached={() => next()}
+                onEndReachedThreshold={0.5}
+              />
 
-              {FFiveTextHello()}
 
-              <Text style={styles.WhiteColor}>초대코드 1:{UserData.RecommendationCode1}</Text>
-              <Text style={styles.WhiteColor}>초대코드 2:{UserData.RecommendationCode2}</Text>
+          
+              <Text style={[styles.WhiteColor]}>내 latitude:{location?.latitude}</Text>
+              <Text style={[styles.WhiteColor]}>내 longitude:{location?.longitude}</Text>
 
-
-              <Text style={[styles.WhiteColor]}>{location?.latitude}</Text>
-              <Text style={[styles.WhiteColor]}>{location?.longitude}</Text>
+              {InvitationCodeToFriend.length != 0 ? 
+              <>
+              <Text style={styles.WhiteColor}>초대코드1: {InvitationCodeToFriend[0].InvitationCode} {InvitationCodeToFriend[0].Used ? "사용됨": "초대하기"}</Text>
+              <Text style={styles.WhiteColor}>초대코드2: {InvitationCodeToFriend[1].InvitationCode} {InvitationCodeToFriend[1].Used ? "사용됨": "초대하기"}</Text>
+              </>
+              : null}
 
               <Button title="로그아웃 하기" color={'red'}
                 onPress={()=>{
-                  logout(navigation)
+                  logout(navigation, SendBird)
                 }}
               ></Button>
+
               
              
               
 
-            </ScrollView>
+            </View>
+
+
          
       
 
@@ -880,6 +1208,8 @@ const MapScreen = (props:any) => {
         </SafeAreaView>
 
       </Modal>
+
+      {ShowUserModalGen()}
       {location && (
         <MapView
           style={{width:'100%', height:'100%'}}
@@ -917,6 +1247,38 @@ const MapScreen = (props:any) => {
           </View>
           </Marker>
           :null}
+
+
+          
+          {/* {isLoading == false ?
+          data?.map((data,index)=>{
+            return(
+            <Marker
+              key={data.latitude}
+              coordinate={{
+                latitude: data.latitude,
+                longitude: data.longitude
+              }}
+              title={data?.Memo}
+              tracksViewChanges={false}
+              description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
+              onPress={()=>{
+                GirlMarkerOnPress(data.ProfileImageUrl, data.UserEmail,
+                  data.Memo , data.PeopleNum, data.CanPayit)
+              }}
+            >
+              <View>
+                <Image 
+                  source={{uri:data.ProfileImageUrl}}
+                  style={MapScreenStyles.GrilsMarker}
+                  resizeMode="cover"
+                />
+              </View>
+            </Marker>
+            )
+            
+          })
+          : null} */}
           {isLoading == false ?
           data?.map((data,index)=>{
             return(
@@ -929,13 +1291,23 @@ const MapScreen = (props:any) => {
               title={data?.Memo}
               tracksViewChanges={false}
               description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
+              onPress={()=>{
+                GirlMarkerOnPress(data.ProfileImageUrl, data.UserEmail,
+                  data.Memo , data.PeopleNum, data.CanPayit)
+              }}
             >
-              <View>
-                <Image 
-                  source={{uri:data.ProfileImageUrl}}
-                  style={MapScreenStyles.GrilsMarker}
-                  resizeMode="cover"
-                />
+            <View style={styles.NoFlexDirectionCenter}>
+
+              {[...Array(3).keys()].map((_, index) => (
+              <Ring key={index} index={index} />
+              ))}
+
+              <Image 
+              style={MapScreenStyles.GrilsMarker}
+              source={{uri:data.ProfileImageUrl}}
+              resizeMode="cover"
+              />
+
               </View>
             </Marker>
             )
@@ -953,6 +1325,9 @@ const MapScreen = (props:any) => {
                 longitude: MansData.longitude
               }}
               tracksViewChanges={false}
+              onPress={()=>{
+                GirlMarkerOnPress(MansData.ProfileImageUrl, MansData.UserEmail)
+              }}
             >
               <View>
                 <Image 
@@ -1073,7 +1448,6 @@ const MapScreen = (props:any) => {
       </SafeAreaView>
       :null}
 
-      
       <View style={[
         styles.NoFlexDirectionCenter,
         MapScreenStyles.ChangeProfileView]}>
@@ -1092,7 +1466,7 @@ const MapScreen = (props:any) => {
           />
         </TouchableOpacity>
       </View> 
-        
+      
 
       {UserData.Gender == 2 ? 
        <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}
@@ -1213,7 +1587,7 @@ const TrackUserLocation = () => {
 };
 
 
-export default codePush(MapScreen);
+export default withAppContext(codePush(MapScreen));
 
 
 

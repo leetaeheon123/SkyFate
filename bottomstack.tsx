@@ -1,36 +1,69 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MapScreen from './src/screens/map';
 import TwoMapScreen from './src/screens/twomap';
 
 import {RootStackParamList} from './src/screens/RootStackParamList';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { firebase } from '@react-native-firebase/database';
+import { withAppContext } from './src/contextReducer';
+
 
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props:any) => {
 
-  console.log("BottomTabScreen:", props.currentUser)
+
+  const [InvitationCodeToFriend, setInvitationCodeToFriend] = useState<Object>(null);
+
+
+  // console.log("BottomTabScreen:", props.currentUser)
+  // const GetInvitationToFriendCode = (PkNumber:Number) => {
+  //   return (
+  //   firebase.firestore().collection(`InvitationCodeList`).doc(`${String(PkNumber)}`)
+  //   .get()
+  //   )
+  // }
+
+  // useEffect(()=>{
+  //   GetInvitationToFriendCode(props.currentUser.PkNumber).then(doc => {
+  //     const Code = doc.data()
+  //     if(Code) {
+  //       console.log(Code)
+  //       setInvitationCodeToFriend(Code)
+  //     }
+  //   })
+  // }, [props.currentUser])
+
+
+
   // 성별 가져오는 코드 필요합니다 - 2022 10 09 오후1시.
 
     return (
       <BottomTab.Navigator
         >
-
-        <BottomTab.Screen
-          name="MapScreen"
-          component={MapScreen}
-          initialParams={props.currentUser}
-        />
          <BottomTab.Screen
-          name="TwoMapScreen"
-          component={TwoMapScreen}
-          initialParams={props.currentUser}
-        />
+         name="MapScreen"
+         component={MapScreen}
+         initialParams={{
+           CurrentUser: props.currentUser,
+         }}
+       />
+       {props.currentUser.Gender == 2 ? 
+        <BottomTab.Screen
+        name="TwoMapScreen"
+        component={TwoMapScreen}
+        initialParams={{
+          CurrentUser: props.currentUser,
+        }}
+      />
+       :null}
+       
+       
        
       </BottomTab.Navigator>
 
     );
 };
 
-export default BottomTabScreen;
+export default withAppContext(BottomTabScreen);
