@@ -16,6 +16,10 @@ import {
   TextInput,
   Alert,
   Platform,
+  Image,
+  Dimensions,
+  Modal,
+  Button,
 } from 'react-native';
 
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
@@ -53,14 +57,26 @@ const ChatScreen = props => {
     error: '',
   });
 
+  const onoffReportModal = () => {
+    setPortModalVisiable(!ReportModalVisiable);
+  };
+
+  const [ReportModalVisiable, setPortModalVisiable] = useState(false);
+  const {height} = Dimensions.get('window');
   useLayoutEffect(() => {
     const right = (
       <View style={style.headerRightContainer}>
         <TouchableOpacity
           activeOpacity={0.85}
           style={style.headerRightButton}
-          onPress={leave}>
-          <Icon name="directions-walk" color="#fff" size={28} />
+          onPress={onoffReportModal}>
+          <Image
+            style={{
+              width: 30,
+              height: 30,
+            }}
+            source={require('../Assets/security.png')}
+          />
         </TouchableOpacity>
       </View>
     );
@@ -167,6 +183,7 @@ const ChatScreen = props => {
     });
   };
 
+
   const handleStateChange = newState => {
     if (newState === 'active') {
       SendBird.setForegroundState();
@@ -249,7 +266,6 @@ const ChatScreen = props => {
     }
   };
 
-  
   const selectFile = async () => {
     try {
       if (Platform.OS === 'android') {
@@ -336,10 +352,72 @@ const ChatScreen = props => {
       // );
     }
   };
+
+  const [SelectedId, setSelectedId] = useState(0);
+
+  const ReturnTo = (message, id) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          ReportSelect(id);
+        }}
+        style={{
+          width: '100%',
+          height: 50,
+          marginVertical: 10,
+
+          backgroundColor: SelectedId == id ? 'skyblue' : null,
+        }}>
+        <Text>{message}</Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const ReportSelect = id => {
+    setSelectedId(id);
+  };
+
+  const ReportSubmit = async () => {
+    console.log(SelectedId);
+    onoffReportModal();
+    setTimeout(() => {
+      navigation.navigate('IndicatorScreen', {
+        From: 'ChatScreen',
+      });
+    }, 2000);
+
+    Alert.alert('신고 감사합니다. 조치할게요');
+  };
+
   return (
     <>
       <StatusBar backgroundColor="#742ddd" barStyle="light-content" />
+
       <SafeAreaView style={style.container}>
+        <Modal visible={ReportModalVisiable}>
+          <View
+            style={{
+              width: '90%',
+              height: height * 0.5,
+              backgroundColor: 'red',
+              marginLeft: '5%',
+              marginTop: '30%',
+            }}>
+            <Image
+              style={{
+                width: 30,
+                height: 30,
+              }}
+              source={require('../Assets/security.png')}
+            />
+            <Button title="Close" onPress={onoffReportModal} />
+            {ReturnTo('허위 프로필', 1)}
+            {ReturnTo('욕설 및 비방', 2)}
+            {ReturnTo('불쾌한 대화', 3)}
+            {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+            <Button title="Submit" onPress={ReportSubmit} />
+          </View>
+        </Modal>
         <FlatList
           data={state.messages}
           inverted={true}

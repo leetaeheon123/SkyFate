@@ -8,6 +8,7 @@ import {name as appName} from './app.json';
 import messaging from '@react-native-firebase/messaging';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
+import notifee, {AndroidImportance} from '@notifee/react-native';
 
 function SendPushNotificationInforeground() {
   PushNotificationIOS.addNotificationRequest({
@@ -53,7 +54,49 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   } else {
     // AndroidInforeground();
   }
+
+  SendBirdNoti(remoteMessage);
 });
+
+const SendBirdNoti = async message => {
+  const isSendbirdNotification = Boolean(message.data.sendbird);
+  if (!isSendbirdNotification) return;
+
+  const text = message.data.message;
+  const payload = JSON.parse(message.data.sendbird);
+
+  // The following is required for compatibility with Android 8.0 (API level 26) and higher.
+  // Link: https://notifee.app/react-native/reference/createchannel
+  // Link: https://notifee.app/react-native/reference/androidchannel
+  const channelId = await notifee.createChannel({
+    id: 'NOTIFICATION_CHANNEL_ID',
+    name: 'NOTIFICATION_CHANNEL_NAME',
+    importance: AndroidImportance.HIGH,
+  });
+
+  // Link: https://notifee.app/react-native/reference/displaynotification
+  await notifee.displayNotification({
+    id: message.messageId,
+    title: 'New message has arrived!',
+    subtitle: `Number of unread messages: ${payload.unread_message_count}`,
+    body: payload.message,
+    data: payload,
+    // Link: https://notifee.app/react-native/reference/notificationandroid
+    android: {
+      channelId,
+      smallIcon: NOTIFICATION_ICON_RESOURCE_ID,
+      importance: AndroidImportance.HIGH,
+    },
+    // Link: https://notifee.app/react-native/reference/notificationios
+    ios: {
+      foregroundPresentationOptions: {
+        alert: true,
+        badge: true,
+        sound: true,
+      },
+    },
+  });
+};
 
 function HeadlessCheck({isHeadless}) {
   if (isHeadless) {

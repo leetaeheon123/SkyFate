@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MapScreen from './src/screens/map';
 import TwoMapScreen from './src/screens/twomap';
 
-import {RootStackParamList} from './src/screens/RootStackParamList';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { firebase } from '@react-native-firebase/database';
 import { withAppContext } from './src/contextReducer';
 
 

@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 
-const SIZE = 40;
+const SIZE = 65;
 const COLOR = '#6E01EF';
 // const COLOR = 'skyblue';
 

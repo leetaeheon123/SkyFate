@@ -33,12 +33,9 @@ import Geolocation from 'react-native-geolocation-service';
 
 import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import Feather from 'react-native-vector-icons/Feather'
 import firestore from '@react-native-firebase/firestore';
 import AntDesgin from "react-native-vector-icons/AntDesign"
 
-import messaging from '@react-native-firebase/messaging';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
 import {fcmService} from "../UsefulFunctions/push.fcm"
@@ -47,6 +44,7 @@ import axios from 'axios';
 
 import MarkerAnimationStyles from "../../styles/MarkerAnimation"
 import Ring from './Ring';
+import OtherRing from './OtherRing';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import * as Progress from 'react-native-progress';
@@ -212,7 +210,7 @@ function Counter(callback:Function, delay:number | null, Reset:Function) {
   }, [delay]);
 }
 
-const ManLocationUpdate = async (UserEmail:string, ProfileImageUrl:string) => {
+const ManLocationUpdate = async (UserEmail:string, ProfileImageUrl:string, NickName:string) => {
   let ReplaceUserEmail = UserEmail.replace('.com','')
 
   let id = setInterval(()=>{
@@ -227,7 +225,8 @@ const ManLocationUpdate = async (UserEmail:string, ProfileImageUrl:string) => {
             latitude: latitude,
             longitude: longitude,
             ProfileImageUrl: ProfileImageUrl,
-            TimeStamp: EpochTime
+            TimeStamp: EpochTime,
+            NickName:NickName
           })
       },
       (error) => {
@@ -368,12 +367,12 @@ const DeleteMyLocation = (UserEmail:string, Gender:number) => {
 }
 
 const UpdateMyLocation = async (UserEmail: string ,Memo:string, PeopleNum:Number,CanPayit:Number,
-  ProfileImageUrl:any) => {
+  ProfileImageUrl:any, NickName:string) => {
 
 
   let CanPayNum:string
   if(CanPayit == 1) {
-    CanPayNum = "미정"
+    CanPayNum = "보고결정"
   } else if(CanPayit == 2){
     CanPayNum = "O"
   } else if(CanPayit == 3){
@@ -402,7 +401,8 @@ const UpdateMyLocation = async (UserEmail: string ,Memo:string, PeopleNum:Number
           PeopleNum: PeopleNum,
           ProfileImageUrl: ProfileImageUrl,
           TimeStamp: EpochTime,
-          UserEmail: UserEmail
+          UserEmail: UserEmail,
+          NickName:NickName
 
         })
         .then(() => DeleteMyLocation(ReplaceUserEmail, 2));
@@ -486,7 +486,7 @@ const MapScreen = (props:any) => {
   const Context = useContext(AppContext)
   const SendBird = Context.sendbird
 
-
+  const {width , height} = Dimensions.get('window')
 
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
   
@@ -589,7 +589,7 @@ const MapScreen = (props:any) => {
 
       // UpdateMyLocationWatch(setLocation)
       if(UserData.Gender == "1"){
-        let Result = ManLocationUpdate(UserData.UserEmail, UserData.ProfileImageUrl)
+        let Result = ManLocationUpdate(UserData.UserEmail, UserData.ProfileImageUrl, UserData.NickName)
         return Result
       }
       await GetInvitationToFriendCode(UserData.PkNumber)
@@ -634,9 +634,10 @@ const MapScreen = (props:any) => {
 
     SendBird.addConnectionHandler('channels', connectionHandler);
     SendBird.addChannelHandler('channels', channelHandler);
+    SendBird.addUserEventHandler('users', userEventHandler);
+   
 
-
-    // const unsubscribe = AppState.addEventListener('change', handleStateChange)
+    const unsubscribe = AppState.addEventListener('change', handleStateChange)
 
     if (!SendBird.currentUser) {
       // userId를 커낵트시킨 뒤
@@ -658,6 +659,7 @@ const MapScreen = (props:any) => {
     return () => {
       database().ref('/Location').off('child_added', onChildAdd);
       database().ref('/ManLocation').off('child_added', ManonChildAdd);
+      unsubscribe.remove();
       // clearInterval(Result)
       SendBird.removeConnectionHandler('channels');
       SendBird.removeChannelHandler('channels');
@@ -723,6 +725,15 @@ const MapScreen = (props:any) => {
    channelHandler.onChannelDeleted = channel => {
      dispatch({type: 'delete-channel', payload: {channel}});
    };
+   const userEventHandler = new SendBird.UserEventHandler();
+
+
+
+   userEventHandler.onTotalUnreadMessageCountUpdated = (totalCount:any, countByCustomTypes:any) => {
+    console.log("totalCount And countByCustomTypes:",totalCount, countByCustomTypes )
+   };
+   
+  
 
   const handleStateChange = (newState:any)=> {
     // ios - active - inactive
@@ -735,6 +746,8 @@ const MapScreen = (props:any) => {
       SendBird.setBackgroundState();
     }
   };
+
+
 
   const refresh = () => {
     // state값에 sendbird.groupchannel. 그룹채널리스트 만들기 쿼리를 실행한 뒤 리턴값을 state에 저장
@@ -787,7 +800,6 @@ const MapScreen = (props:any) => {
 
 
   const [second, setSecond] = useState<number>(180);
-  const {width} = Dimensions.get('window')
 
   const ChangeModalVisiable = () => {
     setModalVisiable(previousState => !previousState)
@@ -813,7 +825,7 @@ const MapScreen = (props:any) => {
     console.log(day)
     // day가 오후 10시 ~ 새벽 7시 
     if(day >= 22 && day <=24 || day >= 1 && day <= 7) {
-        UpdateMyLocation(UserData.UserEmail,Memo, PeopleNum, MoenyRadioBox, UserData.ProfileImageUrl)
+        UpdateMyLocation(UserData.UserEmail,Memo, PeopleNum, MoenyRadioBox, UserData.ProfileImageUrl, UserData.NickName)
         setGpsOn(true)
         ChangeModalVisiable()
     } else {
@@ -827,21 +839,22 @@ const MapScreen = (props:any) => {
   }
 
   const Stateize = async (ProfileImageUrl:string , UserEmail:string,
-    Memo:string, PeopleNum:number, CanPayit:string) => {
+    Memo:string, PeopleNum:number, CanPayit:string, NickName:string) => {
    setProfileForGtoM({
      ProfileImageUrl: ProfileImageUrl,
      UserEmail:UserEmail,
      Memo:Memo,
      PeopleNum:PeopleNum,
-     CanPayit:CanPayit
+     CanPayit:CanPayit,
+     NickName:NickName
    })
  }
   const GirlMarkerOnPress = async (ProfileImageUrl:string , UserEmail:string,
-    Memo:string, PeopleNum:number, CanPayit:string) => {
+    Memo:string, PeopleNum:number, CanPayit:string , NickName:string) => {
 
     console.log(Memo, PeopleNum, CanPayit)
 
-    await Stateize(ProfileImageUrl, UserEmail, Memo, PeopleNum, CanPayit)
+    await Stateize(ProfileImageUrl, UserEmail, Memo, PeopleNum, CanPayit,NickName)
     SwitchShowUserModal()
   }
 
@@ -947,21 +960,29 @@ const MapScreen = (props:any) => {
       transparent={true}
       visible={ShowUserModal}
     >
-      <SafeAreaView
+      <ScrollView
         style={MapScreenStyles.Memomodal}
       >
-        <Text style={{color:'white', fontSize:22, fontWeight:'500', marginLeft:'5%', marginBottom:20, marginTop:20}}>나의 상태 설정하기</Text>
+        <Text style={{color:'white', fontSize:22, fontWeight:'500', marginLeft:'5%', marginBottom:20, marginTop:20}}>{ProfileForGtoM?.NickName}</Text>
         <View style={[styles.W90ML5]}>
           <Image 
+            // resizeMode='center'
             source={{uri:ProfileForGtoM?.ProfileImageUrl}}
-            style={{width: 43, height: 43}}
+            style={{width: '100%'
+            , height: height * 0.35
+            , borderRadius:10
+            , marginBottom:20
+            }}
           />
-          {ProfileForGtoM.Memo != undefined ?
-          <>
-             <Text style={MapScreenStyles.WhiteText}>메모:{ProfileForGtoM?.Memo}</Text>
-             <Text style={MapScreenStyles.WhiteText}>인원수:{ProfileForGtoM?.PeopleNum}명</Text>
-             <Text style={MapScreenStyles.WhiteText}>지불여수:{ProfileForGtoM?.CanPayit}</Text>
-          </>
+          {ProfileForGtoM.Memo != '' ?
+          <View style={{marginBottom:10}}>
+             <Text style={[MapScreenStyles.WhiteText, {marginBottom:10, fontWeight:'700', fontSize:20}]}>👩🏼 인원수:{ProfileForGtoM?.PeopleNum}명</Text>
+             <Text style={[MapScreenStyles.WhiteText, {marginBottom:10, fontSize:16, fontWeight:'600'
+              // color:'#efa5c8'
+              
+              }]}>💸 지불여부: {ProfileForGtoM?.CanPayit}</Text>
+             <Text style={[MapScreenStyles.WhiteText, {marginBottom:10, fontSize:16, fontWeight:'500'}]}>💌 메모:{ProfileForGtoM?.Memo}</Text>
+          </View>
           :null}
        
         </View>
@@ -993,7 +1014,7 @@ const MapScreen = (props:any) => {
           </View>
   
         
-      </SafeAreaView>
+      </ScrollView>
   
       </Modal>
       )
@@ -1010,11 +1031,19 @@ const MapScreen = (props:any) => {
           <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
 
             <View style={MapScreenStyles.ProfileModalScrollView}>
+              <View style={{
+                display:'flex',
+                flexDirection:'row',
+                justifyContent:'flex-end',
+                marginTop:40
+              }}>
               <TouchableOpacity
                 style={{
                   width:100,
                   height:100,
-                  backgroundColor:'white'
+                  backgroundColor:'white',
+                  borderRadius:10,
+                  
                 }}
               onPress={()=>{
                 ChangeMyProfileImage(UserData.UserEmail, UserData.Gender, navigation)
@@ -1022,6 +1051,10 @@ const MapScreen = (props:any) => {
                {ProfileImage()}
 
               </TouchableOpacity>
+
+
+              </View>
+
               <Text style={{color:'white', fontSize:22, fontWeight:'600'}}>내 등급</Text>
               <Text style={{color:'white', marginLeft:'50%'}}>50%</Text>
               <Progress.Bar progress={0.5} width={width*0.9}
@@ -1088,6 +1121,7 @@ const MapScreen = (props:any) => {
 
               <Button title="로그아웃 하기" color={'red'}
                 onPress={()=>{
+                  setProfileModalVisiable(!ProfileModalVisiable)
                   logout(navigation, SendBird)
                 }}
               ></Button>
@@ -1160,7 +1194,7 @@ const MapScreen = (props:any) => {
               onPress={()=>{setMoneyRadioBox(3)}}
               style={MoenyRadioBox == 3 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
               >
-                <Text style={MoenyRadioBox == 3?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>생각있음</Text>
+                <Text style={MoenyRadioBox == 3?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>생각없음</Text>
               </TouchableOpacity>
             </View>
           </View> 
@@ -1221,7 +1255,8 @@ const MapScreen = (props:any) => {
           }}
           showsUserLocation={!GpsOn}
           loadingEnabled={true}
-          userInterfaceStyle="light"
+          // userInterfaceStyle="light"
+          userInterfaceStyle="dark"
           minZoomLevel={10}
           maxZoomLevel={17}
           >
@@ -1248,37 +1283,6 @@ const MapScreen = (props:any) => {
           </Marker>
           :null}
 
-
-          
-          {/* {isLoading == false ?
-          data?.map((data,index)=>{
-            return(
-            <Marker
-              key={data.latitude}
-              coordinate={{
-                latitude: data.latitude,
-                longitude: data.longitude
-              }}
-              title={data?.Memo}
-              tracksViewChanges={false}
-              description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
-              onPress={()=>{
-                GirlMarkerOnPress(data.ProfileImageUrl, data.UserEmail,
-                  data.Memo , data.PeopleNum, data.CanPayit)
-              }}
-            >
-              <View>
-                <Image 
-                  source={{uri:data.ProfileImageUrl}}
-                  style={MapScreenStyles.GrilsMarker}
-                  resizeMode="cover"
-                />
-              </View>
-            </Marker>
-            )
-            
-          })
-          : null} */}
           {isLoading == false ?
           data?.map((data,index)=>{
             return(
@@ -1288,19 +1292,22 @@ const MapScreen = (props:any) => {
                 latitude: data.latitude,
                 longitude: data.longitude
               }}
-              title={data?.Memo}
+              // title={data?.Memo}
               tracksViewChanges={false}
-              description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
+              // description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
               onPress={()=>{
                 GirlMarkerOnPress(data.ProfileImageUrl, data.UserEmail,
-                  data.Memo , data.PeopleNum, data.CanPayit)
+                  data.Memo , data.PeopleNum, data.CanPayit, data.NickName)
               }}
             >
-            <View style={styles.NoFlexDirectionCenter}>
-
+              <View 
+              style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center, {
+              }]}
+              >
               {[...Array(3).keys()].map((_, index) => (
-              <Ring key={index} index={index} />
-              ))}
+                <OtherRing key={index} index={index} />
+                ))}
+          
 
               <Image 
               style={MapScreenStyles.GrilsMarker}
@@ -1326,7 +1333,7 @@ const MapScreen = (props:any) => {
               }}
               tracksViewChanges={false}
               onPress={()=>{
-                GirlMarkerOnPress(MansData.ProfileImageUrl, MansData.UserEmail)
+                GirlMarkerOnPress(MansData.ProfileImageUrl, MansData.UserEmail, '',0,'', MansData.NickName)
               }}
             >
               <View>

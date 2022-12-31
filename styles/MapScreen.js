@@ -33,19 +33,16 @@ export const MapScreenStyles = StyleSheet.create({
     elevation: 2,
   },
   Memomodal: {
-    // height:NS,
-    // height:533,
     height: NS2,
     top: '14%',
     width: '90%',
     position: 'absolute',
     backgroundColor: 'black',
-    // top:'21.5%',
+    // backgroundColor: 'white',
     left: '5%',
     borderRadius: 14,
     display: 'flex',
     flexDirection: 'column',
-    // justifyContent:'space-around'
   },
   MinusPeopleNumber: {
     width: 18,

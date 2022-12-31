@@ -59,3 +59,20 @@ buck-out/
 # Ruby / CocoaPods
 /ios/Pods/
 /vendor/bundle/
+
+
+# apple 인증키 무시
+
+apple 인증키/
+
+# 랑데부 uiux 사진 무시 
+
+랑데부 uiux/
+
+# 랑데부 데모영상 무시 
+
+랑데부 IOS 디바이스에서 돌아가는 사진/
+
+# 랑데부 데모영상과 uiux 사진이 담긴 폴더
+
+rendezvous etc/

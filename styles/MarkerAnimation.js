@@ -14,7 +14,6 @@ const MarkerAnimationStyles = StyleSheet.create({
     // height: SIZE,
     // width: SIZE,
     // borderRadius: SIZE / 2,
-
     height: 80,
     width: 80,
     borderRadius: 40,

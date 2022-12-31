@@ -39,7 +39,8 @@ const Routes = (props:any) => {
 
     return (
 
-      <Stack.Navigator initialRouteName="IndicatorScreen">
+      <Stack.Navigator initialRouteName="IndicatorScreen"
+      >
          <Stack.Screen
           name="BottomTabScreen"
           component={BottomTabScreen}

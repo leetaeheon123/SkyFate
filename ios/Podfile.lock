@@ -926,6 +926,11 @@ PODS:
     - RNFBApp
   - RNGestureHandler (2.4.2):
     - React-Core
+  - RNNotifee (5.7.0):
+    - React-Core
+    - RNNotifee/NotifeeCore (= 5.7.0)
+  - RNNotifee/NotifeeCore (5.7.0):
+    - React-Core
   - RNPermissions (3.6.1):
     - React-Core
   - RNReanimated (2.8.0):
@@ -1049,6 +1054,7 @@ DEPENDENCIES:
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - "RNNotifee (from `../node_modules/@notifee/react-native`)"
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -1213,6 +1219,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/storage"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNNotifee:
+    :path: "../node_modules/@notifee/react-native"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
   RNReanimated:
@@ -1322,6 +1330,7 @@ SPEC CHECKSUMS:
   RNFBMessaging: eb8d1b08795c8718706007ed0743732d00e1acc4
   RNFBStorage: bffb285f037e0cb3937bdc2c72992dd7a6a83982
   RNGestureHandler: 61628a2c859172551aa2100d3e73d1e57878392f
+  RNNotifee: 5155e0a5e0a97d0c839030d8192783cd63053999
   RNPermissions: dcdb7b99796bbeda6975a6e79ad519c41b251b1c
   RNReanimated: 64573e25e078ae6bec03b891586d50b9ec284393
   RNScreens: 40a2cb40a02a609938137a1e0acfbf8fc9eebf19
@@ -1333,6 +1342,6 @@ SPEC CHECKSUMS:
   Yoga: 99652481fcd320aefa4a7ef90095b95acd181952
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: ca96cc1d08b112023fec012353b661a2b0c6d0e8
+PODFILE CHECKSUM: 1dbfc0677144f50839fd8d6f865c01487f397ae6
 
 COCOAPODS: 1.11.3

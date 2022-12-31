@@ -17,7 +17,7 @@ import qs from 'qs'
 
 export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCodeSet">;
 
-const SBConnect = async (SendBird:any, UserEmail:string, NickName:string) => {
+const SBConnect = async (SendBird:any, UserEmail:string, NickName:string, navigation:Object) => {
   SendBird.connect(UserEmail, (user:any, err:any) => {
     console.log('In Sendbird.connect CallbackFunction User:', user);
     // 에러가 존재하지 않으면
@@ -27,12 +27,13 @@ const SBConnect = async (SendBird:any, UserEmail:string, NickName:string) => {
         SendBird.updateCurrentUserInfo(
           NickName,
           'https://blog.kakaocdn.net/dn/tEMUl/btrDc6957nj/NwJoDw0EOapJNDSNRNZK8K/img.jpg',
-          (user:any, err:any) => {
+          async (user:any, err:any) => {
             console.log('In sendbird.updateCurrentUserInfo User:', user);
             if (!err) {
+              await RegisterUserData(UserEmail, navigation, user, SendBird)
               console.log("Succes connect SendBird In Register SBconnect Function")
             } else {
-              Alert.alert(`에러가 난 이유 : ${err.message}`)
+              Alert.alert(`SbConnect Function In RegisterScreen에서에러가 난 이유 : ${err.message}`)
             }
           },
         );
@@ -53,9 +54,8 @@ const SignUpWithEmail = async (navigation:any, Email:string, Password:string , G
     // await InvitationCodeToFriend를 서버로부터 가져오는 함수 
     let UserEmail:string = result.user.email
     await SignUpFirestore(UserEmail,Gender, BasicImageUrl, InvitationCode,PkNumber,NickName)
-    await SBConnect(SendBird, UserEmail, NickName)
+    await SBConnect(SendBird, UserEmail, NickName,navigation)
     await UpdateInvitationCodeToFriend(InvitationCode)
-    await RegisterUserData(UserEmail, navigation)
   } 
   catch (error) {
     if (error.code === 'auth/email-already-in-use') {

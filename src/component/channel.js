@@ -55,9 +55,17 @@ const Channel = props => {
       }
     }
   };
+
   const updateUnreadMessageCount = channel => {
     setUnreadMessageCount(createUnreadMessageCount(channel));
   };
+
+  const DecrementUnreadMessageCount = channel => {
+    console.log('DecrementUnreadMessageCount');
+    // channel.unreadMessageCount = 0;
+    channel.markAsRead();
+  };
+
   const updateUpdatedAt = channel => {
     setUpdatedAt(
       moment(
@@ -81,7 +89,11 @@ const Channel = props => {
     <TouchableOpacity
       activeOpacity={0.75}
       style={style.container}
-      onPress={() => onPress(channel)}>
+      onPress={() => {
+        onPress(channel);
+
+        DecrementUnreadMessageCount(channel);
+      }}>
       <Image
         source={
           channel.coverUrl

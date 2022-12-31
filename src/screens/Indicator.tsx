@@ -6,6 +6,7 @@ import BottomTabScreen from '../../bottomstack';
 import ValidInvitationCodeScreen from './ValidInvitationCode';
 
 import {AppContext} from "../UsefulFunctions/Appcontext"
+import {handleNotificationAction} from '../utils';
 
 const IndicatorScreen = (props:any) => {
 
@@ -17,6 +18,8 @@ const IndicatorScreen = (props:any) => {
   const Context = useContext(AppContext)
   const SendBird = Context.sendbird
 
+  const {navigation} = props 
+
   useEffect(() => {
     AsyncStorage.getItem(savedUserKey)
       .then(user => {
@@ -26,6 +29,12 @@ const IndicatorScreen = (props:any) => {
         }
         // 그다음에 셋이니셜라이즈
         setInitialized(true);
+
+        return handleNotificationAction(
+          navigation,
+          SendBird,
+          currentUser,
+        );
       })
       .catch(err => console.error(err));
   }, []);

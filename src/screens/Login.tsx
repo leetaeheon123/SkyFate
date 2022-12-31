@@ -9,45 +9,16 @@ import {AppContext} from '../UsefulFunctions/Appcontext'
 
 import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
 import { RegisterUserData } from "../UsefulFunctions/SaveUserDataInDevice"
-import AsyncStorage from '@react-native-community/async-storage';
 
 import { LoginAndRegisterTextInputStyle } from '../../styles/LoginAndRegiser';
 export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">;
 
-const RegisterCurrentUserForSendBirdChat = (user:any) => {
-  const savedUserKey = 'savedUser';
-  // user값을 에이싱크 스토리지에 저장한 뒤, 샌드버드에 알람용 토큰값을 저장함
-  AsyncStorage.setItem(savedUserKey, JSON.stringify(user))
-    .then(async () => {
-      try {
-        setCurrentUser(user);
-        const authorizationStatus = await messaging().requestPermission();
-        if (
-          authorizationStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-          authorizationStatus === messaging.AuthorizationStatus.PROVISIONAL
-        ) {
-          if (Platform.OS === 'ios') {
-            const token = await messaging().getAPNSToken();
-            // console.log('iostoken', token);
-            sendbird.registerAPNSPushTokenForCurrentUser(token);
-          } else {
-            const token = await messaging().getToken();
-            console.log('aostoken', token);
 
-            sendbird.registerGCMPushTokenForCurrentUser(token);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    })
-    .catch(err => console.error(err));
-};
 const SBConnect = async (SendBird:any, UserEmail:string, navigation:any) => {
   SendBird.connect(UserEmail, (user:any, err:any) => {
 
     if(!err){
-      RegisterUserData(UserEmail, navigation, user)
+      RegisterUserData(UserEmail, navigation, user, SendBird)
 
       console.log("SendBird Connect is Success In LoginScreen")
     } else {
@@ -64,7 +35,6 @@ const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:strin
     const result = await signIn({email: Email, password:InvitationCode})
     let UserEmail = result.user.email
     await SBConnect(SendBird, UserEmail, navigation)
-    // RegisterUserData(UserEmail, navigation)
   } 
   catch (error) {
     if(error.code === "auth/wrong-password") {
