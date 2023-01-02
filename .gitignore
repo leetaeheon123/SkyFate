@@ -76,3 +76,6 @@ apple 인증키/
 # 랑데부 데모영상과 uiux 사진이 담긴 폴더
 
 rendezvous etc/
+
+# env 파일
+.env

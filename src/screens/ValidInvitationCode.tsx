@@ -1,6 +1,16 @@
 import React, {useState} from 'react';
-import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput,
-   StyleSheet , Pressable, Dimensions} from 'react-native';
+import {
+  View,
+  Button,
+  Platform,
+  Text,
+  SafeAreaView,
+  Alert,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  Dimensions,
+} from 'react-native';
 import {
   AppleButton,
   appleAuth,
@@ -10,17 +20,20 @@ import {useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-community/async-storage';
 import {login, getProfile} from '@react-native-seoul/kakao-login';
-import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
+import {signIn, signUp} from '../UsefulFunctions/FirebaseAuth';
 import firestore from '@react-native-firebase/firestore';
 import styles from '../../styles/ManToManBoard';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from './RootStackParamList';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from './RootStackParamList';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import {LoginAndReigsterStyles} from '../../styles/LoginAndRegiser';
 
-export type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">
+export type RegisterScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  'InvitationCode'
+>;
 
-const signInWithKakao = async navigation => {
+const signInWithKakao = async (navigation) => {
   const token = await login();
 
   // console.warn(JSON.stringify(token));
@@ -35,7 +48,7 @@ const signInWithKakao = async navigation => {
   GetKaKaoProfile(navigation);
 };
 
-const GetKaKaoProfile = async navigation => {
+const GetKaKaoProfile = async (navigation) => {
   const Profile = await getProfile();
 
   RegisterIdentityToken(Profile.id);
@@ -89,97 +102,96 @@ async function onAppleButtonPress(navigation: any) {
   // use credentialState response to ensure the user is authenticated
   // identityToken을 식별자로 일단 앱을 배포한다.
   if (credentialState === appleAuth.State.AUTHORIZED) {
-    (appleAuthRequestResponse.user, navigation);
+    appleAuthRequestResponse.user, navigation;
     auth().signInWithCredential(appleCredential);
     // navigation.navigate('SelectSubJect');
   }
 }
 
-const ValidInvitationCodeLength = (InvitationCode:string) => {
-  if(InvitationCode.length ==6 ) {
-    return true
+const ValidInvitationCodeLength = (InvitationCode: string) => {
+  if (InvitationCode.length == 6) {
+    return true;
   }
 
-  return false
-}
+  return false;
+};
 
-const ValidateInvitationCode = (InvitationCode:string, navigation:any) => {
-
-  let Valid = ValidInvitationCodeLength(InvitationCode)
-  if(Valid == false){
-    Alert.alert("초대코드를 다시한번 확인해주세요")
-    return
+const ValidateInvitationCode = (InvitationCode: string, navigation: any) => {
+  let Valid = ValidInvitationCodeLength(InvitationCode);
+  if (Valid == false) {
+    Alert.alert('초대코드를 다시한번 확인해주세요');
+    return;
   }
 
   firestore()
-  .collection("InvitationCodeList")
-  .where('InvitationCode', '==', InvitationCode)
-  .get()
-  .then((querySnapshot)=>{
-    let Valid = 0
-    let length = querySnapshot.size
-    let PkNumber
-    console.log(length)
-    querySnapshot.forEach((doc) => {
-      if(length == 1 && doc.data().Used == false) {
-        PkNumber = doc.data().Number
-        Valid = 1
-      } else if (length == 1 && doc.data().Used == true){
-        Valid = 2
+    .collection('InvitationCodeList')
+    .where('InvitationCode', '==', InvitationCode)
+    .get()
+    .then((querySnapshot) => {
+      let Valid = 0;
+      let length = querySnapshot.size;
+      let PkNumber;
+      console.log(length);
+      querySnapshot.forEach((doc) => {
+        if (length == 1 && doc.data().Used == false) {
+          PkNumber = doc.data().Number;
+          Valid = 1;
+        } else if (length == 1 && doc.data().Used == true) {
+          Valid = 2;
+        }
+      });
+
+      let Obj = {
+        Valid: Valid,
+        PkNumber: PkNumber,
+      };
+      return Obj;
+    })
+    .then(async (Obj) => {
+      if (Obj.Valid == 1) {
+        navigation.navigate('CertificationScreen', {
+          InvitationCode: InvitationCode,
+          PkNumber: Obj.PkNumber,
+        });
+      } else if (Obj.Valid == 0) {
+        Alert.alert('존재하지 않는 초대코드입니다.');
+        return;
+      } else if (Obj.Valid == 2) {
+        Alert.alert('이미 사용된 초대코드입니다');
+        return;
       }
     });
-
-    let Obj = {
-      Valid : Valid,
-      PkNumber: PkNumber
-    }
-    return Obj
-  }).then(async (Obj)=>{
-    if(Obj.Valid == 1){
-      navigation.navigate('CertificationScreen', {
-        InvitationCode: InvitationCode,
-        PkNumber: Obj.PkNumber
-      })
-    } else if (Obj.Valid == 0){
-      Alert.alert("존재하지 않는 초대코드입니다.")
-      return
-    } else if (Obj.Valid == 2){
-      Alert.alert("이미 사용된 초대코드입니다")
-      return
-    } 
-  })
-
-}
+};
 
 const ValidInvitationCodeScreen = () => {
   const [BorderBottomColor, setBorderBottomColor] = useState('lightgray');
 
-  const [TextInputInvitationCode , setTextInputInvitationCode] = useState("AHfPqW")
+  const [TextInputInvitationCode, setTextInputInvitationCode] =
+    useState('AHfPqW');
   const navigation = useNavigation();
-  
+
   const TextInputStyle = StyleSheet.create({
     TextInput: {
       width: '100%',
       height: '50%',
       borderBottomColor: BorderBottomColor,
       borderBottomWidth: 1,
-      fontSize:18,
+      fontSize: 18,
       fontWeight: '600',
-      color:'black',
+      color: 'black',
       // backgroundColor:'skyblue'
     },
-    ViewStyle:{
+    ViewStyle: {
       width: '100%',
       height: '40%',
       marginTop: '5%',
       display: 'flex',
       justifyContent: 'center',
-    }
-  })
+    },
+  });
 
   const InvitationCode = () => (
-    <View
-      style={TextInputStyle.ViewStyle}>
+    <View style={TextInputStyle.ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -187,9 +199,7 @@ const ValidInvitationCodeScreen = () => {
         초대코드 입력
       </Text>
       <TextInput
-        style={
-          TextInputStyle.TextInput
-        }
+        style={TextInputStyle.TextInput}
         placeholder="초대코드를 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
@@ -199,7 +209,7 @@ const ValidInvitationCodeScreen = () => {
           setBorderBottomColor('lightgray');
         }}
         value={TextInputInvitationCode}
-        onChangeText={value => {
+        onChangeText={(value) => {
           setTextInputInvitationCode(value);
         }}
       />
@@ -207,17 +217,14 @@ const ValidInvitationCodeScreen = () => {
   );
 
   return (
-    <SafeAreaView
-      style={LoginAndReigsterStyles.Body}>
-      <View
-        style={LoginAndReigsterStyles.Main}>
-        <View
-          style={LoginAndReigsterStyles.Description}>
+    <SafeAreaView style={LoginAndReigsterStyles.Body}>
+      <View style={LoginAndReigsterStyles.Main}>
+        <View style={LoginAndReigsterStyles.Description}>
           <Text
             style={{
               fontSize: 22,
               fontWeight: 'bold',
-              color:'black'
+              color: 'black',
             }}>
             초대받은 번호로 등록을 시작해주세요
           </Text>
@@ -231,61 +238,64 @@ const ValidInvitationCodeScreen = () => {
           {InvitationCode()}
         </View>
 
-        <Button title="즉시 회원가입으로 이동"
-          onPress={()=>{
-            navigation.navigate("RegisterScreen", {
-              InvitationCode:"AHfPqW",
-              Gender:1,
-              PkNumber:0,
-              imp_uid:""
-            })
-           
+        <Button
+          title="즉시 이용약관 페이지로 이동"
+          onPress={() => {
+            navigation.navigate('AgreementScreen', {
+              InvitationCode: 'AHfPqW',
+              PkNumber: 0,
+            });
+          }}></Button>
+
+        <Button
+          title="즉시 회원가입으로 이동"
+          onPress={() => {
+            navigation.navigate('RegisterScreen', {
+              InvitationCode: 'AHfPqW',
+              Gender: 1,
+              PkNumber: 0,
+              imp_uid: '',
+            });
           }}
         />
 
-        <Button title="닉네임 입력창 이동"
-          onPress={()=>{
-            navigation.navigate("NickNameSelectScreen")
+        <Button
+          title="닉네임 입력창 이동"
+          onPress={() => {
+            navigation.navigate('NickNameSelectScreen');
           }}
-        />  
+        />
 
         <View style={LoginAndReigsterStyles.CheckBox}>
-        <Pressable
-          style={LoginAndReigsterStyles.CheckBt}
-          onPress={() => {
-            ValidateInvitationCode(TextInputInvitationCode, navigation)
-          }}>
-          <Text style={InvitationCodeStyles.CheckText}>다음</Text>
-        </Pressable>
+          <Pressable
+            style={LoginAndReigsterStyles.CheckBt}
+            onPress={() => {
+              ValidateInvitationCode(TextInputInvitationCode, navigation);
+            }}>
+            <Text style={InvitationCodeStyles.CheckText}>다음</Text>
+          </Pressable>
+        </View>
 
-
-      </View>
-
-      <View style={[{
-        position:'absolute',
-        bottom:'3%',
-        width:'100%'
-      }]}>
-       <Pressable
-          style={[styles.RowCenter]}
-          onPress={() => {
-            navigation.navigate('LoginScreen')
-          }}>
-          <Text>이미 계정이 있습니다 ></Text>
-
-        </Pressable>
-
-      </View>
-
-     
-
-     
-     
+        <View
+          style={[
+            {
+              position: 'absolute',
+              bottom: '3%',
+              width: '100%',
+            },
+          ]}>
+          <Pressable
+            style={[styles.RowCenter]}
+            onPress={() => {
+              navigation.navigate('LoginScreen');
+            }}>
+            <Text>이미 계정이 있습니다 &gt;</Text>
+          </Pressable>
+        </View>
       </View>
     </SafeAreaView>
   );
 };
-
 
 const InvitationCodeStyles = StyleSheet.create({
   NotMyCellPhoneText: {
@@ -309,7 +319,6 @@ const InvitationCodeStyles = StyleSheet.create({
     padding: 1,
     color: 'blue',
   },
-  
 });
 
 export default ValidInvitationCodeScreen;
