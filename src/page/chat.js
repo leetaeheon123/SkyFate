@@ -32,8 +32,10 @@ import Message from '../component/message';
 import {createChannelName} from '../utilsReducer';
 
 import {AppContext} from '../UsefulFunctions/Appcontext';
+import {GetTime} from '../../1108backup/src/UsefulFunctions/GetTime';
+import {now} from 'moment';
 
-const ChatScreen = props => {
+const ChatScreen = (props) => {
   const {route, navigation} = props;
 
   const {channel} = route.params;
@@ -183,8 +185,7 @@ const ChatScreen = props => {
     });
   };
 
-
-  const handleStateChange = newState => {
+  const handleStateChange = (newState) => {
     if (newState === 'active') {
       SendBird.setForegroundState();
     } else {
@@ -323,12 +324,12 @@ const ChatScreen = props => {
       }
     }
   };
-  const viewDetail = message => {
+  const viewDetail = (message) => {
     if (message.isFileMessage()) {
       // TODO: show file details
     }
   };
-  const showContextMenu = message => {
+  const showContextMenu = (message) => {
     if (message.sender && message.sender.userId === UserData.userId) {
       // message control
       // showActionSheetWithOptions(
@@ -373,13 +374,14 @@ const ChatScreen = props => {
     );
   };
 
-  const ReportSelect = id => {
+  const ReportSelect = (id) => {
     setSelectedId(id);
   };
 
   const ReportSubmit = async () => {
     console.log(SelectedId);
     onoffReportModal();
+    await SaveReportInDB();
     setTimeout(() => {
       navigation.navigate('IndicatorScreen', {
         From: 'ChatScreen',
@@ -387,6 +389,16 @@ const ChatScreen = props => {
     }, 2000);
 
     Alert.alert('신고 감사합니다. 조치할게요');
+  };
+
+  const SaveReportInDB = async () => {
+    const Today = GetTime();
+    firestore.collection(`Report/${Today}/UserEmail`).doc('uid').set({
+      // Reporter:
+      // Reported:
+      Cause: SelectedId,
+      CreateAt: Date.now(),
+    });
   };
 
   return (
@@ -427,11 +439,11 @@ const ChatScreen = props => {
               channel={channel}
               message={item}
               SendBird={SendBird}
-              onPress={message => viewDetail(message)}
-              onLongPress={message => showContextMenu(message)}
+              onPress={(message) => viewDetail(message)}
+              onLongPress={(message) => showContextMenu(message)}
             />
           )}
-          keyExtractor={item => `${item.messageId}` || item.reqId}
+          keyExtractor={(item) => `${item.messageId}` || item.reqId}
           contentContainerStyle={{flexGrow: 1, paddingVertical: 10}}
           ListHeaderComponent={
             state.error && (
@@ -460,7 +472,7 @@ const ChatScreen = props => {
             style={style.input}
             multiline={true}
             numberOfLines={2}
-            onChangeText={content => {
+            onChangeText={(content) => {
               // if (content.length > 0) {
               //   channel.startTyping();
               // } else {

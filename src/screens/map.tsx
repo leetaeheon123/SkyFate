@@ -16,7 +16,8 @@ import {
   ScrollView,
   AppState,
   FlatList,
-  RefreshControl
+  RefreshControl,
+  Switch
 } from 'react-native';
 
 import { MapScreenStyles } from '../../styles/MapScreen';
@@ -354,16 +355,22 @@ const GetLocation = (setLocation:Function) => {
 
 
 const DeleteMyLocation = (UserEmail:string, Gender:number) => {
+  let ReplaceUserEmail = UserEmail.replace('.com','')
 
   if(Gender ==2){
     setTimeout(()=>{
-      // reference.ref(`/Location/${UserEmail}`).remove()
+      // reference.ref(`/Location/${ReplaceUserEmail}`).remove()
     }, 180000)
   }
   // } else if(Gender == 1){
   //   console.log("Man")
   // }
 
+}
+
+const DirectDeleteMyLocation = (UserEmail:string) => {
+  let ReplaceUserEmail = UserEmail.replace('.com','')
+  reference.ref(`/Location/${ReplaceUserEmail}`).remove()
 }
 
 const UpdateMyLocation = async (UserEmail: string ,Memo:string, PeopleNum:Number,CanPayit:Number,
@@ -787,6 +794,12 @@ const MapScreen = (props:any) => {
 
 
   const [ GpsOn, setGpsOn] = useState(false);
+  const StopShowMyLocation = () => {
+    setGpsOn(previousState => !previousState);
+    setSecond(180)
+    DirectDeleteMyLocation(UserData.UserEmail)
+  }
+
 
   const [ ModalVisiable, setModalVisiable] = useState(false);
   const [ ProfileModalVisiable, setProfileModalVisiable] = useState(false);
@@ -1260,7 +1273,7 @@ const MapScreen = (props:any) => {
           minZoomLevel={10}
           maxZoomLevel={17}
           >
-          {GpsOn == true ?
+          {/* {GpsOn == true ?
           <Marker
           coordinate={{
             // latitude: 37.5817005,
@@ -1281,7 +1294,7 @@ const MapScreen = (props:any) => {
             source={{uri:UserData.ProfileImageUrl}}/>
           </View>
           </Marker>
-          :null}
+          :null} */}
 
           {isLoading == false ?
           data?.map((data,index)=>{
@@ -1439,16 +1452,29 @@ const MapScreen = (props:any) => {
           :  <Text style={{color:'#28FF98', fontSize:16, fontWeight:'500'}}>
           {Math.floor(second / 60)} : {second % 60}
           </Text>}
+
+          {GpsOn == true ? 
+          <Switch
+          trackColor={{false: '#202124', true: '#202124'}}
+          thumbColor={GpsOn ? '#28FF98' : '#f4f3f4'}
+          ios_backgroundColor="#202124"
+          onValueChange={StopShowMyLocation}
+          value={GpsOn}
+          />
+          : null}
+
           {GpsOn == false ? 
           
           <View style={[styles.NoFlexDirectionCenter,{width:38, height:22, 
             backgroundColor:'#B4B4B4', borderRadius:4}]}>
-            <Text style={{fontWeight:'500', fontSize:14}}>ON</Text>
+            <Text style={{fontWeight:'500', fontSize:14}}>OFF</Text>
           </View>
-          :<View style={[styles.NoFlexDirectionCenter,{width:33, height:22, 
+          :
+          <View style={[styles.NoFlexDirectionCenter,{width:33, height:22, 
             backgroundColor:'#28FF98', borderRadius:4}]}>
             <Text style={{fontWeight:'500', fontSize:14}}>ON</Text>
-          </View>}
+          </View>
+          }
 
           
 
