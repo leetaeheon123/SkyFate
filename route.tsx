@@ -12,7 +12,6 @@ import ManToManBoardScreen from './src/screens/ManToManBorad';
 import ManToManBoardViewScreen from './src/screens/ManToManBoradView';
 import AnimationTestScreen from './src/screens/AnimationTest';
 import AnimationTestScreen2 from './src/screens/AnimationTest2';
-import TestScreen from './src/screens/Test';
 
 import ImageUploadSample from './src/screens/ImageUploadSample';
 import PhoneRing from './src/screens/PhoneRing';
@@ -115,11 +114,6 @@ const Routes = (props: any) => {
         name="AnimationTestScreen2"
         component={AnimationTestScreen2}
         // options={{title: ''}}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="TestScreen"
-        component={TestScreen}
         options={{headerShown: false}}
       />
       <Stack.Screen

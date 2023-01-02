@@ -1253,7 +1253,7 @@ const MapScreen = (props:any) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
-          showsUserLocation={!GpsOn}
+          showsUserLocation={false}
           loadingEnabled={true}
           // userInterfaceStyle="light"
           userInterfaceStyle="dark"
