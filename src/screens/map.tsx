@@ -874,26 +874,30 @@ const MapScreen = (props:any) => {
   const CreateChating = () => {
     console.log("StartChatingBetweenGirls In TwoMapScreen")
     let params = new SendBird.GroupChannelParams();
-    {isEmptyObj(ProfileForGtoM) ? null
-    :
-    params.addUserIds([`${ProfileForGtoM.UserEmail}`, `${UserData.UserEmail}`]);
-    params.coverUrl = ProfileForGtoM.ProfileImageUrl
-    params.name = "TestName"
-    params.operatorUserIds =  [`${ProfileForGtoM.UserEmail}`],
-    params.isDistinct =  true,
-    params.isPublic = false;
 
-    SendBird.GroupChannel.createChannel(params, function(groupChannel:any, error:Error) {
-      if (error) {
-        console.log(error)
-          // Handle error.
-      } else if (!error){
-        SwitchShowUserModal()
-        chat(groupChannel)
-        console.log("groupChannel In CreateChating Function In MapScreen:",groupChannel)
-      }
+    if(isEmptyObj(ProfileForGtoM) == false) {
+      // let Member = [`${ProfileForGtoM.UserEmail}`, `${UserData.UserEmail}`]
+      let Member = [ProfileForGtoM.UserEmail, UserData.UserEmail]
+      let MemberNickNames = [ProfileForGtoM.NickName, UserData.NickName]
+
+      params.addUserIds(Member);
+      params.coverUrl = ProfileForGtoM.ProfileImageUrl
+      params.name = "TestName"
+      params.operatorUserIds = Member
+      params.isDistinct =  true,
+      params.isPublic = false;
   
-    })
+      SendBird.GroupChannel.createChannel(params, function(groupChannel:any, error:Error) {
+        if (error) {
+          console.log(error)
+            // Handle error.
+        } else if (!error){
+          SwitchShowUserModal()
+          chat(groupChannel)
+          console.log("groupChannel In CreateChating Function In MapScreen:",groupChannel)
+        }
+    
+      })
     }
    
   }
@@ -1131,6 +1135,8 @@ const MapScreen = (props:any) => {
               <Text style={styles.WhiteColor}>초대코드2: {InvitationCodeToFriend[1].InvitationCode} {InvitationCodeToFriend[1].Used ? "사용됨": "초대하기"}</Text>
               </>
               : null}
+
+              <Text style={styles.WhiteColor}>Email: {UserData.UserEmail} / NickName: {UserData.NickName}</Text>
 
               <Button title="로그아웃 하기" color={'red'}
                 onPress={()=>{

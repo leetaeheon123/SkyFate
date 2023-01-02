@@ -33,7 +33,7 @@ import {createChannelName} from '../utilsReducer';
 
 import {AppContext} from '../UsefulFunctions/Appcontext';
 import {GetTime} from '../../1108backup/src/UsefulFunctions/GetTime';
-import {now} from 'moment';
+import firestore from '@react-native-firebase/firestore';
 
 const ChatScreen = (props) => {
   const {route, navigation} = props;
@@ -44,8 +44,8 @@ const ChatScreen = (props) => {
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
-  console.log('In Chat Page SendBird:', SendBird);
-  console.log('In Chat Page channel:', channel);
+  // console.log('In Chat Page SendBird:', SendBird);
+  // console.log('In Chat Page channel:', channel);
 
   const [query, setQuery] = useState(null);
   const [state, dispatch] = useReducer(chatReducer, {
@@ -219,7 +219,7 @@ const ChatScreen = (props) => {
       query.load((fetchedMessages, err) => {
         if (!err) {
           console.log('Success to get the messages.');
-          console.log('fetchedMessages In Chat page:', fetchedMessages);
+          // console.log('fetchedMessages In Chat page:', fetchedMessages);
           dispatch({
             type: 'fetch-messages',
             payload: {messages: fetchedMessages},
@@ -239,9 +239,9 @@ const ChatScreen = (props) => {
       const params = new SendBird.UserMessageParams();
       params.message = state.input;
 
-      console.log('In SendUserMessaging Params:', params);
+      // console.log('In SendUserMessaging Params:', params);
 
-      console.log('channel In sendUserMessage:', channel);
+      // console.log('channel In sendUserMessage:', channel);
 
       const pendingMessage = channel.sendUserMessage(params, (message, err) => {
         if (!err) {
@@ -379,9 +379,10 @@ const ChatScreen = (props) => {
   };
 
   const ReportSubmit = async () => {
-    console.log(SelectedId);
     onoffReportModal();
-    await SaveReportInDB();
+    const ReportId = await GetReportUid();
+    await SaveReportInDB(ReportId);
+    // Ban();
     setTimeout(() => {
       navigation.navigate('IndicatorScreen', {
         From: 'ChatScreen',
@@ -391,15 +392,89 @@ const ChatScreen = (props) => {
     Alert.alert('신고 감사합니다. 조치할게요');
   };
 
-  const SaveReportInDB = async () => {
-    const Today = GetTime();
-    firestore.collection(`Report/${Today}/UserEmail`).doc('uid').set({
-      // Reporter:
-      // Reported:
+  const GetReported = () => {
+    const MemberList = [channel.members[0].userId, channel.members[1].userId];
+    const ReportedList = MemberList.filter((data) => {
+      return data != UserData.UserEmail;
+    });
+
+    const Reported = ReportedList[0];
+
+    return Reported;
+  };
+
+  const Today = GetTime();
+  const collection = firestore().collection(`Report/${Today}/ReportData`);
+
+  const SaveReportInDB = async (ReportId) => {
+    const MemberList = [channel.members[0].userId, channel.members[1].userId];
+
+    const Reported = GetReported();
+
+    collection.doc(String(ReportId)).set({
+      Reporter: UserData.UserEmail,
+      Reported: Reported,
+      Members: MemberList,
       Cause: SelectedId,
-      CreateAt: Date.now(),
+      CreateAt: Date.now().toLocaleString(),
     });
   };
+
+  const GetReportUid = async () => {
+    let ReportId;
+    await collection.get().then((querySnapshot) => {
+      ReportId = querySnapshot.size;
+    });
+
+    return ReportId;
+  };
+
+  // const Ban = () => {
+  //   const Reported = GetReported();
+  //   console.log('Reported In Ban:', Reported);
+  //   // const Reported = UserData.UserEmail;
+
+  //   // console.log('channel.myRole', channel.myRole);
+  //   // console.log('SendBird.Member Role ', SendBird.Member().Role);
+  //   // if (channel.myRole === SendBird.Member.Role.OPERATOR) {
+  //   // Ban a user.
+
+  //   // channel.banUserWithUserId(Reported, 60, function (response, error) {
+  //   //   if (error) {
+  //   //     console.log('error:', error);
+  //   //   }
+  //   // });
+
+  //   SendBird.GroupChannel.getChannel(
+  //     'sendbird_group_channel_104563026_f3802fa5761bcc0a50172a96e1ac038c946c7ba5',
+  //     function (groupChannel, error) {
+  //       if (error) {
+  //         // Handle error.
+  //       }
+  //       // Ban a user.
+  //       groupChannel.banUser(
+  //         Reported,
+  //         -1,
+  //         'DESCRIPTION',
+  //         function (response, error) {
+  //           if (error) {
+  //             console.log('error:', error);
+  //           }
+  //         },
+  //       );
+
+  //       // Unban a user.
+  //       // groupChannel.unbanUser(USER, function (response, error) {
+  //       //   if (error) {
+  //       //     // Handle error.
+  //       //   }
+
+  //       //   // The user is successfully unbanned for the channel.
+  //       //   // You could notify the user of being unbanned by displaying a prompt.
+  //       // });
+  //     },
+  //   );
+  // };
 
   return (
     <>
