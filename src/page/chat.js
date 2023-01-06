@@ -196,14 +196,17 @@ const ChatScreen = (props) => {
   };
   channelHandler.onUserLeft = (channel, user) => {
     if (user.userId === UserData.userId) {
-      navigation.navigate('Lobby', {
+      navigation.navigate('IndicatorScreen', {
         action: 'leave',
         data: {channel},
       });
     }
   };
-  channelHandler.onChannelDeleted = (channelUrl, channelType) => {
-    navigation.navigate('IndicatorScreen', {id: 20});
+  channelHandler.onChannelDeleted = (channel) => {
+    navigation.navigate('IndicatorScreen', {
+      action: 'deleteInServer',
+      data: {channel},
+    });
   };
 
   const handleStateChange = (newState) => {
@@ -388,6 +391,10 @@ const ChatScreen = (props) => {
         } else {
           Alert.alert('60초 초과');
         }
+      } else if (message.customType == 'L1_Res') {
+        navigation.navigate('MeetMapScreen',{
+          
+        });
       } else {
         console.log('viewDetail message in chat,js:', message);
       }

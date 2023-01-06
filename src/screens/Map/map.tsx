@@ -59,12 +59,12 @@ import {channelsReducer} from '../../reducer/channels';
 import Channel from 'sc/channel';
 import { withAppContext } from '../../contextReducer';
 import { isEmptyObj } from '../../UsefulFunctions/isEmptyObj';
+import { err } from 'react-native-svg/lib/typescript/xml';
 
 interface ILocation {
   latitude: number;
   longitude: number;
 }
-
 
 const reference = firebase
   .app()
@@ -72,7 +72,8 @@ const reference = firebase
     'https://hunt-d7d89-default-rtdb.asia-southeast1.firebasedatabase.app/',
   );
 
-const PushAxios = () => {
+// 여성유저가 위치 공유시 남성 유저분들에게 알람을 보내는 기능
+const SendPushToMans = () => {
   axios.post('http://13.124.209.97/firebase/createPushNotificationToMan/uid', {
   })
   .then(function (response) {
@@ -83,7 +84,7 @@ const PushAxios = () => {
   });
 }
 
-const Get_Query_AllLocation = () => {
+const Get_GirlsLocation = () => {
   const databaseDirectory = `/Location`;
   return (
     reference
@@ -91,12 +92,10 @@ const Get_Query_AllLocation = () => {
     .once('value')
     .then(snapshot => {
 
-      let val = snapshot.val()
-      const target = Object.values(val)
+      let ObjValue = snapshot.val()
+      const target = Object.values(ObjValue)
       return target
     }).then((AllLocationData)=>{
-      // console.log("Get_Query_AllLocation")
-
       return AllLocationData
     })
   )
@@ -115,8 +114,6 @@ const Get_MansLocations = () => {
       const target = Object.values(val)
       return target
     }).then((AllLocationData)=>{
-      console.log("AllLocationData In Get_MansLocations:", AllLocationData)
-
       return AllLocationData
     })
   )
@@ -159,7 +156,6 @@ const Get_Sinsa_HotPlaceList = () => {
   )
  
 };
-// ManToManBoard에서 글 리스트 가져오는 코드 
 
 const RequestLocationPermissionsAndroid = async () => {
   try {
@@ -185,7 +181,6 @@ const GetLocationPermission = async () => {
     await Geolocation.requestAuthorization('always');
   } else {
     await RequestLocationPermissionsAndroid()
-    // PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
   }
 } 
 
@@ -210,16 +205,39 @@ function Counter(callback:Function, delay:number | null, Reset:Function) {
   }, [delay]);
 }
 
-const ManLocationUpdate = async (UserEmail:string, ProfileImageUrl:string, NickName:string) => {
-  let ReplaceUserEmail = UserEmail.replace('.com','')
+const ReplacedotInEmail = (UserEmail:string) => {
+  let ReplacedUserEmail = UserEmail.replace('.com','')
+  return ReplacedUserEmail
+}
 
+const GetMyCoords = async (callback:Function, errstring:String, successtring:string = '') => {
+  return (
+  Geolocation.getCurrentPosition(
+    async (position) => {
+      try {
+        const {latitude, longitude} = position.coords;
+        callback(latitude, longitude)
+        console.log(successtring)
+      } catch(err) {
+        console.log('error:' , err.message)
+        console.log(`${errstring}`)
+      }
+    },
+    (error) => {
+      console.log(error.code, error.message);
+    },
+    { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
+  )
+  )
+}
+
+const ShowManLocationForGM = async (UserEmail:string, ProfileImageUrl:string, NickName:string) => {
+  let ReplaceUserEmail = ReplacedotInEmail(UserEmail)
   let id = setInterval(()=>{
     const EpochTime = +new Date()
-    Geolocation.getCurrentPosition(
-      (position) => {
-        const {latitude, longitude} = position.coords;
-        console.log("ManLocationForeGroundUpdate")
-          reference
+
+    const UpdateManLocation = (latitude:any , longitude:any) => {
+      reference
           .ref(`/ManLocation/${ReplaceUserEmail}`)
           .update({
             latitude: latitude,
@@ -228,13 +246,9 @@ const ManLocationUpdate = async (UserEmail:string, ProfileImageUrl:string, NickN
             TimeStamp: EpochTime,
             NickName:NickName
           })
-      },
-      (error) => {
-          // See error code charts below.
-          console.log(error.code, error.message);
-      },
-      { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
-    );
+    }
+
+    GetMyCoords(UpdateManLocation, 'ManLocationUdpate Function', 'ManLocationForeGroundUpdate')
 
   }, 20000)
 
@@ -242,9 +256,7 @@ const ManLocationUpdate = async (UserEmail:string, ProfileImageUrl:string, NickN
   return id
 }
 
-
-
-const FirebaseInput = async (UserEmail:string, StorageUrl:string) => {
+const UpdateProfileImageUrl = async (UserEmail:string, StorageUrl:string) => {
 
   firestore()
   .collection(`UserList`)
@@ -253,7 +265,7 @@ const FirebaseInput = async (UserEmail:string, StorageUrl:string) => {
     ProfileImageUrl:StorageUrl,
   })
   .then(() => {
-    // console.log('User updated!');
+    console.log('Scuessful UpdateProfileImageUrl')
   });
 
 }
@@ -278,10 +290,7 @@ const ImagePicker = (fun:Function) => {
     }
     , async (res)=>{
       if (res.didCancel) return;
-      // setImageUrl(res?.assets[0]?.Url);
-      // console.log("ImagePicker",res.assets[0])
       let LocalImagePath = res.assets[0].uri
-      // console.log("LocalImagePath223",LocalImagePath)
       fun(LocalImagePath)
 
     
@@ -289,21 +298,28 @@ const ImagePicker = (fun:Function) => {
     })
 }
 
+const GetEpochTime = () => {
+  const EpochTime = +new Date()
+  return EpochTime
+}
+
+const GenderNumToStr = (GenderNum:Number) => {
+  let GenderStr:string
+
+  if(GenderNum == 1) {
+    GenderStr = "Mans"
+  } else if (GenderNum == 2){
+    GenderStr = "Girls"
+  } else {
+    GenderStr = "except"
+  }
+}
 const PutInStorage = async (LocalImagePath:any, UserEmail:string, Gender:any) => {
 
-  let GenderString:string
-  const EpochTime = +new Date()
+  const EpochTime = GetEpochTime()
 
-  if(Gender == 1) {
-    GenderString = "Mans"
-  } else if (Gender == 2){
-    GenderString = "Grils"
-  } else {
-    GenderString = "except"
-  }
-
-  console.log(GenderString)
-  const DBUrl = `/ProfileImage/${GenderString}/${UserEmail}`
+  let GenderStr = GenderNumToStr(Gender)
+  const DBUrl = `/ProfileImage/${GenderStr}/${UserEmail}`
   // console.log("DBUrl:" , DBUrl)
   const reference = storage().ref(`${DBUrl}/${EpochTime}/ProfileImage`)
   // console.log("LocalImagePath",LocalImagePath)
@@ -316,12 +332,9 @@ const ChangeMyProfileImage = async (UserEmail:string, Gender:number, navigation:
 
   let fun = async (LocalImagePath:string) => {
 
-    let StorageUrl:string = ""
-    await PutInStorage(LocalImagePath,UserEmail,Gender).then((doc)=>{
-      StorageUrl = doc
-    })
+    const StorageUrl = await PutInStorage(LocalImagePath,UserEmail,Gender)
    
-    await FirebaseInput(UserEmail, StorageUrl)
+    await UpdateProfileImageUrl(UserEmail, StorageUrl)
     // await SaveUserDataInDevice(UserEmail)
     navigation.navigate("IndicatorScreen", {id:20})
   }
@@ -329,35 +342,11 @@ const ChangeMyProfileImage = async (UserEmail:string, Gender:number, navigation:
   ImagePicker(fun)
 }
 
-const GetLocation = (setLocation:Function) => {
-  return new Promise((resolve, reject) => {
-    Geolocation.getCurrentPosition(
-      async (position) => {
-        const {latitude, longitude} = position.coords;
-        await setLocation({
-          latitude,
-          longitude,
-        })
-        resolve(null)
-      },
-      (error) => {
-          // See error code charts below.
-        console.log(error.code, error.message);
-        reject()
-      },
-      { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
-);
-})
-  
-}
-
-
-const DeleteMyLocation = (UserEmail:string, Gender:number) => {
-  let ReplaceUserEmail = UserEmail.replace('.com','')
-
-  if(Gender ==2){
+const DeleteMyLocationAfter3Min = (UserEmail:string, Gender:number) => {
+  let ReplaceUserEmail = ReplacedotInEmail(UserEmail)
+  if(Gender == 2){
     setTimeout(()=>{
-      // reference.ref(`/Location/${ReplaceUserEmail}`).remove()
+      reference.ref(`/Location/${ReplaceUserEmail}`).remove()
     }, 180000)
   }
   // } else if(Gender == 1){
@@ -367,57 +356,53 @@ const DeleteMyLocation = (UserEmail:string, Gender:number) => {
 }
 
 const DirectDeleteMyLocation = (UserEmail:string) => {
-  let ReplaceUserEmail = UserEmail.replace('.com','')
+  let ReplaceUserEmail = ReplacedotInEmail(UserEmail)
   reference.ref(`/Location/${ReplaceUserEmail}`).remove()
 }
 
-const UpdateMyLocation = async (UserEmail: string ,Memo:string, PeopleNum:Number,CanPayit:Number,
+// 여성유저가 자신의 위치를 3분동안 공유하기 시작하는 코드 
+const Girl_StartShowLocation = async (UserEmail: string ,Memo:string = '', PeopleNum:Number,CanPayit:Number,
   ProfileImageUrl:any, NickName:string) => {
 
-
-  let CanPayNum:string
+  let CanPayStr:string
   if(CanPayit == 1) {
-    CanPayNum = "보고결정"
+    CanPayStr= "보고결정"
   } else if(CanPayit == 2){
-    CanPayNum = "O"
+    CanPayStr = "O"
   } else if(CanPayit == 3){
-    CanPayNum = "X"
+    CanPayStr = "X"
   }
 
+  // const CanPayObj = {
+  //   1: '보고결정',
+  //   2: 'O',
+  //   3: 'X'
+  // }
+  // const CanPayStr:string = CanPayObj.CanPayit
 
-  if(Memo == "") {
-    Memo = "."
-  }
 
-  const EpochTime = +new Date()
-  let ReplaceUserEmail = UserEmail.replace('.com','')
+  const EpochTime = GetEpochTime()
+  let ReplaceUserEmail = ReplacedotInEmail(UserEmail)
   // 현재 위치를 db에 업데이트시키는 코드 
 
-  Geolocation.getCurrentPosition(
-    (position) => {
-      const {latitude, longitude} = position.coords;
-        reference
-        .ref(`/Location/${ReplaceUserEmail}`)
-        .update({
-          latitude: latitude,
-          longitude: longitude,
-          Memo: Memo,
-          CanPayit: CanPayNum,
-          PeopleNum: PeopleNum,
-          ProfileImageUrl: ProfileImageUrl,
-          TimeStamp: EpochTime,
-          UserEmail: UserEmail,
-          NickName:NickName
+  const UpdateGirlLocation = (latitude:number, longitude:number) => {
+    reference
+      .ref(`/Location/${ReplaceUserEmail}`)
+      .update({
+        latitude: latitude,
+        longitude: longitude,
+        Memo: Memo,
+        CanPayit: CanPayStr,
+        PeopleNum: PeopleNum,
+        ProfileImageUrl: ProfileImageUrl,
+        TimeStamp: EpochTime,
+        UserEmail: UserEmail,
+        NickName:NickName
+      })
+      .then(() => DeleteMyLocationAfter3Min(ReplaceUserEmail, 2))
+  }
 
-        })
-        .then(() => DeleteMyLocation(ReplaceUserEmail, 2));
-    },
-    (error) => {
-        // See error code charts below.
-        console.log(error.code, error.message);
-    },
-    { enableHighAccuracy: true, timeout: 300000, maximumAge: 10000 }
-  );
+  GetMyCoords(UpdateGirlLocation, 'Girl_StartShowLocation Function')
 
 }
 const logout = (navigation:any, SendBird:any) => {
@@ -481,8 +466,6 @@ const UpdateMyLocationWatch = (setLocation:Function) => {
   };
 }
 
-
-
 const MapScreen = (props:any) => {
 
   const UserData = props.route.params.CurrentUser
@@ -498,43 +481,48 @@ const MapScreen = (props:any) => {
   
   const [InvitationCodeToFriend, setInvitationCodeToFriend] = useState([]);
   
+  const GetInvitationToFriendObj = async (InvitationCodeToFriend:Array<string>) => {
+    let Array:Array<Object> = []
+    await firestore().collection('InvitationCodeList')
+    .where('InvitationCode', '==', InvitationCodeToFriend[0])
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc)=>{
+        let Obj = {
+          InvitationCode: InvitationCodeToFriend[0],
+          Used: doc.data().Used
+        }
+        Array.push(Obj)
+      })
+    })
+
+    await firestore().collection('InvitationCodeList')
+    .where('InvitationCode', '==', InvitationCodeToFriend[1])
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc)=>{
+        let Obj = {
+          InvitationCode: InvitationCodeToFriend[1],
+          Used: doc.data().Used
+        }
+
+        Array.push(Obj)
+      })
+    })
+    return Array
+  }
   const GetInvitationToFriendCode = async (PkNumber:string) => {
+
     firestore().collection(`InvitationCodeList`).doc(String(PkNumber))
     .get().then(async (doc)=>{
       const Result = doc.data()
       const InvitationCodeToFriend = Result?.InvitationCodeToFriend
-
-      let Array:Array<Object> = [
-      ]
-      await firestore().collection('InvitationCodeList')
-      .where('InvitationCode', '==', InvitationCodeToFriend[0])
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc)=>{
-          let Obj = {
-            InvitationCode: InvitationCodeToFriend[0],
-            Used: doc.data().Used
-          }
-          Array.push(Obj)
-        })
-      })
-
-      await firestore().collection('InvitationCodeList')
-      .where('InvitationCode', '==', InvitationCodeToFriend[1])
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc)=>{
-          let Obj = {
-            InvitationCode: InvitationCodeToFriend[1],
-            Used: doc.data().Used
-          }
-
-          Array.push(Obj)
-        })
-      })
-      return Array
+      let InviObj:Array<Object> = await GetInvitationToFriendObj(InvitationCodeToFriend)
+      console.log("InviObj:",InviObj)
+      
+      return InviObj
     }).then((InvitationCodeToFriend)=>{
-      console.log(InvitationCodeToFriend)
+      console.log("InvitationCodeToFriend:", InvitationCodeToFriend)
 
       setInvitationCodeToFriend(InvitationCodeToFriend)
     })
@@ -592,17 +580,21 @@ const MapScreen = (props:any) => {
     setAsyncEmail(AsyncStorageEmail)
   }
 
+  const SetMyLocation = (latitude:number, longitude:number) => {
+    setLocation({latitude, longitude})
+  }
+
   useEffect(() => {
     console.log("UserData In UseEffect", UserData)
     async function SaveInDevice() { 
       // 로케이션 위치 가져오는 권한설정
       await GetLocationPermission()
-      await GetLocation(setLocation)
+      await GetMyCoords(SetMyLocation, 'SetMyLocation Function In MapScreen', 'Success SetMyLocation')
       // 현재위치를 state화 &추적
 
       // UpdateMyLocationWatch(setLocation)
       if(UserData.Gender == "1"){
-        let Result = ManLocationUpdate(UserData.UserEmail, UserData.ProfileImageUrl, UserData.NickName)
+        let Result = ShowManLocationForGM(UserData.UserEmail, UserData.ProfileImageUrl, UserData.NickName)
         return Result
       }
       await GetInvitationToFriendCode(UserData.PkNumber)
@@ -619,14 +611,14 @@ const MapScreen = (props:any) => {
       .ref('/Location')
       .on('child_added', snapshot => {
         console.log("In child_Added snapshot:", snapshot)
-        GrilsLocationsrefetch()
+        GirlsLocationsrefetch()
       });
 
     const onChildRemove = database()
     .ref('/Location')
     .on('child_removed', snapshot => {
       console.log(snapshot)
-      GrilsLocationsrefetch()
+      GirlsLocationsrefetch()
     });
 
     const ManonChildAdd = database()
@@ -868,7 +860,7 @@ const MapScreen = (props:any) => {
     console.log(day)
     // day가 오후 10시 ~ 새벽 7시 
     if(day >= 22 && day <=24 || day >= 1 && day <= 7) {
-        UpdateMyLocation(UserData.UserEmail,Memo, PeopleNum, MoenyRadioBox, UserData.ProfileImageUrl, UserData.NickName)
+        Girl_StartShowLocation(UserData.UserEmail,Memo, PeopleNum, MoenyRadioBox, UserData.ProfileImageUrl, UserData.NickName)
         setGpsOn(true)
         ChangeModalVisiable()
     } else {
@@ -974,7 +966,7 @@ const MapScreen = (props:any) => {
 
   
 
-  const {data, isLoading, refetch:GrilsLocationsrefetch} = useQuery("QueryLocation", Get_Query_AllLocation)
+  const {data, isLoading, refetch:GirlsLocationsrefetch} = useQuery("QueryLocation", Get_GirlsLocation)
 
   const {data:MansLocations, isLoading:isLoadingMansLocations, refetch:MansLocationsretech} = useQuery("MansLocationsUseQuery", Get_MansLocations)
 
@@ -1182,8 +1174,6 @@ const MapScreen = (props:any) => {
                 onEndReached={() => next()}
                 onEndReachedThreshold={0.5}
               />
-
-
           
               <Text style={[styles.WhiteColor]}>내 latitude:{location?.latitude}</Text>
               <Text style={[styles.WhiteColor]}>내 longitude:{location?.longitude}</Text>
@@ -1394,7 +1384,7 @@ const MapScreen = (props:any) => {
           
 
               <Image 
-              style={MapScreenStyles.GrilsMarker}
+              style={MapScreenStyles.GirlsMarker}
               source={{uri:data.ProfileImageUrl}}
               resizeMode="cover"
               />
@@ -1436,7 +1426,7 @@ const MapScreen = (props:any) => {
               <View>
                 <Image 
                   source={{uri:MansData.ProfileImageUrl}}
-                  style={MapScreenStyles.GrilsMarker}
+                  style={MapScreenStyles.GirlsMarker}
                   resizeMode="cover"
                 />
               </View>
@@ -1614,99 +1604,7 @@ const MapScreen = (props:any) => {
   );
 };  
 
-// 자신의 위치를 트랙킹해서 맵에 보여주는 컴포넌트
-const TrackUserLocation = () => {
-  const [locations, setLocations] = useState<Array<ILocation>>([]);
-  let _watchId: number;
 
-  //_watchId라는 값에 Geolocation.watchPostion의 반환값을 저장. 
-  // locations state가 변경될때마다 rendering -> 즉 위치변경때마다 화면렌더링을 
-  // 통해 마커로 지도 내 자신의 위치를 추적
-
-
-  useEffect(() => {
-    _watchId = Geolocation.watchPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setLocations([...locations, {latitude, longitude}]);
-      },
-      error => {
-        console.log(error);
-      },
-      {
-        enableHighAccuracy: true,
-        distanceFilter: 100,
-        interval: 5000,
-        fastestInterval: 2000,
-      },
-    );
-  }, [locations]);
-
-  // _watchId가 null이 아니면 clear..?? 
-  // Watch에 대해 더 공부할 필요가 있다. 
-
-  useEffect(() => {
-
-    GetLocationPermission()
-    return () => {
-      if (_watchId !== null) {
-        Geolocation.clearWatch(_watchId);
-      }
-    };
-  }, []);
-
-  return (
-    <View style={{
-      flex:1
-    }}>
-      {locations.length > 0 && (
-        <MapView
-          // {Platform.OS === 'android' ? provider={PROVIDER_GOOGLE} : provider={default}}
-          showsUserLocation
-          // followsUserLocation
-          loadingEnabled
-          style={{flex: 1}}
-          initialRegion={{
-            // latitude: locations[0].latitude,
-            // longitude: locations[0].longitude,
-            latitude: 37.5226,
-            longitude: 127.0280,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}>
-          {locations.map((location: ILocation, index: number) => (
-            <Marker
-            key={`location-${index}`}
-            coordinate={{ 
-              latitude: location.latitude,
-              longitude: location.longitude
-            }}
-            >
-              <View
-              style={{
-                height:35,
-                width:35,
-                borderRadius:50,
-                backgroundColor:'white',
-                display:'flex',
-                justifyContent:'center',
-                alignItems:'center'
-              }}
-              >
-                <Image 
-                  source={{uri:'https://thumb.mt.co.kr/06/2021/04/2021042213221223956_1.jpg/dims/optimize/'}}
-                  style={{width: 30, height: 30
-                  ,borderRadius:35}}
-                  resizeMode="cover"
-                />
-              </View>
-          </Marker>
-          ))}
-        </MapView>
-      )}
-    </View>
-  );
-};
 
 
 export default withAppContext(codePush(MapScreen));
