@@ -5,7 +5,7 @@ import moment from 'moment';
 
 import {withAppContext} from '../contextReducer';
 
-const UserMessage = props => {
+const UserMessage = (props) => {
   const {
     SendBird,
     channel,
@@ -13,10 +13,10 @@ const UserMessage = props => {
     onPress = () => {},
     onLongPress = () => {},
   } = props;
-  console.log('props In UserMessage:', props);
+  // console.log('props In UserMessage:', props);
   const isMyMessage = message.sender.userId === SendBird.currentUser.userId;
 
-  console.log('channel In UserMessageComponent:', channel);
+  // console.log('channel In UserMessageComponent:', channel);
   // const [readReceipt, setReadReceipt] = useState(channel.members.length - 1);
 
   useEffect(() => {
