@@ -11,8 +11,8 @@ const PhoneRing = () => {
       <View style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center]}>
         {[...Array(2).keys()].map((_, index) => (
           <Ring key={index} index={index} />
-        ))}
-        <Image source={require('../Assets/phone.png')} />
+        ))} 
+        <Image source={require('../../Assets/phone.png')} />
       </View>
     </View>
   );

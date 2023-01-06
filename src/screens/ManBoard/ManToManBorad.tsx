@@ -14,14 +14,11 @@ import {
   TextInput
 } from 'react-native';
 
-import { useQuery } from 'react-query';
-import database from '@react-native-firebase/database';
 import {firebase} from '@react-native-firebase/database';
 import {useNavigation} from '@react-navigation/native'
 
-import styles from '../../styles/ManToManBoard'
-import { ManToManBoardSampleList } from '../../SampleData/Data';
-import { GetTime } from '../UsefulFunctions/GetTime';
+import styles from '../../../styles/ManToManBoard'
+import { GetTime } from '../../UsefulFunctions/GetTime';
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Feather from 'react-native-vector-icons/Feather'

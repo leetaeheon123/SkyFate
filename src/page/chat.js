@@ -70,6 +70,30 @@ const ChatScreen = (props) => {
       <View style={style.headerRightContainer}>
         <TouchableOpacity
           activeOpacity={0.85}
+          style={[style.headerRightButton, {width: 25, height: 25}]}
+          onPress={leave}>
+          <Icon name="directions-walk" color="black" size={28} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={style.headerRightButton}
+          onPress={() => {
+            sendL1InviteAndResUserMessage(
+              'L1_Invite',
+              '~~님께서 요청하셨습니다.',
+            );
+          }}>
+          <Image
+            style={{
+              width: 30,
+              height: 30,
+            }}
+            source={require('../Assets/security.png')}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.85}
           style={style.headerRightButton}
           onPress={onoffReportModal}>
           <Image
@@ -179,10 +203,7 @@ const ChatScreen = (props) => {
     }
   };
   channelHandler.onChannelDeleted = (channelUrl, channelType) => {
-    navigation.navigate('Lobby', {
-      action: 'delete',
-      data: {channel},
-    });
+    navigation.navigate('IndicatorScreen', {id: 20});
   };
 
   const handleStateChange = (newState) => {
@@ -198,7 +219,7 @@ const ChatScreen = (props) => {
       {
         text: 'OK',
         onPress: () => {
-          navigation.navigate('Lobby', {
+          navigation.navigate('IndicatorScreen', {
             action: 'leave',
             data: {channel},
           });
@@ -239,10 +260,6 @@ const ChatScreen = (props) => {
       const params = new SendBird.UserMessageParams();
       params.message = state.input;
 
-      // console.log('In SendUserMessaging Params:', params);
-
-      // console.log('channel In sendUserMessage:', channel);
-
       const pendingMessage = channel.sendUserMessage(params, (message, err) => {
         if (!err) {
           dispatch({type: 'send-message', payload: {message}});
@@ -265,6 +282,31 @@ const ChatScreen = (props) => {
         payload: {message: pendingMessage, clearInput: true},
       });
     }
+  };
+
+  const sendL1InviteAndResUserMessage = (Type, message) => {
+    const params = new SendBird.UserMessageParams();
+    params.message = message;
+    params.customType = Type;
+
+    const pendingMessage = channel.sendUserMessage(params, (message, err) => {
+      if (!err) {
+        // 이부분이 없으면 매세지를 보냈을 때 내 화면이 리로딩되지 않음
+        dispatch({type: 'send-message', payload: {message}});
+      } else {
+        console.log('In SendUserMessaging Error:', err);
+        setTimeout(() => {
+          dispatch({
+            type: 'error',
+            payload: {error: 'Failed to send a message.'},
+          });
+          dispatch({
+            type: 'delete-message',
+            payload: {reqId: pendingMessage.reqId},
+          });
+        }, 500);
+      }
+    });
   };
 
   const selectFile = async () => {
@@ -327,8 +369,31 @@ const ChatScreen = (props) => {
   const viewDetail = (message) => {
     if (message.isFileMessage()) {
       // TODO: show file details
+    } else {
+      if (message.customType == 'L1_Invite') {
+        let now = Date.now();
+        let milis = now - message.createdAt;
+        let second = Math.floor(milis / 1000);
+
+        if (second <= 60) {
+          // Alert.alert('Gogo?');
+          if (message.sender.userId != UserData.UserEmail) {
+            sendL1InviteAndResUserMessage(
+              'L1_Res',
+              '둘 다 수락하여 방이 생성되었습니다! 이 메세지 클릭시 이동됩니다',
+            );
+          } else {
+            Alert.alert('자기가 누르는건 에바지');
+          }
+        } else {
+          Alert.alert('60초 초과');
+        }
+      } else {
+        console.log('viewDetail message in chat,js:', message);
+      }
     }
   };
+
   const showContextMenu = (message) => {
     if (message.sender && message.sender.userId === UserData.userId) {
       // message control

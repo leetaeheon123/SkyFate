@@ -20,9 +20,9 @@ import {
   Switch
 } from 'react-native';
 
-import { MapScreenStyles } from '../../styles/MapScreen';
+import { MapScreenStyles } from '~/MapScreen';
 
-import styles from '../../styles/ManToManBoard'
+import styles from '~/ManToManBoard'
 import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage'
 
@@ -39,27 +39,26 @@ import AntDesgin from "react-native-vector-icons/AntDesign"
 
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
-import {fcmService} from "../UsefulFunctions/push.fcm"
-import {localNotificationService} from "../UsefulFunctions/push.noti"
+import {fcmService} from "../../UsefulFunctions/push.fcm"
+import {localNotificationService} from "../../UsefulFunctions/push.noti"
 import axios from 'axios';
 
-import MarkerAnimationStyles from "../../styles/MarkerAnimation"
-import Ring from './Ring';
-import OtherRing from './OtherRing';
+import MarkerAnimationStyles from "~/MarkerAnimation"
+import Ring from '../Ring/Ring';
+import OtherRing from '../Ring/OtherRing';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import * as Progress from 'react-native-progress';
 import { useNavigation } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
-import { Get_itaewon_HotPlaceList } from '../UsefulFunctions/HotPlaceList';
-import { SaveUserDataInDevice } from '../UsefulFunctions/SaveUserDataInDevice';
+import { Get_itaewon_HotPlaceList } from '../../UsefulFunctions/HotPlaceList';
 
-import { AppContext } from '../UsefulFunctions/Appcontext';
+import { AppContext } from '../../UsefulFunctions//Appcontext';
 
-import {channelsReducer} from '../reducer/channels';
-import Channel from '../component/channel';
-import { withAppContext } from '../contextReducer';
-import { isEmptyObj } from '../UsefulFunctions/isEmptyObj';
+import {channelsReducer} from '../../reducer/channels';
+import Channel from 'sc/channel';
+import { withAppContext } from '../../contextReducer';
+import { isEmptyObj } from '../../UsefulFunctions/isEmptyObj';
 
 interface ILocation {
   latitude: number;
@@ -313,7 +312,6 @@ const PutInStorage = async (LocalImagePath:any, UserEmail:string, Gender:any) =>
   return StorageUrl
 }
 
-
 const ChangeMyProfileImage = async (UserEmail:string, Gender:number, navigation:any) => {
 
   let fun = async (LocalImagePath:string) => {
@@ -324,7 +322,7 @@ const ChangeMyProfileImage = async (UserEmail:string, Gender:number, navigation:
     })
    
     await FirebaseInput(UserEmail, StorageUrl)
-    await SaveUserDataInDevice(UserEmail)
+    // await SaveUserDataInDevice(UserEmail)
     navigation.navigate("IndicatorScreen", {id:20})
   }
 
@@ -429,7 +427,7 @@ const logout = (navigation:any, SendBird:any) => {
 
 }
 const RemoveIdentityToken = async () => {
-  AsyncStorage.removeItem('UserData');
+  AsyncStorage.removeItem('UserEmail');
 
 }
 // foreground에서 푸쉬알림 보기 테스트 
@@ -492,6 +490,7 @@ const MapScreen = (props:any) => {
 
   const Context = useContext(AppContext)
   const SendBird = Context.sendbird
+
 
   const {width , height} = Dimensions.get('window')
 
@@ -586,6 +585,13 @@ const MapScreen = (props:any) => {
 
   }
 
+  const [AsyncEmail, setAsyncEmail] = useState('')
+
+  const GetAsyncStorageEmail = async () => {
+    let AsyncStorageEmail = await AsyncStorage.getItem('UserEmail')
+    setAsyncEmail(AsyncStorageEmail)
+  }
+
   useEffect(() => {
     console.log("UserData In UseEffect", UserData)
     async function SaveInDevice() { 
@@ -600,6 +606,7 @@ const MapScreen = (props:any) => {
         return Result
       }
       await GetInvitationToFriendCode(UserData.PkNumber)
+      await GetAsyncStorageEmail()
 
     }
 
@@ -608,11 +615,19 @@ const MapScreen = (props:any) => {
     fcmService.register(onRegister, onNotification,onOpenNotification);
     localNotificationService.configure(onOpenNotification);
 
-    const onChildAdd = database()
+    const onChildAdd = reference
       .ref('/Location')
       .on('child_added', snapshot => {
+        console.log("In child_Added snapshot:", snapshot)
         GrilsLocationsrefetch()
       });
+
+    const onChildRemove = database()
+    .ref('/Location')
+    .on('child_removed', snapshot => {
+      console.log(snapshot)
+      GrilsLocationsrefetch()
+    });
 
     const ManonChildAdd = database()
     .ref('/ManLocation')
@@ -658,14 +673,17 @@ const MapScreen = (props:any) => {
         }
       });
     } else {
+      console.log("SendBird.currentUser value In Map Screen UseEffect Function:", SendBird.currentUser)
       // 샌드버드에 등록된 유저값이 존재하면 리프래쉬!
       refresh();
     }
 
     // Stop listening for updates when no longer required
     return () => {
-      database().ref('/Location').off('child_added', onChildAdd);
-      database().ref('/ManLocation').off('child_added', ManonChildAdd);
+      reference.ref('/Location').off('child_added', onChildAdd);
+      reference.ref('/ManLocation').off('child_added', ManonChildAdd);
+      reference.ref('/Location').off('child_moved', onChildRemove);
+
       unsubscribe.remove();
       // clearInterval(Result)
       SendBird.removeConnectionHandler('channels');
@@ -676,6 +694,10 @@ const MapScreen = (props:any) => {
     }
 
   }, []);
+
+  
+
+
 
   useEffect(() => {
     if (query) {
@@ -728,9 +750,15 @@ const MapScreen = (props:any) => {
    };
    channelHandler.onChannelChanged = channel => {
      dispatch({type: 'update-channel', payload: {channel}});
+     console.log("channelHandler.onChannelChanged")
    };
-   channelHandler.onChannelDeleted = channel => {
+   channelHandler.onChannelDeleted = (channel) => {
+    console.log("channel in channelHandler.onChannelDeleted:", channel)
      dispatch({type: 'delete-channel', payload: {channel}});
+     navigation.navigate('IndicatorScreen', {
+      action: 'deleteInServer',
+      data: {channel},
+    });
    };
    const userEventHandler = new SendBird.UserEventHandler();
 
@@ -763,6 +791,7 @@ const MapScreen = (props:any) => {
       SendBird.GroupChannel.createMyGroupChannelListQuery(),
     );
     setQuery(SendBird.GroupChannel.createMyGroupChannelListQuery());
+    dispatch({ type: 'refresh' });
   };
 
   const next = () => {
@@ -818,6 +847,7 @@ const MapScreen = (props:any) => {
     setModalVisiable(previousState => !previousState)
   }
 
+
   Counter(
     () => {
       if(GpsOn == true) {
@@ -871,6 +901,32 @@ const MapScreen = (props:any) => {
     SwitchShowUserModal()
   }
 
+  const DeleteChannelAfter10Minutes = (Channel:Object) => {
+    console.log("ChannelUrl In DeleteChannelAfter10Minutes:", Channel.url)
+    UploadChannelUrlInDb(Channel.url)
+    ChannelDeleteTimer(Channel)
+  }
+
+  const UploadChannelUrlInDb = (ChannelUrl:string) => {
+    reference.ref(`/ChatingList/${ChannelUrl}`).update({
+      ChannelUrl: ChannelUrl,
+      CreateAt: Date.now()
+    })
+  }
+
+  const ChannelDeleteTimer = (channel:Object) => {
+    // setTimeout(() => {
+    //   navigation.navigate('IndicatorScreen', {
+    //     action: 'deleteInClient',
+    //     data: {channel},
+    //   });
+    // }, 2000);
+
+    // setTimeout(() => {
+    //   Channel.delete()
+    // }, 600000);
+  }
+
   const CreateChating = () => {
     console.log("StartChatingBetweenGirls In TwoMapScreen")
     let params = new SendBird.GroupChannelParams();
@@ -894,6 +950,9 @@ const MapScreen = (props:any) => {
         } else if (!error){
           SwitchShowUserModal()
           chat(groupChannel)
+          // 10분 경과시 채팅방을 삭제하기 위한 코드 추가 
+          DeleteChannelAfter10Minutes(groupChannel)
+
           console.log("groupChannel In CreateChating Function In MapScreen:",groupChannel)
         }
     
@@ -1137,6 +1196,7 @@ const MapScreen = (props:any) => {
               : null}
 
               <Text style={styles.WhiteColor}>Email: {UserData.UserEmail} / NickName: {UserData.NickName}</Text>
+              <Text style={styles.WhiteColor}>Async에 저장된 email: {AsyncEmail}</Text>
 
               <Button title="로그아웃 하기" color={'red'}
                 onPress={()=>{
@@ -1144,6 +1204,13 @@ const MapScreen = (props:any) => {
                   logout(navigation, SendBird)
                 }}
               ></Button>
+
+              <Button title ="L1으로 이동" onPress={()=>{
+                navigation.navigate("MeetMapScreen", {
+                  
+                })
+                setProfileModalVisiable(false)
+              }}/>
 
               
              
@@ -1272,18 +1339,16 @@ const MapScreen = (props:any) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
-          showsUserLocation={false}
+          showsUserLocation={true}
           loadingEnabled={true}
           // userInterfaceStyle="light"
           userInterfaceStyle="dark"
           minZoomLevel={10}
           maxZoomLevel={17}
           >
-          {/* {GpsOn == true ?
+          {GpsOn == true && Platform.OS === "android"?
           <Marker
           coordinate={{
-            // latitude: 37.5817005,
-            // longitude: 126.9355308
             latitude: location.latitude,
             longitude: location.longitude
           }}>
@@ -1300,7 +1365,7 @@ const MapScreen = (props:any) => {
             source={{uri:UserData.ProfileImageUrl}}/>
           </View>
           </Marker>
-          :null} */}
+          :null}
 
           {isLoading == false ?
           data?.map((data,index)=>{
@@ -1335,6 +1400,19 @@ const MapScreen = (props:any) => {
               />
 
               </View>
+
+            {/* <View 
+          style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center, {
+          }]}
+          >
+          {[...Array(3).keys()].map((_, index) => (
+            <Ring key={index} index={index} />
+            ))}
+          
+          <Image 
+            style={MarkerAnimationStyles.Image}
+            source={{uri:UserData.ProfileImageUrl}}/>
+          </View> */}
             </Marker>
             )
             
@@ -1445,7 +1523,12 @@ const MapScreen = (props:any) => {
           
           
         </MapView>
-      )}
+      ) 
+      // || 
+        // <View>
+        //   <Text>위치권한을 허용해주세요.</Text>
+        // </View>
+      }
 
       {UserData.Gender == 2 ? 
       <SafeAreaView style={[styles.Row_OnlyColumnCenter,MapScreenStyles.TopView]}>

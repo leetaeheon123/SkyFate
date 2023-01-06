@@ -149,7 +149,7 @@ const ValidateInvitationCode = (InvitationCode: string, navigation: any) => {
     })
     .then(async (Obj) => {
       if (Obj.Valid == 1) {
-        navigation.navigate('CertificationScreen', {
+        navigation.navigate('RegisterScreen', {
           InvitationCode: InvitationCode,
           PkNumber: Obj.PkNumber,
         });
@@ -252,9 +252,7 @@ const ValidInvitationCodeScreen = () => {
           onPress={() => {
             navigation.navigate('RegisterScreen', {
               InvitationCode: 'AHfPqW',
-              Gender: 1,
               PkNumber: 0,
-              imp_uid: '',
             });
           }}
         />

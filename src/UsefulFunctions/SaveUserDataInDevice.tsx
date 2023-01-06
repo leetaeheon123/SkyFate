@@ -16,22 +16,27 @@ export const GetUserData = async (userEmail:string) => {
         return Result
     })
     )
-  }
-
-
-
-export const SaveUserDataInDevice = async (UserEmail:string,UserDataForSendBird:any) => {
-  const UserData:Object = await GetUserData(UserEmail)
-  const DataWithSendBirdData = {...UserData, ...UserDataForSendBird}
-  console.log("UserDataForSendBird In SaveUserDataInDevice:", UserDataForSendBird)
-
-  console.log("DataWithSendBirdData In SaveUserDataInDevice:", DataWithSendBirdData)
-  await AsyncStorage.setItem('UserData', JSON.stringify(DataWithSendBirdData));
 }
 
-export const RegisterUserData = async (UserEmail:any, navigation:any, UserDataForSendBird:any, SendBird:Object) => {
+export const SaveUserEmailInDevice = async (UserEmail:string) => {
+  await AsyncStorage.setItem('UserEmail', UserEmail);
+}
+
+export const RegisterUserEmail = async (UserEmail:string, navigation:any, SendBird:Object) => {
   try {
-    await SaveUserDataInDevice(UserEmail,UserDataForSendBird)
+    await SaveUserEmailInDevice(UserEmail)
+    await RegisterSendBirdToken(SendBird,UserEmail)
+    await navigation.navigate('NickNameSelectScreen', {
+      UserEmail
+    });
+  } catch (error) {
+    Alert.alert('RegisterUserEmail Function In  SaveUserDataInDevice.js의 UsefulFunctions에서 오류 발생:',error);
+  }
+}
+
+export const LoginUserEmail = async (UserEmail:string, navigation:any, SendBird:Object) => {
+  try {
+    await SaveUserEmailInDevice(UserEmail)
     await RegisterSendBirdToken(SendBird,UserEmail)
     await navigation.navigate('IndicatorScreen', {
       From:"LoginAndRegister"
@@ -41,7 +46,7 @@ export const RegisterUserData = async (UserEmail:any, navigation:any, UserDataFo
   }
 }
 
-const RegisterSendBirdToken = async (SendBird:Object, UserEmail:string) => {
+export const RegisterSendBirdToken = async (SendBird:Object, UserEmail:string) => {
   try {
     const authorizationStatus = await messaging().requestPermission();
     if (
@@ -72,7 +77,8 @@ const UpdateFCMToken = (UserEmail:string, Token:string) => {
     .collection("UserList")
     .doc(`${UserEmail}`)
     .update({
-      iosFcmToken: Token
+      Token: Token,
+      OSType: 'ios'
     })
     .then(()=>{
       console.log("Sucess Update Fcm Toekn In firestore. Toekn ")
@@ -82,11 +88,28 @@ const UpdateFCMToken = (UserEmail:string, Token:string) => {
     .collection("UserList")
     .doc(`${UserEmail}`)
     .update({
-      aosFcmToken: Token
+      Token: Token,
+      OSType: 'android'
     })
     .then(()=>{
       console.log("Sucess Update Fcm Toekn In firestore. Toekn ")
     })
   }
 
+}
+
+
+export const RegisterSendBirdUser = async (SendBird:any, UserEmail:string, NickName:string, ProfileImageUrl:string) => {
+  SendBird.updateCurrentUserInfo(
+    NickName,
+    ProfileImageUrl,
+    async (user:any, err:any) => {
+      console.log('In sendbird.updateCurrentUserInfo User:', user);
+      if (!err) {
+        console.log("Succes connect SendBird In Register SBconnect Function")
+      } else {
+        Alert.alert(`SbConnect Function In RegisterScreen에서에러가 난 이유 : ${err.message}`)
+      }
+    },
+  );
 }

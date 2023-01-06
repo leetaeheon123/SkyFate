@@ -20,7 +20,7 @@ import {
   RefreshControl
 } from 'react-native'
 
-import styles from '../../styles/ManToManBoard'
+import styles from '../../../styles/ManToManBoard'
 import Icon from "react-native-vector-icons/Ionicons"
 import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage'
@@ -38,27 +38,27 @@ import AntDesgin from "react-native-vector-icons/AntDesign"
 
 import messaging from '@react-native-firebase/messaging';
 
-import {fcmService} from "../UsefulFunctions/push.fcm"
-import {localNotificationService} from "../UsefulFunctions/push.noti"
+import {fcmService} from "../../UsefulFunctions/push.fcm"
+import {localNotificationService} from "../../UsefulFunctions/push.noti"
 import axios from 'axios';
 
-import { MapScreenStyles } from '../../styles/MapScreen';
-import MarkerAnimationStyles from "../../styles/MarkerAnimation"
-import Ring from './Ring';
+import { MapScreenStyles } from '../../../styles/MapScreen';
+import MarkerAnimationStyles from "../../../styles/MarkerAnimation"
+import Ring from '../Ring/Ring';
 
-import { Get_itaewon_HotPlaceList } from '../UsefulFunctions/HotPlaceList';
+import { Get_itaewon_HotPlaceList } from '../../UsefulFunctions/HotPlaceList';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import * as Progress from 'react-native-progress';
 import { useNavigation } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
-import { AppContext } from '../UsefulFunctions/Appcontext';
+import { AppContext } from '../../UsefulFunctions/Appcontext';
 
-import { channelsReducer } from '../reducer/channels';
-import Channel from '../component/channel';
+import { channelsReducer } from '../../reducer/channels';
+import Channel from '../../component/channel';
 
 
-import { isEmptyObj } from '../UsefulFunctions/isEmptyObj';
+import { isEmptyObj } from '../../UsefulFunctions/isEmptyObj';
 interface ILocation {
   latitude: number;
   longitude: number;

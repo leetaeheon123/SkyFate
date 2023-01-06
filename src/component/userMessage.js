@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Text, Image, TouchableOpacity, View} from 'react-native';
+import {Text, Image, TouchableOpacity, View, StyleSheet} from 'react-native';
 import * as Progress from 'react-native-progress';
 import moment from 'moment';
 
@@ -34,10 +34,46 @@ const UserMessage = (props) => {
     };
   }, []);
 
+  const dstyle = (isMyMessage, customType) => {
+    if (customType == 'L1') {
+      StyleSheet.create({
+        container: {
+          backgroundColor: 'red',
+        },
+      });
+    } else {
+      if (isMyMessage) {
+        StyleSheet.create({
+          container: {
+            backgroundColor: '#7b53ef',
+          },
+        });
+      } else {
+        StyleSheet.create({
+          container: {
+            backgroundColor: '#ddd',
+          },
+        });
+      }
+    }
+  };
+
+  const bgP = (isMyMessage, customType) => {
+    let bg = isMyMessage ? '#7b53ef' : '#ddd';
+    if (customType == 'L1_Invite' || customType == 'L1_Res') {
+      bg = 'red';
+    }
+    // bg = customType == 'L1_Invite' ? 'red' : bg;
+    return bg;
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.75}
-      onPress={() => onPress(message)}
+      onPress={() => {
+        // console.log(message.customType);
+        onPress(message);
+      }}
       onLongPress={() => onLongPress(message)}
       style={{
         ...style.container,
@@ -62,7 +98,8 @@ const UserMessage = (props) => {
         <View
           style={{
             ...style.messageBubble,
-            backgroundColor: isMyMessage ? '#7b53ef' : '#ddd',
+
+            backgroundColor: bgP(isMyMessage, message.customType),
           }}>
           <Text
             style={{...style.message, color: isMyMessage ? '#fff' : '#333'}}>

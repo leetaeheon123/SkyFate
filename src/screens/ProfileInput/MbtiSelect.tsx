@@ -1,10 +1,24 @@
 import React, {} from 'react';
 import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
 
-import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
+import { LoginAndReigsterStyles } from '~/LoginAndRegiser';
+import firestore from '@react-native-firebase/firestore'
 
 
-const MbtiSelectScreen = (props:any) => {
+const MbtiSelectScreen = ({navigation, route}:any) => {
+
+  console.log(route.params.UserEmail)
+  const {UserEmail} = route.params
+
+  const UpdateMbti = async () => {
+    await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
+      Mbti:'Mbti'
+    })
+
+    navigation.navigate("GenderSelectScreen", {
+      UserEmail:UserEmail,
+    })
+  }
 
   return (
     <SafeAreaView
@@ -33,6 +47,7 @@ const MbtiSelectScreen = (props:any) => {
         <Pressable
           style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
+            UpdateMbti()
           }}>
           <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
         </Pressable>

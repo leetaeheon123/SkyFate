@@ -13,7 +13,7 @@ import {
   Platform,
   TextInput
 } from 'react-native';
-import styles from '../../styles/ManToManBoard';
+import styles from '../../../styles/ManToManBoard';
 import Icon from 'react-native-vector-icons/AntDesign'
 
 import AutoHeightImage from 'react-native-auto-height-image';

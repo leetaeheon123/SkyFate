@@ -1,10 +1,24 @@
 import React, {} from 'react';
 import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
 
-import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
+import { LoginAndReigsterStyles } from '../../../styles/LoginAndRegiser';
+import firestore from '@react-native-firebase/firestore'
 
 
-const AgeSelectScreen = (props:any) => {
+const AgeSelectScreen = ({navigation, route}:any) => {
+
+  console.log(route.params.UserEmail)
+  const {UserEmail} = route.params
+
+  const UpdateAge = async () => {
+    await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
+      Age: 22
+    })
+
+    navigation.navigate("ProfileImageSelectScreen", {
+      UserEmail:UserEmail,
+    })
+  }
 
   return (
     <SafeAreaView
@@ -33,6 +47,7 @@ const AgeSelectScreen = (props:any) => {
         <Pressable
           style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
+            UpdateAge()
           }}>
           <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
         </Pressable>
