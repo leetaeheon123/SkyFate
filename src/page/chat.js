@@ -40,6 +40,9 @@ const ChatScreen = (props) => {
 
   const {channel} = route.params;
   const {UserData} = route.params;
+  const {otherUserData} = route.params;
+
+  console.log('otherUserData In Chat.js:', otherUserData);
 
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
@@ -392,8 +395,9 @@ const ChatScreen = (props) => {
           Alert.alert('60초 초과');
         }
       } else if (message.customType == 'L1_Res') {
-        navigation.navigate('MeetMapScreen',{
-          
+        navigation.navigate('MeetMapScreen', {
+          UserData: UserData,
+          otherUserData: otherUserData,
         });
       } else {
         console.log('viewDetail message in chat,js:', message);

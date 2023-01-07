@@ -66,7 +66,7 @@ interface ILocation {
   longitude: number;
 }
 
-const reference = firebase
+export const reference = firebase
   .app()
   .database(
     'https://hunt-d7d89-default-rtdb.asia-southeast1.firebasedatabase.app/',
@@ -590,7 +590,7 @@ const MapScreen = (props:any) => {
       await GetMyCoords(SetMyLocation, 'SetMyLocation Function In MapScreen', 'Success SetMyLocation')
       // 현재위치를 state화 &추적
 
-      // UpdateMyLocationWatch(setLocation)
+      UpdateMyLocationWatch(setLocation)
       if(UserData.Gender == "1"){
         let Result = ShowManLocationForGM(UserData.UserEmail, UserData.ProfileImageUrl, UserData.NickName)
         return Result
@@ -868,22 +868,24 @@ const MapScreen = (props:any) => {
   }
 
   const Stateize = async (ProfileImageUrl:string , UserEmail:string,
-    Memo:string, PeopleNum:number, CanPayit:string, NickName:string) => {
+    Memo:string, PeopleNum:number, CanPayit:string, NickName:string, latitude:Number, longitude:Number) => {
    setProfileForGtoM({
      ProfileImageUrl: ProfileImageUrl,
      UserEmail:UserEmail,
      Memo:Memo,
      PeopleNum:PeopleNum,
      CanPayit:CanPayit,
-     NickName:NickName
+     NickName:NickName,
+     latitude:latitude,
+     longitude:longitude
    })
  }
   const GirlMarkerOnPress = async (ProfileImageUrl:string , UserEmail:string,
-    Memo:string, PeopleNum:number, CanPayit:string , NickName:string) => {
+    Memo:string, PeopleNum:number, CanPayit:string , NickName:string, latitude:Number, longitude:Number) => {
 
     console.log(Memo, PeopleNum, CanPayit)
 
-    await Stateize(ProfileImageUrl, UserEmail, Memo, PeopleNum, CanPayit,NickName)
+    await Stateize(ProfileImageUrl, UserEmail, Memo, PeopleNum, CanPayit,NickName, latitude, longitude)
     SwitchShowUserModal()
   }
 
@@ -955,6 +957,8 @@ const MapScreen = (props:any) => {
       ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl
     }
 
+    
+
     setProfileModalVisiable(false)
     navigation.navigate('ChatScreen', {
       channel,
@@ -974,25 +978,25 @@ const MapScreen = (props:any) => {
   const {data:GangNam_HotPlaceList, isLoading:GangNam_HotPlaceListisLoading} = useQuery("GangNam_HotPlaceList", Get_GangNam_HotPlaceList)
   const {data:Sinsa_HotPlaceList, isLoading:Sinsa_HotPlaceListisLoading} = useQuery("Sinsa_HotPlaceList", Get_Sinsa_HotPlaceList)
 
-  // const AnimationMarker = (ProfileImageUrl:string) => {
-  //   return (
-  //   <Marker
-  //     coordinate={{
-  //       latitude: location.latitude,
-  //       longitude: location.longitude,
-  //     }}>
+  const AnimationMarker = (ProfileImageUrl:string) => {
+    return (
+    <Marker
+      coordinate={{
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }}>
 
-  //   <View style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center]}>
-  //     {[...Array(3).keys()].map((_, index) => (
-  //     <Ring key={index} index={index} />
-  //     ))}
-  //     <Image 
-  //       style={MarkerAnimationStyles.Image}
-  //       source={{uri:ProfileImageUrl}}/>
-  //     </View>
-  //   </Marker>
-  //   )
-  // }
+    <View style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center]}>
+      {[...Array(3).keys()].map((_, index) => (
+      <Ring key={index} index={index} />
+      ))}
+      <Image 
+        style={MarkerAnimationStyles.Image}
+        source={{uri:ProfileImageUrl}}/>
+      </View>
+    </Marker>
+    )
+  }
 
   const MinusIcon = <TouchableOpacity style={[styles.RowCenter,MapScreenStyles.MinusPeopleNumber]}
   onPress={() => {
@@ -1384,16 +1388,17 @@ const MapScreen = (props:any) => {
               // description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
               onPress={()=>{
                 GirlMarkerOnPress(data.ProfileImageUrl, data.UserEmail,
-                  data.Memo , data.PeopleNum, data.CanPayit, data.NickName)
+                  data.Memo , data.PeopleNum, data.CanPayit, data.NickName,
+                  data.latitude, data.longitude)
               }}
             >
               <View 
               style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center, {
               }]}
               >
-              {[...Array(3).keys()].map((_, index) => (
+              {/* {[...Array(3).keys()].map((_, index) => (
                 <OtherRing key={index} index={index} />
-                ))}
+                ))} */}
               <Image 
               style={MapScreenStyles.GirlsMarker}
               source={{uri:data.ProfileImageUrl}}

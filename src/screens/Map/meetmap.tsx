@@ -4,13 +4,100 @@ import {
   Text,
   View,
   Button,
+  Image
 
 } from 'react-native'
 
 import MapView, {Marker, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
+import { MapScreenStyles } from '~/MapScreen';
+import { reference } from './map';
+const MeetMapScreen = ({route}:any) => {
 
-const MeetMapScreen = (props:any) => {
+  const {UserData, otherUserData} = route.params
+
+  console.log("UserData:", UserData)
+  console.log("otherUserData:", otherUserData)
+
+  
+
+  const Test = () => {
+    const DBUrl = '/1v1meet/123uid'
+    reference.ref(DBUrl).update({
+      ManLang:origin,
+      GirlLang:destination
+    })
+  }
+
+  const origin = {latitude: 37.522623,
+    longitude: 127.028021};
+  const destination = {latitude: 37.522621,
+    longitude: 127.026001};
+
+
+  return (
+    <View style={{width:'100%', height:'100%'}}>
+
+      <MapView
+          style={{width:'100%', height:'90%'}}
+          initialRegion={{
+            latitude: origin.latitude,
+            longitude: origin.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+          showsUserLocation={false}
+          loadingEnabled={true}
+          userInterfaceStyle="light"
+          // userInterfaceStyle="dark"
+          minZoomLevel={5}
+          maxZoomLevel={17}
+          >
+          <Marker
+              coordinate={origin}
+              tracksViewChanges={false}
+            >
+              <View>
+                <Image 
+                  source={{uri:UserData.ProfileImageUrl}}
+                  style={MapScreenStyles.GirlsMarker}
+                  resizeMode="cover"
+                />
+              </View>
+            </Marker>
+            <Marker
+              coordinate={destination}
+              tracksViewChanges={false}
+            >
+              <View>
+                <Image 
+                  source={{uri:UserData.ProfileImageUrl}}
+                  style={MapScreenStyles.GirlsMarker}
+                  resizeMode="cover"
+                />
+              </View>
+            </Marker>
+
+  <Polyline
+    coordinates={[origin, destination]}>
+
+  </Polyline>
+
+          </MapView>
+          <Button title="Test" 
+      onPress={()=>{
+        Test()
+      }}
+      />
+    </View>
+  ) 
+
+}
+
+export default MeetMapScreen
+
+
+
+
 
   // const GetMyPosition = async (EndLongitude, EndLatitude, GoToChat) => {
   //   Geolocation.getCurrentPosition(
@@ -60,75 +147,4 @@ const MeetMapScreen = (props:any) => {
   // }
 
   // const GOOGLE_MAPS_APIKEY = "AIzaSyB4tGCRQ3tKg3jvJ2mnG4OUxltghPldMcs"
-
-
-
-  const origin = {latitude: 37.522623,
-    longitude: 127.028021};
-  const destination = {latitude: 37.522621,
-    longitude: 127.026001};
-
-
-  return (
-    <View style={{width:'100%', height:'100%'}}>
-
-      <MapView
-          style={{width:'100%', height:'90%'}}
-          initialRegion={{
-            latitude: origin.latitude,
-            longitude: origin.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          showsUserLocation={false}
-          loadingEnabled={true}
-          userInterfaceStyle="light"
-          // userInterfaceStyle="dark"
-          minZoomLevel={5}
-          maxZoomLevel={17}
-          >
-
-          <Marker
-              key={37.5226}
-              coordinate={origin}/>
-
-          <Marker
-              key={37.6226}
-              coordinate={destination}/>
-
-{/* <MapViewDirections
-    origin={"대한민국 서울특별시 강남구 신사동 585-12"}
-    destination={"대한민국 서울특별시 강남구 논현로159길 27"}
-    apikey={GOOGLE_MAPS_APIKEY}
-    // strokeWidth={3}
-    onError={(errorMessage) => {
-      console.log('GOT AN ERROR', errorMessage);
-    }}
-    lineDashPattern={[0]}
-
-  /> */}
-
-  <Polyline
-    coordinates={[origin, destination]}>
-
-  </Polyline>
-
-
-
-
-
-          </MapView>
-          <Button title="Test" 
-      onPress={()=>{
-        ReverseGeocoding()
-      }}
-      />
-    </View>
-  ) 
-
-}
-
-export default MeetMapScreen
-
-
 
