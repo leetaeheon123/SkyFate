@@ -168,7 +168,7 @@ export const MapScreenStyles = StyleSheet.create({
     borderRadius: 10,
   },
 
-  GrilsMarker: {
+  GirlsMarker: {
     width: 35,
     height: 35,
     borderRadius: 50,

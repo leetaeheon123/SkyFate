@@ -1,13 +1,28 @@
 import React, {useState} from 'react';
 import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
 
-import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
-import { LoginAndRegisterTextInputStyle } from '../../styles/LoginAndRegiser';
+import { LoginAndReigsterStyles } from '../../../styles/LoginAndRegiser';
+import { LoginAndRegisterTextInputStyle } from '../../../styles/LoginAndRegiser';
+import firestore from '@react-native-firebase/firestore'
+const NickNameSelectScreen = ({navigation, route}:any) => {
 
-const NickNameSelectScreen = (props:any) => {
+  console.log(route.params.UserEmail)
+  const {UserEmail} = route.params
 
   const [NickNameBorderBottomColor, setNickNameBorderBottomColor] = useState('lightgray');
   const [NickName , setNickName] = useState("Taeheon9")
+
+  const UpdateNickName = async () => {
+    await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
+      NickName:NickName
+    })
+
+    navigation.navigate("MbtiSelectScreen", {
+      UserEmail:UserEmail,
+    })
+
+
+  }
 
 
   const NickNameTextInput = () => (
@@ -65,7 +80,7 @@ const NickNameSelectScreen = (props:any) => {
           style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
             if(NickName != ""){
-
+              UpdateNickName()
             } else {
               Alert.alert("닉네임을 입력해주세요")
             }

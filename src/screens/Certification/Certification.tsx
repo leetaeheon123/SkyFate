@@ -1,9 +1,9 @@
 import React from 'react';
 import IMP from 'iamport-react-native';
-import { getUserCode } from './utils';
+import { getUserCode } from '../utils';
 
 import {NativeStackScreenProps} from "@react-navigation/native-stack"
-import type {RootStackParamListN} from './RootStackParamList'
+import type {RootStackParamListN} from '../RootStackParamList'
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<RootStackParamListN, 'Certification'>;

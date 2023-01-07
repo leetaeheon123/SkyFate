@@ -16,7 +16,7 @@ export const chatReducer = (state, action) => {
       console.log('mesages In Fetch-messages:', messages);
 
       const distinctMessages = messages.filter(
-        message => !state.messageMap[message.reqId],
+        (message) => !state.messageMap[message.reqId],
       );
       const mergedMessages = [...state.messages, ...distinctMessages];
       for (let i = 0; i < mergedMessages.length - 1; i++) {
@@ -40,6 +40,7 @@ export const chatReducer = (state, action) => {
       };
     }
     case 'send-message':
+      console.log('send-message In chat Reducer');
     case 'receive-message':
     case 'update-message': {
       if (action.type === 'receive-message') {
@@ -87,7 +88,7 @@ export const chatReducer = (state, action) => {
           state.messages[i].reqId === reqId
         ) {
           const updatedMessages = state.messages.filter(
-            m => m.reqId !== reqId && m.messageId !== messageId,
+            (m) => m.reqId !== reqId && m.messageId !== messageId,
           );
           for (let i = 0; i < updatedMessages.length - 1; i++) {
             updatedMessages[i].hasSameSenderAbove =

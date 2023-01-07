@@ -1,90 +1,55 @@
 import React, {useContext, useState} from 'react';
-import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
+import {View, Text, SafeAreaView, Alert,TextInput , Pressable} from 'react-native';
 
-import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
+import { signUp } from "../../UsefulFunctions/FirebaseAuth"
 import firestore from '@react-native-firebase/firestore';
 
 import {NativeStackScreenProps} from "@react-navigation/native-stack"
-import { RootStackParamList } from './RootStackParamList';
-
-import { RegisterUserData } from "../UsefulFunctions/SaveUserDataInDevice"
-import { LoginAndRegisterTextInputStyle, LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
-
-import {AppContext} from "../UsefulFunctions/Appcontext"
-import axios from 'axios';
+import { RootStackParamList } from '..//RootStackParamList';
+import { LoginAndRegisterTextInputStyle, LoginAndReigsterStyles } from '../../../styles/LoginAndRegiser';
+import { RegisterUserEmail } from '../../UsefulFunctions/SaveUserDataInDevice';
+import {AppContext} from "../../UsefulFunctions/Appcontext"
 import qs from 'qs'
 
 
 export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCodeSet">;
 
-const SBConnect = async (SendBird:any, UserEmail:string, NickName:string, navigation:Object) => {
-  SendBird.connect(UserEmail, (user:any, err:any) => {
-    console.log('In Sendbird.connect CallbackFunction User:', user);
-    // 에러가 존재하지 않으면
-    if (!err) {
-      // 유저 닉네임 중복 방지
-      if (user.nickname !== NickName) {
-        SendBird.updateCurrentUserInfo(
-          NickName,
-          'https://blog.kakaocdn.net/dn/tEMUl/btrDc6957nj/NwJoDw0EOapJNDSNRNZK8K/img.jpg',
-          async (user:any, err:any) => {
-            console.log('In sendbird.updateCurrentUserInfo User:', user);
-            if (!err) {
-              await RegisterUserData(UserEmail, navigation, user, SendBird)
-              console.log("Succes connect SendBird In Register SBconnect Function")
-            } else {
-              Alert.alert(`SbConnect Function In RegisterScreen에서에러가 난 이유 : ${err.message}`)
-            }
-          },
-        );
-      } 
-    } else {
-      Alert.alert(`에러가 난 이유 : ${err.message}`)
-    }
-  });
-};
-
-const SignUpWithEmail = async (navigation:any, Email:string, Password:string , Gender:number, InvitationCode:string, PkNumber:number
-  ,NickName:string, SendBird:any) => {
-  let BasicImageUrl = BasicImage(Gender)
+const SignUpWithEmail = async (navigation:any, Email:string, Password:string , InvitationCode:string, PkNumber:number
+  , SendBird:any) => {
+  // let BasicImageUrl = BasicImage(Gender)
   
   try {
     const result = await signUp({email: Email, password:Password})
     Alert.alert("회원가입 완료")
     // await InvitationCodeToFriend를 서버로부터 가져오는 함수 
     let UserEmail:string = result.user.email
-    await SignUpFirestore(UserEmail,Gender, BasicImageUrl, InvitationCode,PkNumber,NickName)
-    await SBConnect(SendBird, UserEmail, NickName,navigation)
+    await SignUpFirestore(UserEmail, InvitationCode,PkNumber)
     await UpdateInvitationCodeToFriend(InvitationCode)
+    await RegisterUserEmail(UserEmail, navigation, SendBird)
   } 
   catch (error) {
     if (error.code === 'auth/email-already-in-use') {
       Alert.alert("이메일이 이미 사용되었습니다")
     }
-
     if (error.code === 'auth/invalid-email') {
       Alert.alert("해당 이메일값이 유효하지 않습니다. 다시한번 이메일을 확인해주세요")
     }
-
     if (error.code ==='auth/weak-password') {
       Alert.alert('비밀번호가 6자리 이상이여야 합니다.')
-
     }
     console.log("error In SignUp:", error) 
   }
 }
 
-const SignUpFirestore = async (Email:string,GenderNumber:number, BasicImageUrl:any, InvitationCode:string,
-  PkNumber:number,NickName:String) => {
+const SignUpFirestore = async (Email:string, 
+  InvitationCode:string,
+  PkNumber:number) => {
 
 
   firestore().collection("UserList").doc(Email).set({
     UserEmail:Email,
-    Gender:GenderNumber,
-    ProfileImageUrl:BasicImageUrl,
     InvitationCode: InvitationCode,
     PkNumber: PkNumber,
-    NickName:NickName,
     Grade:0,
     TensionGrade:0,
     MannerGrade:0,
@@ -126,18 +91,17 @@ const UpdateInvitationCodeToFriend = async (InvitationCode:string) => {
 
 const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
   const {InvitationCode} = route.params
-  const {Gender} = route.params
-  const {NickName} = route.params
+  // const {Gender} = route.params
+  // const GenderNumber = Number(Gender)
+  // const {NickName} = route.params
 
 
-  const GenderNumber = Number(Gender)
   const {PkNumber} = route.params
-  const {imp_uid} = route.params
 
-  console.log("Gender In RegisterScreen:",Gender)
+  // console.log("Gender In RegisterScreen:",Gender)
   console.log("InvitationCode In RegisterScreen:",InvitationCode)
   console.log("PkNumber In RegisterScreen:",PkNumber)
-  console.log('imp_uid In RegisterScreen', imp_uid)
+  // console.log('imp_uid In RegisterScreen', imp_uid)
 
   const Context = useContext(AppContext)
   const SendBird = Context.sendbird
@@ -241,7 +205,7 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
         <Pressable
           style={LoginAndReigsterStyles.CheckBt}
           onPress={() => {
-              SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,GenderNumber,InvitationCode, PkNumber, NickName, SendBird)
+              SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,InvitationCode, PkNumber, SendBird)
           }}>
           <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
         </Pressable>

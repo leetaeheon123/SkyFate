@@ -1,36 +1,37 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import ManToManBoardWriteScreen from './src/screens/ManToManBoardWrite';
+import ManToManBoardWriteScreen from './src/screens/ManBoard/ManToManBoardWrite';
 import ValidInvitationCodeScreen from './src/screens/ValidInvitationCode';
-import RegisterScreen from './src/screens/Register';
-import LoginScreen from './src/screens/Login';
+import RegisterScreen from './src/screens/SignInUp/Register';
+import LoginScreen from './src/screens/SignInUp/Login';
 
 import IndicatorScreen from './src/screens/Indicator';
 
-import ManToManBoardScreen from './src/screens/ManToManBorad';
-import ManToManBoardViewScreen from './src/screens/ManToManBoradView';
-import AnimationTestScreen from './src/screens/AnimationTest';
-import AnimationTestScreen2 from './src/screens/AnimationTest2';
+import ManToManBoardScreen from './src/screens/ManBoard/ManToManBorad';
+import ManToManBoardViewScreen from './src/screens/ManBoard/ManToManBoradView';
+import AnimationTestScreen from './src/screens/AnimationTest/AnimationTest';
+import AnimationTestScreen2 from './src/screens/AnimationTest/AnimationTest2';
 
 import ImageUploadSample from './src/screens/ImageUploadSample';
-import PhoneRing from './src/screens/PhoneRing';
+import PhoneRing from './src/screens/Ring/PhoneRing';
 
-import CertificationScreen from './src/screens/Certification';
-import CertificationResultScreen from './src/screens/CertificationResult';
+import CertificationScreen from './src/screens/Certification/Certification';
+import CertificationResultScreen from './src/screens/Certification/CertificationResult';
 
 import {RootStackParamList} from './src/screens/RootStackParamList';
 
 import BottomTabScreen from './bottomstack';
 import ChatScreen from './src/page/chat';
-import MbtiSelectScreen from './src/screens/MbtiSelect';
-import GenderSelectScreen from './src/screens/GenderSelect';
-import AgeSelectScreen from './src/screens/AgeSelect';
-import NickNameSelectScreen from './src/screens/NickNameSelect';
+import MbtiSelectScreen from './src/screens/ProfileInput/MbtiSelect';
+import GenderSelectScreen from './src/screens/ProfileInput/GenderSelect';
+import AgeSelectScreen from './src/screens/ProfileInput/AgeSelect';
+import NickNameSelectScreen from './src/screens/ProfileInput/NickNameSelect';
 
-import ProfileImageSelectScreen from './src/screens/ProfileImageSelect';
+import ProfileImageSelectScreen from './src/screens/ProfileInput/ProfileImageSelect';
 import AgreementScreen from './src/screens/AgreementScreen';
 import WebViewScreen from './src/screens/WebViewScreen';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const Routes = (props: any) => {

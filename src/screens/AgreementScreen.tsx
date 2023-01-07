@@ -5,11 +5,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {LoginAndReigsterStyles} from '../../styles/LoginAndRegiser';
 import {RootStackParamList} from './RootStackParamList';
 import CheckBox from '@react-native-community/checkbox';
-import {
-  AGREEMENT_LOCATION_URL,
-  AGREEMENT_SERVICE_URL,
-  AGREEMENT_PRIVACY_URL,
-} from '@env';
+
 
 export type AgreementScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -17,6 +13,10 @@ export type AgreementScreenProps = NativeStackScreenProps<
 >;
 
 const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
+
+  const AGREEMENT_LOCATION_URL="https://zealous-jumpsuit-7f6.notion.site/844c74cb6068412a98b5afcc529ec7c2"
+  const AGREEMENT_SERVICE_URL="https://zealous-jumpsuit-7f6.notion.site/e746adc75467454f9a5364be8b90c93d"
+  const AGREEMENT_PRIVACY_URL="https://zealous-jumpsuit-7f6.notion.site/b0d186174c2f4db7adbc97b3c7f2b0ae"
   const [all, setAll] = useState(false);
   const [service, setService] = useState(false);
   const [privacy, setPrivacy] = useState(false);

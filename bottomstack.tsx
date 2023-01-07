@@ -1,49 +1,64 @@
 import React, { useEffect, useState } from 'react';
-import MapScreen from './src/screens/map';
-import TwoMapScreen from './src/screens/twomap';
-
+import MapScreen from './src/screens/Map/map';
+import TwoMapScreen from './src/screens/Map/twomap';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { withAppContext } from './src/contextReducer';
 
+import MeetMapScreen from './src/screens/Map/meetmap'
 
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props:any) => {
 
-
   const [InvitationCodeToFriend, setInvitationCodeToFriend] = useState<Object>(null);
+  const { route, currentUser } = props;
 
+  useEffect(() => {
+    if (route.params && route.params.action) {
+      const { action, data } = route.params;
+      switch (action) {
+        case 'leave':
+          data.channel.leave((_, err) => {
+            // if (err) {
+            //   dispatch({
+            //     type: 'error',
+            //     payload: {
+            //       error: 'Failed to leave the channel.',
+            //     },
+            //   });
+            // }
+          });
+          break;
+        case 'deleteInClient':
+          data.channel.delete((_, err) => {
+            // if (err) {
+            //   dispatch({
+            //     type: 'error',
+            //     payload: {
+            //       error: 'Failed to leave the channel.',
+            //     },
+            //   });
+            // }
+          });
+          break;
+        case 'deleteInServer':
+          console.log("deleteInserver")
+          break;
+            
+      }
 
-  // console.log("BottomTabScreen:", props.currentUser)
-  // const GetInvitationToFriendCode = (PkNumber:Number) => {
-  //   return (
-  //   firebase.firestore().collection(`InvitationCodeList`).doc(`${String(PkNumber)}`)
-  //   .get()
-  //   )
-  // }
-
-  // useEffect(()=>{
-  //   GetInvitationToFriendCode(props.currentUser.PkNumber).then(doc => {
-  //     const Code = doc.data()
-  //     if(Code) {
-  //       console.log(Code)
-  //       setInvitationCodeToFriend(Code)
-  //     }
-  //   })
-  // }, [props.currentUser])
-
-
-
-  // 성별 가져오는 코드 필요합니다 - 2022 10 09 오후1시.
+    }
+  }, [route.params]);
 
     return (
       <BottomTab.Navigator
+
         >
          <BottomTab.Screen
          name="MapScreen"
          component={MapScreen}
          initialParams={{
-           CurrentUser: props.currentUser,
+           CurrentUser: currentUser,
          }}
        />
        {props.currentUser.Gender == 2 ? 
@@ -51,12 +66,18 @@ const BottomTabScreen = (props:any) => {
         name="TwoMapScreen"
         component={TwoMapScreen}
         initialParams={{
-          CurrentUser: props.currentUser,
+          CurrentUser: currentUser,
         }}
       />
        :null}
        
-       
+       <BottomTab.Screen
+         name="MeetMapScreen"
+         component={MeetMapScreen}
+         initialParams={{
+           CurrentUser: props.currentUser,
+         }}
+       />
        
       </BottomTab.Navigator>
 

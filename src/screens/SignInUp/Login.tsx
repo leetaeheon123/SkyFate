@@ -1,40 +1,24 @@
 import React, {useState, useContext} from 'react';
 import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
 
-import { signIn, signUp } from "../UsefulFunctions/FirebaseAuth"
+import { signIn, signUp } from "../../UsefulFunctions/FirebaseAuth"
 
 import {NativeStackScreenProps} from "@react-navigation/native-stack"
-import { RootStackParamList } from './RootStackParamList';
-import {AppContext} from '../UsefulFunctions/Appcontext'
+import { RootStackParamList } from '../RootStackParamList';
+import {AppContext} from '../../UsefulFunctions/Appcontext'
 
-import { LoginAndReigsterStyles } from '../../styles/LoginAndRegiser';
-import { RegisterUserData } from "../UsefulFunctions/SaveUserDataInDevice"
+import { LoginAndReigsterStyles } from '../../../styles/LoginAndRegiser';
+import { LoginUserEmail } from "../../UsefulFunctions/SaveUserDataInDevice"
 
-import { LoginAndRegisterTextInputStyle } from '../../styles/LoginAndRegiser';
+import { LoginAndRegisterTextInputStyle } from '../../../styles/LoginAndRegiser';
 export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">;
 
-
-const SBConnect = async (SendBird:any, UserEmail:string, navigation:any) => {
-  SendBird.connect(UserEmail, (user:any, err:any) => {
-
-    if(!err){
-      RegisterUserData(UserEmail, navigation, user, SendBird)
-
-      console.log("SendBird Connect is Success In LoginScreen")
-    } else {
-      console.log("SendBird Connect Failed In LoginScreen And Error Message:", err.message)
-    }
-  });
-};
-
-
-const LoginWithEmail = async (navigation:any, Email:string, InvitationCode:string ,SendBird:Object
-  ) => {
+const LoginWithEmail = async (navigation:any, Email:string, Password:string ,SendBird:Object) => {
 
   try {
-    const result = await signIn({email: Email, password:InvitationCode})
+    const result = await signIn({email: Email, password:Password})
     let UserEmail = result.user.email
-    await SBConnect(SendBird, UserEmail, navigation)
+    LoginUserEmail(UserEmail, navigation, SendBird)
   } 
   catch (error) {
     if(error.code === "auth/wrong-password") {
