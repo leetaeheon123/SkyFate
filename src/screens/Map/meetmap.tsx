@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState, useReducer, useContext} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -11,12 +11,97 @@ import {
 import MapView, {Marker, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
 import { MapScreenStyles } from '~/MapScreen';
 import { reference } from './map';
+import {chatReducer} from '../../reducer/chat';
+import {AppContext} from '../../UsefulFunctions/Appcontext';
+
 const MeetMapScreen = ({route}:any) => {
 
-  const {UserData, otherUserData} = route.params
+
+  const {UserData, otherUserData, channel} = route.params
 
   console.log("UserData:", UserData)
   console.log("otherUserData:", otherUserData)
+
+
+  const Context = useContext(AppContext);
+  const SendBird = Context.sendbird;
+  
+  const [query, setQuery] = useState(null);
+  const [state, dispatch] = useReducer(chatReducer, {
+    SendBird,
+    channel,
+    messages: [],
+    messageMap: {}, // redId => boolean
+    loading: false,
+    input: '',
+    empty: '',
+    error: '',
+  });
+
+  useEffect(() => {
+    // SendBird.addConnectionHandler('chat', connectionHandler);
+    // SendBird.addChannelHandler('chat', channelHandler);
+    // const unsubscribe = AppState.addEventListener('change', handleStateChange);
+
+    if (!SendBird.currentUser) {
+      SendBird.connect(UserData.userId, (_, err) => {
+        if (!err) {
+          console.log("refresj In UseEffect In MeetMap")
+          refresh();
+        } else {
+          dispatch({
+            type: 'error',
+            payload: {
+              error: 'Connection failed. Please check the network status.',
+            },
+          });
+        }
+      });
+    } else {
+      refresh();
+    }
+
+    return () => {
+      // SendBird.removeConnectionHandler('chat');
+      // SendBird.removeChannelHandler('chat');
+      // unsubscribe.remove();
+    };
+  }, []);
+
+  const refresh = () => {
+    // channel.markAsRead();
+    setQuery(channel.createPreviousMessageListQuery());
+    dispatch({type: 'refresh'});
+  };
+  const next = () => {
+    if (query.hasMore) {
+      dispatch({type: 'error', payload: {error: ''}});
+      query.limit = 50;
+      query.reverse = true;
+      query.load((fetchedMessages, err) => {
+        if (!err) {
+          console.log('Success to get the messages.');
+          // console.log('fetchedMessages In Chat page:', fetchedMessages);
+          dispatch({
+            type: 'fetch-messages',
+            payload: {messages: fetchedMessages},
+          });
+        } else {
+          console.log('Failed to get the messages.');
+          dispatch({
+            type: 'error',
+            payload: {error: 'Failed to get the messages.'},
+          });
+        }
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (query) {
+      next();
+    }
+  }, [query]);
 
   
 

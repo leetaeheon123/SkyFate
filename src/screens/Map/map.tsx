@@ -952,10 +952,10 @@ const MapScreen = (props:any) => {
 
   const chat = (channel:any) => {
 
-    const otherUserData:Object = {
-      UserEmail:ProfileForGtoM?.UserEmail,
-      ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl
-    }
+    // const otherUserData:Object = {
+    //   UserEmail:ProfileForGtoM?.UserEmail,
+    //   ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl
+    // }
 
     
 
@@ -963,7 +963,7 @@ const MapScreen = (props:any) => {
     navigation.navigate('ChatScreen', {
       channel,
       UserData,
-      otherUserData
+      // otherUserData
     });
 
   };
@@ -1365,8 +1365,8 @@ const MapScreen = (props:any) => {
           }}
           showsUserLocation={true}
           loadingEnabled={true}
-          // userInterfaceStyle="light"
-          userInterfaceStyle="dark"
+          userInterfaceStyle="light"
+          // userInterfaceStyle="dark"
           minZoomLevel={10}
           maxZoomLevel={17}
           >
