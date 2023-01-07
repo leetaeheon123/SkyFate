@@ -570,7 +570,6 @@ const MapScreen = (props:any) => {
     console.log('[App] onOpenNotification : notify :', notify);
     Alert.alert('누군가가 위치 공유를 시작했습니다!');
     // Alert.alert('Open Notification : notify.body :'+ );
-
   }
 
   const [AsyncEmail, setAsyncEmail] = useState('')
@@ -585,7 +584,6 @@ const MapScreen = (props:any) => {
   }
 
   useEffect(() => {
-    console.log("UserData In UseEffect", UserData)
     async function SaveInDevice() { 
       // 로케이션 위치 가져오는 권한설정
       await GetLocationPermission()
@@ -610,7 +608,6 @@ const MapScreen = (props:any) => {
     const onChildAdd = reference
       .ref('/Location')
       .on('child_added', snapshot => {
-        console.log("In child_Added snapshot:", snapshot)
         GirlsLocationsrefetch()
       });
 
@@ -665,7 +662,7 @@ const MapScreen = (props:any) => {
         }
       });
     } else {
-      console.log("SendBird.currentUser value In Map Screen UseEffect Function:", SendBird.currentUser)
+      // console.log("SendBird.currentUser value In Map Screen UseEffect Function:", SendBird.currentUser)
       // 샌드버드에 등록된 유저값이 존재하면 리프래쉬!
       refresh();
     }
@@ -754,13 +751,9 @@ const MapScreen = (props:any) => {
    };
    const userEventHandler = new SendBird.UserEventHandler();
 
-
-
    userEventHandler.onTotalUnreadMessageCountUpdated = (totalCount:any, countByCustomTypes:any) => {
     console.log("totalCount And countByCustomTypes:",totalCount, countByCustomTypes )
    };
-   
-  
 
   const handleStateChange = (newState:any)=> {
     // ios - active - inactive
@@ -773,7 +766,6 @@ const MapScreen = (props:any) => {
       SendBird.setBackgroundState();
     }
   };
-
 
 
   const refresh = () => {
@@ -792,10 +784,10 @@ const MapScreen = (props:any) => {
     if (query.hasNext) {
       query.limit = 20;
       query.next((fetchedChannels:any, err:Error) => {
-        console.log(
-          "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
-          fetchedChannels,
-        );
+        // console.log(
+        //   "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
+        //   fetchedChannels,
+        // );
         if (!err) {
           dispatch({
             type: 'fetch-channels',
@@ -813,13 +805,15 @@ const MapScreen = (props:any) => {
     }
   };
 
-
-  const [ GpsOn, setGpsOn] = useState(false);
   const StopShowMyLocation = () => {
     setGpsOn(previousState => !previousState);
     setSecond(180)
     DirectDeleteMyLocation(UserData.UserEmail)
   }
+
+
+  const [ GpsOn, setGpsOn] = useState(false);
+
 
 
   const [ ModalVisiable, setModalVisiable] = useState(false);
@@ -956,10 +950,16 @@ const MapScreen = (props:any) => {
 
   const chat = (channel:any) => {
 
+    const otherUserData:Object = {
+      UserEmail:ProfileForGtoM?.UserEmail,
+      ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl
+    }
+
     setProfileModalVisiable(false)
     navigation.navigate('ChatScreen', {
       channel,
       UserData,
+      otherUserData
     });
 
   };
@@ -974,25 +974,25 @@ const MapScreen = (props:any) => {
   const {data:GangNam_HotPlaceList, isLoading:GangNam_HotPlaceListisLoading} = useQuery("GangNam_HotPlaceList", Get_GangNam_HotPlaceList)
   const {data:Sinsa_HotPlaceList, isLoading:Sinsa_HotPlaceListisLoading} = useQuery("Sinsa_HotPlaceList", Get_Sinsa_HotPlaceList)
 
-  const AnimationMarker = (ProfileImageUrl:string) => {
-    return (
-    <Marker
-      coordinate={{
-        latitude: location.latitude,
-        longitude: location.longitude,
-      }}>
+  // const AnimationMarker = (ProfileImageUrl:string) => {
+  //   return (
+  //   <Marker
+  //     coordinate={{
+  //       latitude: location.latitude,
+  //       longitude: location.longitude,
+  //     }}>
 
-    <View style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center]}>
-      {[...Array(2).keys()].map((_, index) => (
-      <Ring key={index} index={index} />
-      ))}
-      <Image 
-        style={MarkerAnimationStyles.Image}
-        source={{uri:ProfileImageUrl}}/>
-      </View>
-    </Marker>
-    )
-  }
+  //   <View style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center]}>
+  //     {[...Array(3).keys()].map((_, index) => (
+  //     <Ring key={index} index={index} />
+  //     ))}
+  //     <Image 
+  //       style={MarkerAnimationStyles.Image}
+  //       source={{uri:ProfileImageUrl}}/>
+  //     </View>
+  //   </Marker>
+  //   )
+  // }
 
   const MinusIcon = <TouchableOpacity style={[styles.RowCenter,MapScreenStyles.MinusPeopleNumber]}
   onPress={() => {
@@ -1020,8 +1020,8 @@ const MapScreen = (props:any) => {
       />
     )
   }
-
-  const ShowUserModalGen = () => {
+  
+  const ShowClickedUserDataModal = () => {
     return ( 
       <Modal 
       animationType="slide"
@@ -1088,238 +1088,268 @@ const MapScreen = (props:any) => {
       )
   }
 
+  const ShowMyProfileModal = () => {
+    return ( 
+      <Modal
+      animationType='slide'
+      visible={ProfileModalVisiable}
+      transparent={true}
+      >
+        <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
+
+          <View style={MapScreenStyles.ProfileModalScrollView}>
+            <View style={{
+              display:'flex',
+              flexDirection:'row',
+              justifyContent:'flex-end',
+              marginTop:40
+            }}>
+            <TouchableOpacity
+              style={{
+                width:100,
+                height:100,
+                backgroundColor:'white',
+                borderRadius:10,
+                
+              }}
+            onPress={()=>{
+              ChangeMyProfileImage(UserData.UserEmail, UserData.Gender, navigation)
+            }}>
+             {ProfileImage()}
+
+            </TouchableOpacity>
+
+
+            </View>
+
+            <Text style={{color:'white', fontSize:22, fontWeight:'600'}}>내 등급</Text>
+            <Text style={{color:'white', marginLeft:'50%'}}>50%</Text>
+            <Progress.Bar progress={0.5} width={width*0.9}
+              // indeterminate={true}
+              color={'skyblue'}
+              // unfilledColor={'black'}
+              borderWidth={1}
+              // borderColor="red"
+              height={8}
+              borderRadius={15}
+            />
+            <Button title="X"
+              onPress={()=>{
+                setProfileModalVisiable(false)
+              }}
+            />
+          <FlatList
+              data={state.channels}
+              renderItem={({item}) => (
+                <Channel
+                  key={item.url}
+                  channel={item}
+                  sendbird={SendBird}
+                  onPress={channel => chat(channel)}
+                />
+              )}
+              keyExtractor={item => item.url}
+              refreshControl={
+                <RefreshControl
+                  refreshing={state.loading}
+                  colors={['#742ddd']}
+                  tintColor={'#742ddd'}
+                  onRefresh={refresh}
+                />
+              }
+              contentContainerStyle={{flexGrow: 1}}
+              // ListHeaderComponent={
+              //   state.error && (
+              //     <View style={style.errorContainer}>
+              //       <Text style={style.error}>{state.error}</Text>
+              //     </View>
+              //   )
+              // }
+              // ListEmptyComponent={
+              //   <View style={style.emptyContainer}>
+              //     <Text style={style.empty}>{state.empty}</Text>
+              //   </View>
+              // }
+              onEndReached={() => next()}
+              onEndReachedThreshold={0.5}
+            />
+        
+            <Text style={[styles.WhiteColor]}>내 latitude:{location?.latitude}</Text>
+            <Text style={[styles.WhiteColor]}>내 longitude:{location?.longitude}</Text>
+
+            {InvitationCodeToFriend.length != 0 ? 
+            <>
+            <Text style={styles.WhiteColor}>초대코드1: {InvitationCodeToFriend[0].InvitationCode} {InvitationCodeToFriend[0].Used ? "사용됨": "초대하기"}</Text>
+            <Text style={styles.WhiteColor}>초대코드2: {InvitationCodeToFriend[1].InvitationCode} {InvitationCodeToFriend[1].Used ? "사용됨": "초대하기"}</Text>
+            </>
+            : null}
+
+            <Text style={styles.WhiteColor}>Email: {UserData.UserEmail} / NickName: {UserData.NickName}</Text>
+            <Text style={styles.WhiteColor}>Async에 저장된 email: {AsyncEmail}</Text>
+
+            <Button title="로그아웃 하기" color={'red'}
+              onPress={()=>{
+                setProfileModalVisiable(!ProfileModalVisiable)
+                logout(navigation, SendBird)
+              }}
+            ></Button>
+
+            <Button title ="L1으로 이동" onPress={()=>{
+              navigation.navigate("MeetMapScreen", {
+                
+              })
+              setProfileModalVisiable(false)
+            }}/>
+          </View>
+        </SafeAreaView>
+
+    </Modal>
+    )
+  }
+
+  const GirlInputStateModal = () => {
+    return(
+    <Modal 
+    animationType="slide"
+    transparent={true}
+    visible={ModalVisiable}
+  >
+    <SafeAreaView
+      style={MapScreenStyles.Memomodal}
+    >
+      <Text style={{color:'white', fontSize:22, fontWeight:'500', marginLeft:'5%', marginBottom:20, marginTop:20}}>나의 상태 설정하기</Text>
+      <View style={[{height:96, }, styles.W90ML5]}>
+        <Text style={[MapScreenStyles.WhiteText, {fontSize:14, fontWeight:'500', marginBottom:8}]}>메모로 상태알리기</Text>
+        <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>고객님의 상태, 위치, 정보를 50자 이내로 입력해주세요.</Text>
+        <TextInput
+          value={Memo}
+          onChangeText={(text) => setMemo(text)}
+          style={MapScreenStyles.MemoTextInput}>
+        </TextInput>    
+      </View>
+
+      <View style={[styles.W90ML5,{height:96, marginTop:20, marginBottom:20}]}>
+        <Text style={[MapScreenStyles.WhiteText, styles.FW500FS14,{marginBottom:8}]}>인원알려주기</Text>
+        <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>몇명이서 오셨나요?</Text>
+        <View style={[MapScreenStyles.PeopleNumOption, styles.Row_OnlyColumnCenter, ]}>
+            <Text style={[styles.WhiteColor, styles.FW500FS14, {marginLeft:'5%'}]}>인원</Text>
+            <View style={[styles.Row_OnlyColumnCenter, {width:'30%', justifyContent:'space-between', marginRight:'5%'}]}>
+            {MinusIcon}
+              <Text style={[styles.WhiteColor,MapScreenStyles.TotalPeopleNum]}>{PeopleNum}명</Text>
+            {PlusIcon}
+          </View>
+        </View>    
+      </View>
+
+      <View style={[{height:110, marginBottom:10}, styles.W90ML5]}>
+        <Text style={[MapScreenStyles.WhiteText, {fontSize:14, fontWeight:'500', marginBottom:8}]}>비용 나눠 내기</Text>
+        <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>만남 후 비용을 나눠서 지불할 생각이 있으신가요?</Text>
+        <View style={[styles.Row_OnlyColumnCenter, MapScreenStyles.MoneyOptionView, {marginTop:10}]}>
+
+        <TouchableOpacity 
+          onPress={()=>{setMoneyRadioBox(1)}}
+          style={MoenyRadioBox == 1 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
+          >
+            <Text style={MoenyRadioBox == 1 ?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>보고결정</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+          onPress={()=>{setMoneyRadioBox(2)}}
+          style={MoenyRadioBox == 2 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
+          >
+
+            <Text style={MoenyRadioBox == 2 ?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600' }}>생각있음</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+          onPress={()=>{setMoneyRadioBox(3)}}
+          style={MoenyRadioBox == 3 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
+          >
+            <Text style={MoenyRadioBox == 3?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>생각없음</Text>
+          </TouchableOpacity>
+        </View>
+      </View> 
+        
+
+
+        <View style={[styles.Row_OnlyColumnCenter]}>
+
+          <TouchableOpacity 
+          style={[styles.RowCenter,MapScreenStyles.CancelBoxView]}
+          
+          onPress={()=>{
+            ChangeModalVisiable()
+          }}
+          > 
+            <Text>취소</Text>
+        
+          </TouchableOpacity>
+
+
+          {Memo != '' && MoenyRadioBox != 0
+          ?
+          <TouchableOpacity 
+          style={[styles.RowCenter,MapScreenStyles.CheckBoxView, {backgroundColor:'#28FF98'}]}
+          onPress={()=>{
+            ShowMyLocation()
+          }}
+          > 
+            <Text>완료</Text>
+        
+          </TouchableOpacity>
+          :
+          <View 
+          style={[styles.RowCenter,MapScreenStyles.CheckBoxView , {backgroundColor:'#565656'}]}
+          > 
+            <Text>완료</Text>
+        
+          </View>
+          }
+          
+        
+        </View>
+
+      
+    </SafeAreaView>
+
+  </Modal>
+    )
+  }
+
+  const HPMarker = (datas:Array<any>) => {
+    let Result:Array<any> = []
+
+    for(let data of datas) {
+      let Obj = <Marker
+        key={data.Title}
+        coordinate={{
+          latitude:data.latitude,
+          longitude: data.longitude
+        }}
+        title={data.Title}
+        tracksViewChanges={false}
+      >
+        <View>
+          <Image 
+            source={{uri:data.Image}}
+            style={MapScreenStyles.HP_Marker}
+            resizeMode="cover"
+          />
+        </View>
+      </Marker>
+      Result.push(Obj)
+    }
+    return Result
+  }
+
+
+
   
   return (
     <View style={{width:'100%', height:'100%'}}>
-      <Modal
-        animationType='slide'
-        visible={ProfileModalVisiable}
-        transparent={true}
-        >
-          <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
-
-            <View style={MapScreenStyles.ProfileModalScrollView}>
-              <View style={{
-                display:'flex',
-                flexDirection:'row',
-                justifyContent:'flex-end',
-                marginTop:40
-              }}>
-              <TouchableOpacity
-                style={{
-                  width:100,
-                  height:100,
-                  backgroundColor:'white',
-                  borderRadius:10,
-                  
-                }}
-              onPress={()=>{
-                ChangeMyProfileImage(UserData.UserEmail, UserData.Gender, navigation)
-              }}>
-               {ProfileImage()}
-
-              </TouchableOpacity>
-
-
-              </View>
-
-              <Text style={{color:'white', fontSize:22, fontWeight:'600'}}>내 등급</Text>
-              <Text style={{color:'white', marginLeft:'50%'}}>50%</Text>
-              <Progress.Bar progress={0.5} width={width*0.9}
-                // indeterminate={true}
-                color={'skyblue'}
-                // unfilledColor={'black'}
-                borderWidth={1}
-                // borderColor="red"
-                height={8}
-                borderRadius={15}
-              />
-              <Button title="X"
-                onPress={()=>{
-                  setProfileModalVisiable(false)
-                }}
-              />
-            <FlatList
-                data={state.channels}
-                renderItem={({item}) => (
-                  <Channel
-                    key={item.url}
-                    channel={item}
-                    sendbird={SendBird}
-                    onPress={channel => chat(channel)}
-                  />
-                )}
-                keyExtractor={item => item.url}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={state.loading}
-                    colors={['#742ddd']}
-                    tintColor={'#742ddd'}
-                    onRefresh={refresh}
-                  />
-                }
-                contentContainerStyle={{flexGrow: 1}}
-                // ListHeaderComponent={
-                //   state.error && (
-                //     <View style={style.errorContainer}>
-                //       <Text style={style.error}>{state.error}</Text>
-                //     </View>
-                //   )
-                // }
-                // ListEmptyComponent={
-                //   <View style={style.emptyContainer}>
-                //     <Text style={style.empty}>{state.empty}</Text>
-                //   </View>
-                // }
-                onEndReached={() => next()}
-                onEndReachedThreshold={0.5}
-              />
-          
-              <Text style={[styles.WhiteColor]}>내 latitude:{location?.latitude}</Text>
-              <Text style={[styles.WhiteColor]}>내 longitude:{location?.longitude}</Text>
-
-              {InvitationCodeToFriend.length != 0 ? 
-              <>
-              <Text style={styles.WhiteColor}>초대코드1: {InvitationCodeToFriend[0].InvitationCode} {InvitationCodeToFriend[0].Used ? "사용됨": "초대하기"}</Text>
-              <Text style={styles.WhiteColor}>초대코드2: {InvitationCodeToFriend[1].InvitationCode} {InvitationCodeToFriend[1].Used ? "사용됨": "초대하기"}</Text>
-              </>
-              : null}
-
-              <Text style={styles.WhiteColor}>Email: {UserData.UserEmail} / NickName: {UserData.NickName}</Text>
-              <Text style={styles.WhiteColor}>Async에 저장된 email: {AsyncEmail}</Text>
-
-              <Button title="로그아웃 하기" color={'red'}
-                onPress={()=>{
-                  setProfileModalVisiable(!ProfileModalVisiable)
-                  logout(navigation, SendBird)
-                }}
-              ></Button>
-
-              <Button title ="L1으로 이동" onPress={()=>{
-                navigation.navigate("MeetMapScreen", {
-                  
-                })
-                setProfileModalVisiable(false)
-              }}/>
-
-              
-             
-              
-
-            </View>
-
-
-         
-      
-
-          </SafeAreaView>
-
-      </Modal>
-      <Modal 
-        animationType="slide"
-        transparent={true}
-        visible={ModalVisiable}
-      >
-        <SafeAreaView
-          style={MapScreenStyles.Memomodal}
-        >
-          <Text style={{color:'white', fontSize:22, fontWeight:'500', marginLeft:'5%', marginBottom:20, marginTop:20}}>나의 상태 설정하기</Text>
-          <View style={[{height:96, }, styles.W90ML5]}>
-            <Text style={[MapScreenStyles.WhiteText, {fontSize:14, fontWeight:'500', marginBottom:8}]}>메모로 상태알리기</Text>
-            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>고객님의 상태, 위치, 정보를 50자 이내로 입력해주세요.</Text>
-            <TextInput
-              value={Memo}
-              onChangeText={(text) => setMemo(text)}
-              style={MapScreenStyles.MemoTextInput}>
-            </TextInput>    
-          </View>
-
-          <View style={[styles.W90ML5,{height:96, marginTop:20, marginBottom:20}]}>
-            <Text style={[MapScreenStyles.WhiteText, styles.FW500FS14,{marginBottom:8}]}>인원알려주기</Text>
-            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>몇명이서 오셨나요?</Text>
-            <View style={[MapScreenStyles.PeopleNumOption, styles.Row_OnlyColumnCenter, ]}>
-                <Text style={[styles.WhiteColor, styles.FW500FS14, {marginLeft:'5%'}]}>인원</Text>
-                <View style={[styles.Row_OnlyColumnCenter, {width:'30%', justifyContent:'space-between', marginRight:'5%'}]}>
-                {MinusIcon}
-                  <Text style={[styles.WhiteColor,MapScreenStyles.TotalPeopleNum]}>{PeopleNum}명</Text>
-                {PlusIcon}
-              </View>
-            </View>    
-          </View>
-
-          <View style={[{height:110, marginBottom:10}, styles.W90ML5]}>
-            <Text style={[MapScreenStyles.WhiteText, {fontSize:14, fontWeight:'500', marginBottom:8}]}>비용 나눠 내기</Text>
-            <Text style={[{fontSize:12, fontWeight:'400', color:'#6A6A6A', marginBottom:8}]}>만남 후 비용을 나눠서 지불할 생각이 있으신가요?</Text>
-            <View style={[styles.Row_OnlyColumnCenter, MapScreenStyles.MoneyOptionView, {marginTop:10}]}>
-   
-            <TouchableOpacity 
-              onPress={()=>{setMoneyRadioBox(1)}}
-              style={MoenyRadioBox == 1 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
-              >
-                <Text style={MoenyRadioBox == 1 ?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>보고결정</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-              onPress={()=>{setMoneyRadioBox(2)}}
-              style={MoenyRadioBox == 2 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
-              >
-   
-                <Text style={MoenyRadioBox == 2 ?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600' }}>생각있음</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-              onPress={()=>{setMoneyRadioBox(3)}}
-              style={MoenyRadioBox == 3 ? MapScreenStyles.SelectedMoneyIconBox:MapScreenStyles.MoneyIconBox}
-              >
-                <Text style={MoenyRadioBox == 3?{color:'#606060',fontWeight:'600'} :{color:'#202124',fontWeight:'600'}}>생각없음</Text>
-              </TouchableOpacity>
-            </View>
-          </View> 
-            
-
-
-            <View style={[styles.Row_OnlyColumnCenter]}>
-
-              <TouchableOpacity 
-              style={[styles.RowCenter,MapScreenStyles.CancelBoxView]}
-              
-              onPress={()=>{
-                ChangeModalVisiable()
-              }}
-              > 
-                <Text>취소</Text>
-            
-              </TouchableOpacity>
-
-
-              {Memo != '' && MoenyRadioBox != 0
-              ?
-              <TouchableOpacity 
-              style={[styles.RowCenter,MapScreenStyles.CheckBoxView, {backgroundColor:'#28FF98'}]}
-              onPress={()=>{
-                ShowMyLocation()
-              }}
-              > 
-                <Text>완료</Text>
-            
-              </TouchableOpacity>
-              :
-              <View 
-              style={[styles.RowCenter,MapScreenStyles.CheckBoxView , {backgroundColor:'#565656'}]}
-              > 
-                <Text>완료</Text>
-            
-              </View>
-              }
-              
-            
-            </View>
-
-          
-        </SafeAreaView>
-
-      </Modal>
-
-      {ShowUserModalGen()}
+{/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
+      {ShowMyProfileModal()}
+      {GirlInputStateModal()}
+      {ShowClickedUserDataModal()}
       {location && (
         <MapView
           style={{width:'100%', height:'100%'}}
@@ -1337,24 +1367,7 @@ const MapScreen = (props:any) => {
           maxZoomLevel={17}
           >
           {GpsOn == true && Platform.OS === "android"?
-          <Marker
-          coordinate={{
-            latitude: location.latitude,
-            longitude: location.longitude
-          }}>
-          <View 
-          style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center, {
-          }]}
-          >
-          {[...Array(3).keys()].map((_, index) => (
-            <Ring key={index} index={index} />
-            ))}
-          
-          <Image 
-            style={MarkerAnimationStyles.Image}
-            source={{uri:UserData.ProfileImageUrl}}/>
-          </View>
-          </Marker>
+            AnimationMarker(UserData.ProfileImageUrl)
           :null}
 
           {isLoading == false ?
@@ -1381,28 +1394,12 @@ const MapScreen = (props:any) => {
               {[...Array(3).keys()].map((_, index) => (
                 <OtherRing key={index} index={index} />
                 ))}
-          
-
               <Image 
               style={MapScreenStyles.GirlsMarker}
               source={{uri:data.ProfileImageUrl}}
               resizeMode="cover"
               />
-
               </View>
-
-            {/* <View 
-          style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center, {
-          }]}
-          >
-          {[...Array(3).keys()].map((_, index) => (
-            <Ring key={index} index={index} />
-            ))}
-          
-          <Image 
-            style={MarkerAnimationStyles.Image}
-            source={{uri:UserData.ProfileImageUrl}}/>
-          </View> */}
             </Marker>
             )
             
@@ -1435,83 +1432,18 @@ const MapScreen = (props:any) => {
           })
           :null}
 
-
-
           {itaewon_HotPlaceListisLoading == false ? 
-          itaewon_HotPlaceList?.map((data,index)=>{
-            return(
-              <Marker
-                key={data.Title}
-                coordinate={{
-                  latitude:data.latitude,
-                  longitude: data.longitude
-                }}
-                title={data.Title}
-                tracksViewChanges={false}
-
-              >
-                <View>
-                  <Image 
-                    source={{uri:data.Image}}
-                    style={MapScreenStyles.HP_Marker}
-                    resizeMode="cover"
-                  />
-                </View>
-              </Marker>
-              )
-          }) :null}
+            HPMarker(itaewon_HotPlaceList)
+          :null}
           
           {GangNam_HotPlaceListisLoading == false ? 
-          GangNam_HotPlaceList?.map((data,index)=>{
-            return(
-              <Marker
-                key={data.Title}
-                coordinate={{
-                  latitude:data.latitude,
-                  longitude: data.longitude
-                }}
-                title={data.Title}
-                tracksViewChanges={false}
-
-              >
-                <View>
-                  <Image 
-                    source={{uri:data.Image}}
-                    style={MapScreenStyles.HP_Marker}
-                    resizeMode="cover"
-                  />
-                </View>
-              </Marker>
-              )
-          }) :null}
+            HPMarker(GangNam_HotPlaceList)
+          :null}
 
           {Sinsa_HotPlaceListisLoading == false ? 
-          Sinsa_HotPlaceList?.map((data,index)=>{
-            return(
-              <Marker
-                key={data.Title}
-                coordinate={{
-                  latitude:data.latitude,
-                  longitude: data.longitude
-                }}
-                title={data.Title}
-                tracksViewChanges={false}
-
-              >
-                <View>
-                  <Image 
-                    source={{uri:data.Image}}
-                    style={MapScreenStyles.HP_Marker}
-                    resizeMode="cover"
-                  />
-                </View>
-              </Marker>
-              )
-          }) :null}
-          
-
-          
-          
+            HPMarker(Sinsa_HotPlaceList)
+          :null}
+  
         </MapView>
       ) 
       // || 

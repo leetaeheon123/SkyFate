@@ -11,7 +11,7 @@ export const GetUserData = async (userEmail:string) => {
       .doc(`${userEmail}`)
       .get()
       .then((doc)=>{
-        console.log("GetUserData",doc.data())
+        // console.log("GetUserData",doc.data())
         const Result = doc.data()
         return Result
     })

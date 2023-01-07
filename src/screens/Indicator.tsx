@@ -25,7 +25,7 @@ const IndicatorScreen = (props:any) => {
 
   const SBConnect = async (SendBird:any, UserEmail:string, NickName:string, ProfileImageUrl:string) => {
     SendBird.connect(UserEmail, (user:any, err:any) => {
-      console.log('In Sendbird.connect CallbackFunction User:', user);
+      // console.log('In Sendbird.connect CallbackFunction User:', user);
       // 에러가 존재하지 않으면
       if (!err) {
         // 유저가 샌드버드에 등록 안되있으면 등록하는 로직 
@@ -56,7 +56,7 @@ const IndicatorScreen = (props:any) => {
         if(user) {
           const UserEmail = user
           const UserData = await GetUserData(user)
-          console.log("UserData In Indicator", UserData)
+          // console.log("UserData In Indicator", UserData)
 
           const ValidNickName = UserData?.hasOwnProperty('NickName')
           if(!ValidNickName) {
