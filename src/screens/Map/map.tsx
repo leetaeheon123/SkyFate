@@ -60,7 +60,7 @@ import Channel from 'sc/channel';
 import { withAppContext } from '../../contextReducer';
 import { isEmptyObj } from '../../UsefulFunctions/isEmptyObj';
 import { err } from 'react-native-svg/lib/typescript/xml';
-
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 interface ILocation {
   latitude: number;
   longitude: number;
@@ -467,6 +467,10 @@ const UpdateMyLocationWatch = (setLocation:Function) => {
 }
 
 const MapScreen = (props:any) => {
+  const LOCATION_DELTA = {
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  };
 
   const UserData = props.route.params.CurrentUser
   const navigation = useNavigation()
@@ -540,6 +544,8 @@ const MapScreen = (props:any) => {
     empty: '',
     error: null,
   });
+
+  const mapRef = useRef(null);
 
   const [token, setToken] = useState('');
 
@@ -978,6 +984,14 @@ const MapScreen = (props:any) => {
   const {data:GangNam_HotPlaceList, isLoading:GangNam_HotPlaceListisLoading} = useQuery("GangNam_HotPlaceList", Get_GangNam_HotPlaceList)
   const {data:Sinsa_HotPlaceList, isLoading:Sinsa_HotPlaceListisLoading} = useQuery("Sinsa_HotPlaceList", Get_Sinsa_HotPlaceList)
 
+  
+  const moveToMyLocation = () => {
+    const region = {...location, ...LOCATION_DELTA};
+    console.log(region);
+    mapRef.current.animateToRegion(region);
+    console.log('[MapScreen] moveToMyLocation called');
+  };
+
   const AnimationMarker = (ProfileImageUrl:string) => {
     return (
     <Marker
@@ -1363,6 +1377,7 @@ const MapScreen = (props:any) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
+          ref={mapRef}
           showsUserLocation={true}
           loadingEnabled={true}
           userInterfaceStyle="light"
@@ -1528,6 +1543,17 @@ const MapScreen = (props:any) => {
         
       </TouchableOpacity>
       : null}
+
+      <View>
+        <TouchableOpacity
+        style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}
+          onPress={()=>{
+            moveToMyLocation()
+          }}>
+          <MaterialIcons name="my-location" size={27} color="#6713D2" />
+        </TouchableOpacity>
+
+      </View>
 
       {/* {location && (
         <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}>

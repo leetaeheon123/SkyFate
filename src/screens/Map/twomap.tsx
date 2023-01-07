@@ -41,7 +41,7 @@ import messaging from '@react-native-firebase/messaging';
 import {fcmService} from "../../UsefulFunctions/push.fcm"
 import {localNotificationService} from "../../UsefulFunctions/push.noti"
 import axios from 'axios';
-
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { MapScreenStyles } from '../../../styles/MapScreen';
 import MarkerAnimationStyles from "../../../styles/MarkerAnimation"
 import Ring from '../Ring/Ring';
@@ -229,7 +229,10 @@ const RemoveIdentityToken = async () => {
 // 자주 바뀌는 데이터이므로 State화 하기 
 
 const TwoMapScreen = (props:any) => {
-
+  const LOCATION_DELTA = {
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  };
 
   const navigation = useNavigation()
 
@@ -480,6 +483,9 @@ const TwoMapScreen = (props:any) => {
 
   };
 
+  const mapRef = useRef(null);
+
+
 
   const [ GpsOn, setGpsOn] = useState(false);
 
@@ -725,6 +731,13 @@ const TwoMapScreen = (props:any) => {
     )
   }
 
+  const moveToMyLocation = () => {
+    const region = {...location, ...LOCATION_DELTA};
+    console.log(region);
+    mapRef.current.animateToRegion(region);
+    console.log('[TwoMapScreen] moveToMyLocation called');
+  };
+
   
   return (
     <View style={{width:'100%', height:'100%'}}>
@@ -833,6 +846,7 @@ const TwoMapScreen = (props:any) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
+          ref={mapRef}
           showsUserLocation={!GpsOn}
           loadingEnabled={true}
           userInterfaceStyle="light"
@@ -985,6 +999,18 @@ const TwoMapScreen = (props:any) => {
           <Text style={{color:'white'}}>{location.longitude}</Text>
         </TouchableOpacity>
       )} */}
+
+      <View>
+        <TouchableOpacity
+        style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}
+          onPress={()=>{
+            moveToMyLocation()
+          }}>
+          <MaterialIcons name="my-location" size={27} color="#6713D2" />
+        </TouchableOpacity>
+
+      </View>
+
 
 
     </View>

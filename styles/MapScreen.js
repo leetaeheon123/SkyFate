@@ -186,4 +186,21 @@ export const MapScreenStyles = StyleSheet.create({
   WhiteText: {
     color: 'white',
   },
+  MyLocationBtn: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    position: 'absolute',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowRadius: 3.84,
+    elevation: 3,
+    right: '3%',
+    bottom: 130,
+    backgroundColor: 'white',
+  },
 });
