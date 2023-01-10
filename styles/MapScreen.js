@@ -6,10 +6,11 @@ let NS2 = height * 0.7;
 
 export const MapScreenStyles = StyleSheet.create({
   ProfileModalParent: {
-    height: '95%',
+    height: '100%',
     width: '100%',
     backgroundColor: 'black',
-    top: '5%',
+    top: '10%',
+    right: '5%',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
   },

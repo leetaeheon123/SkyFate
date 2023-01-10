@@ -1,4 +1,4 @@
-const isExtreamTen = andate => {
+const isExtreamTen = (andate) => {
   let result = '';
   if (andate < 10) {
     result = '0' + andate;
@@ -26,4 +26,16 @@ export const GetTime = () => {
   let NowDate = `${year}${month}${date}`;
 
   return NowDate;
+};
+
+export const GetEpochTime = () => {
+  const EpochTime = +new Date();
+  return EpochTime;
+};
+
+export const MilisToMinutes = (milis) => {
+  let second = Math.floor(milis / 1000);
+  let minutes = Math.floor(second / 60);
+
+  return minutes;
 };

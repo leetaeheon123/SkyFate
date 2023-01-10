@@ -34,7 +34,8 @@ import {createChannelName} from '../utilsReducer';
 import {AppContext} from '../UsefulFunctions/Appcontext';
 import {GetTime} from '../../1108backup/src/UsefulFunctions/GetTime';
 import firestore from '@react-native-firebase/firestore';
-
+import {GetEpochTime} from '^/GetTime';
+import {MilisToMinutes} from '^/GetTime';
 const ChatScreen = (props) => {
   const {route, navigation} = props;
 
@@ -50,13 +51,13 @@ const ChatScreen = (props) => {
     (data) => data.userId != UserData.UserEmail,
   );
 
-  console.log(otherUserData[0].userId);
-  console.log(otherUserData[0].plainProfileUrl);
+  // console.log(otherUserData[0].userId);
+  // console.log(otherUserData[0].plainProfileUrl);
 
-  const otherUserDataObj = {
-    UserEmail: otherUserData[0].userId,
-    ProfileImageUrl: otherUserData[0].plainProfileUrl,
-  };
+  // const otherUserDataObj = {
+  //   UserEmail: otherUserData[0].userId,
+  //   ProfileImageUrl: otherUserData[0].plainProfileUrl,
+  // };
 
   // console.log('otherUserData In Chat.js:', otherUserData);
 
@@ -64,7 +65,7 @@ const ChatScreen = (props) => {
   const SendBird = Context.sendbird;
 
   // console.log('In Chat Page SendBird:', SendBird);
-  console.log('In Chat Page channel:', channel);
+  // console.log('In Chat Page channel:', channel);
 
   const [query, setQuery] = useState(null);
   const [state, dispatch] = useReducer(chatReducer, {
@@ -277,32 +278,50 @@ const ChatScreen = (props) => {
       });
     }
   };
+
   const sendUserMessage = () => {
     if (state.input.length > 0) {
-      const params = new SendBird.UserMessageParams();
-      params.message = state.input;
+      const now = GetEpochTime();
 
-      const pendingMessage = channel.sendUserMessage(params, (message, err) => {
-        if (!err) {
-          dispatch({type: 'send-message', payload: {message}});
-        } else {
-          console.log('In SendUserMessaging Error:', err);
-          setTimeout(() => {
-            dispatch({
-              type: 'error',
-              payload: {error: 'Failed to send a message.'},
-            });
-            dispatch({
-              type: 'delete-message',
-              payload: {reqId: pendingMessage.reqId},
-            });
-          }, 500);
-        }
-      });
-      dispatch({
-        type: 'send-message',
-        payload: {message: pendingMessage, clearInput: true},
-      });
+      let milis = now - channel.createdAt;
+      let second = Math.floor(milis / 1000);
+      let minutes = MilisToMinutes(milis);
+
+      if (second <= 600) {
+        const params = new SendBird.UserMessageParams();
+        params.message = state.input;
+
+        const pendingMessage = channel.sendUserMessage(
+          params,
+          (message, err) => {
+            if (!err) {
+              dispatch({type: 'send-message', payload: {message}});
+            } else {
+              console.log('In SendUserMessaging Error:', err);
+              setTimeout(() => {
+                dispatch({
+                  type: 'error',
+                  payload: {error: 'Failed to send a message.'},
+                });
+                dispatch({
+                  type: 'delete-message',
+                  payload: {reqId: pendingMessage.reqId},
+                });
+              }, 500);
+            }
+          },
+        );
+        dispatch({
+          type: 'send-message',
+          payload: {message: pendingMessage, clearInput: true},
+        });
+      } else if (second > 600) {
+        Alert.alert('10분 초과하여서 나가집니다.');
+        navigation.navigate('IndicatorScreen', {
+          action: 'leave',
+          data: {channel},
+        });
+      }
     }
   };
 
@@ -413,7 +432,10 @@ const ChatScreen = (props) => {
       } else if (message.customType == 'L1_Res') {
         navigation.navigate('MeetMapScreen', {
           UserData: UserData,
-          otherUserData: otherUserDataObj,
+          otherUserData: {
+            UserEmail: otherUserData[0].userId,
+            ProfileImageUrl: otherUserData[0].plainProfileUrl,
+          },
           channel: channel,
         });
       } else {
@@ -574,7 +596,7 @@ const ChatScreen = (props) => {
       <StatusBar backgroundColor="#742ddd" barStyle="light-content" />
 
       <SafeAreaView style={style.container}>
-        <Modal visible={ReportModalVisiable}>
+        <Modal visible={ReportModalVisiable} transparent={false}>
           <View
             style={{
               width: '90%',

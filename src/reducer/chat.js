@@ -13,7 +13,7 @@ export const chatReducer = (state, action) => {
       console.log('Fetch-messages In Reducer');
 
       const {messages} = action.payload || {};
-      console.log('mesages In Fetch-messages:', messages);
+      // console.log('mesages In Fetch-messages:', messages);
 
       const distinctMessages = messages.filter(
         (message) => !state.messageMap[message.reqId],
