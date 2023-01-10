@@ -9,7 +9,9 @@ import messaging from '@react-native-firebase/messaging';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
 import notifee, {AndroidImportance} from '@notifee/react-native';
+import {LogBox} from 'react-native';
 
+LogBox.ignoreLogs(['Non-serializable']);
 function SendPushNotificationInforeground() {
   PushNotificationIOS.addNotificationRequest({
     id: '123',
@@ -31,7 +33,7 @@ const AndroidInforeground = () => {
   });
 };
 
-messaging().setBackgroundMessageHandler(async remoteMessage => {
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
   //  로 메세지에 접근가능
   console.log('remoteMessage.data:', remoteMessage.data);
   console.log(
@@ -58,7 +60,7 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
   SendBirdNoti(remoteMessage);
 });
 
-const SendBirdNoti = async message => {
+const SendBirdNoti = async (message) => {
   const isSendbirdNotification = Boolean(message.data.sendbird);
   if (!isSendbirdNotification) return;
 

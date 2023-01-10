@@ -41,6 +41,7 @@ import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import firestore from '@react-native-firebase/firestore';
 import AntDesgin from 'react-native-vector-icons/AntDesign';
+
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import messaging from '@react-native-firebase/messaging';
@@ -351,8 +352,9 @@ const TwoMapScreen = (props: any) => {
 
     SendBird.addConnectionHandler('channels', connectionHandler);
     SendBird.addChannelHandler('channels', channelHandler);
-
+    
     // const unsubscribe = AppState.addEventListener('change', handleStateChange)
+
 
     if (!SendBird.currentUser) {
       // userId를 커낵트시킨 뒤
@@ -489,6 +491,8 @@ const TwoMapScreen = (props: any) => {
       UserData,
     });
   };
+
+  const mapRef = useRef(null);
 
   const [GpsOn, setGpsOn] = useState(false);
 
@@ -849,6 +853,7 @@ const TwoMapScreen = (props: any) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
+          ref={mapRef}
           showsUserLocation={!GpsOn}
           loadingEnabled={true}
           userInterfaceStyle="light"
@@ -1040,6 +1045,7 @@ const TwoMapScreen = (props: any) => {
           <Text style={{color:'white'}}>{location.longitude}</Text>
         </TouchableOpacity>
       )} */}
+
     </View>
   );
 };

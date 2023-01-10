@@ -12,7 +12,6 @@ import {
   Button,
   PermissionsAndroid,
   Image,
-  Modal,
   Dimensions,
   TextInput,
   StyleSheet,
@@ -24,6 +23,7 @@ import {
   FlatList,
   RefreshControl,
   Switch,
+  Pressable,
 } from 'react-native';
 
 import {MapScreenStyles} from '~/MapScreen';
@@ -42,6 +42,7 @@ import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import firestore from '@react-native-firebase/firestore';
 import AntDesgin from 'react-native-vector-icons/AntDesign';
+
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
@@ -68,12 +69,17 @@ import {withAppContext} from '../../contextReducer';
 import {isEmptyObj} from '../../UsefulFunctions/isEmptyObj';
 import {err} from 'react-native-svg/lib/typescript/xml';
 
-interface ILocation {
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Modal from 'react-native-modal';
+
+import {GetEpochTime} from '../../../src/UsefulFunctions/GetTime';
+import {locationReducer} from 'reducer/location';
+export interface ILocation {
   latitude: number;
   longitude: number;
 }
 
-const reference = firebase
+export const reference = firebase
   .app()
   .database(
     'https://hunt-d7d89-default-rtdb.asia-southeast1.firebasedatabase.app/',
@@ -435,11 +441,12 @@ const AndroidPushNoti = () => {
 // 여자이면 남자위치데이터 불러와서 지도에 보여주는 로직 추가하기
 // 자주 바뀌는 데이터이므로 State화 하기
 
-const UpdateMyLocationWatch = (setLocation: Function) => {
+export const UpdateMyLocationWatch = (setLocation: Function, dispatch: any) => {
   const _watchId = Geolocation.watchPosition(
     (position) => {
       const {latitude, longitude} = position.coords;
       setLocation({latitude, longitude});
+      dispatch({type: 'update', payload: {latitude, longitude}});
       console.log('state location change');
     },
     (error) => {
@@ -548,6 +555,12 @@ const MapScreen = (props: any) => {
     error: null,
   });
 
+  const [locationState, locationdispatch] = useReducer(locationReducer, {
+    latlng: {},
+  });
+
+  const mapRef = useRef(null);
+
   const [token, setToken] = useState('');
 
   const onRegister = (tk: string) => {
@@ -601,7 +614,7 @@ const MapScreen = (props: any) => {
       );
       // 현재위치를 state화 &추적
 
-      // UpdateMyLocationWatch(setLocation)
+      UpdateMyLocationWatch(setLocation, locationdispatch)
       if (UserData.Gender == '1') {
         let Result = ShowManLocationForGM(
           UserData.UserEmail,
@@ -797,6 +810,21 @@ const MapScreen = (props: any) => {
     if (query.hasNext) {
       query.limit = 20;
       query.next((fetchedChannels: any, err: Error) => {
+
+        console.log('fetchedChannels Type:', typeof fetchedChannels);
+        console.log('fetchedChannels Length:', fetchedChannels.length);
+
+        const distinctChannels = fetchedChannels.filter((data: any) => {
+          let now = GetEpochTime();
+          let milis = now - data?.createdAt;
+          let second = Math.floor(milis / 1000);
+
+          console.log('second In distn:', second);
+          return second < 600;
+        });
+
+        console.log('distinctChannels:', distinctChannels);
+
         // console.log(
         //   "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
         //   fetchedChannels,
@@ -804,6 +832,7 @@ const MapScreen = (props: any) => {
         if (!err) {
           dispatch({
             type: 'fetch-channels',
+            // payload: {channels: distinctChannels},
             payload: {channels: fetchedChannels},
           });
         } else {
@@ -887,6 +916,9 @@ const MapScreen = (props: any) => {
     PeopleNum: number,
     CanPayit: string,
     NickName: string,
+    latitude: Number,
+    longitude: Number,
+
   ) => {
     setProfileForGtoM({
       ProfileImageUrl: ProfileImageUrl,
@@ -895,6 +927,9 @@ const MapScreen = (props: any) => {
       PeopleNum: PeopleNum,
       CanPayit: CanPayit,
       NickName: NickName,
+      latitude: latitude,
+      longitude: longitude,
+
     });
   };
   const GirlMarkerOnPress = async (
@@ -904,6 +939,8 @@ const MapScreen = (props: any) => {
     PeopleNum: number,
     CanPayit: string,
     NickName: string,
+    latitude: Number,
+    longitude: Number,
   ) => {
     console.log(Memo, PeopleNum, CanPayit);
 
@@ -914,6 +951,8 @@ const MapScreen = (props: any) => {
       PeopleNum,
       CanPayit,
       NickName,
+      latitude,
+      longitude,
     );
     SwitchShowUserModal();
   };
@@ -981,16 +1020,17 @@ const MapScreen = (props: any) => {
   };
 
   const chat = (channel: any) => {
-    const otherUserData: Object = {
-      UserEmail: ProfileForGtoM?.UserEmail,
-      ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl,
-    };
-
+  
+    // const otherUserData:Object = {
+    //   UserEmail:ProfileForGtoM?.UserEmail,
+    //   ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl
+    // }
+    
     setProfileModalVisiable(false);
     navigation.navigate('ChatScreen', {
       channel,
       UserData,
-      otherUserData,
+      // otherUserData
     });
   };
 
@@ -1013,25 +1053,33 @@ const MapScreen = (props: any) => {
   const {data: Sinsa_HotPlaceList, isLoading: Sinsa_HotPlaceListisLoading} =
     useQuery('Sinsa_HotPlaceList', Get_Sinsa_HotPlaceList);
 
-  // const AnimationMarker = (ProfileImageUrl:string) => {
-  //   return (
-  //   <Marker
-  //     coordinate={{
-  //       latitude: location.latitude,
-  //       longitude: location.longitude,
-  //     }}>
+  const moveToMyLocation = () => {
+    const region = {...location, ...LOCATION_DELTA};
+    console.log(region);
+    mapRef.current.animateToRegion(region);
+    console.log('[MapScreen] moveToMyLocation called');
+  };
 
-  //   <View style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center]}>
-  //     {[...Array(3).keys()].map((_, index) => (
-  //     <Ring key={index} index={index} />
-  //     ))}
-  //     <Image
-  //       style={MarkerAnimationStyles.Image}
-  //       source={{uri:ProfileImageUrl}}/>
-  //     </View>
-  //   </Marker>
-  //   )
-  // }
+  const AnimationMarker = (ProfileImageUrl: string) => {
+    return (
+      <Marker
+        coordinate={{
+          latitude: location.latitude,
+          longitude: location.longitude,
+        }}>
+        <View style={[MarkerAnimationStyles.dot, MarkerAnimationStyles.center]}>
+          {[...Array(3).keys()].map((_, index) => (
+            <Ring key={index} index={index} />
+          ))}
+          <Image
+            style={MarkerAnimationStyles.Image}
+            source={{uri: ProfileImageUrl}}
+          />
+        </View>
+      </Marker>
+    );
+  };
+     
 
   const MinusIcon = (
     <TouchableOpacity
@@ -1068,7 +1116,13 @@ const MapScreen = (props: any) => {
 
   const ShowClickedUserDataModal = () => {
     return (
-      <Modal animationType="slide" transparent={true} visible={ShowUserModal}>
+      <Modal
+        animationIn="slideInUp"
+        // transparent={true}
+        isVisible={ShowUserModal}
+        coverScreen={false}
+        onBackdropPress={() => setShowUserModal(false)}>
+        
         <ScrollView style={MapScreenStyles.Memomodal}>
           <Text
             style={{
@@ -1153,9 +1207,25 @@ const MapScreen = (props: any) => {
   const ShowMyProfileModal = () => {
     return (
       <Modal
-        animationType="slide"
-        visible={ProfileModalVisiable}
-        transparent={true}>
+        // animationType='slide'
+        animationIn={'slideInUp'}
+        isVisible={ProfileModalVisiable}
+        onBackdropPress={() => setProfileModalVisiable(false)}
+        // visible={ProfileModalVisiable}
+        transparent={true}
+        style={{width: '100%', height: '100%'}}
+        onSwipeComplete={() => setProfileModalVisiable(false)}
+        swipeDirection="down"
+        // coverScreen={false}
+      >
+        {/* <Pressable style={{
+          flex:1,
+          backgroundColor:'red'
+        }}
+        onPress={()=>{
+          setProfileModalVisiable(false)
+        }}
+        /> */}
         <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
           <View style={MapScreenStyles.ProfileModalScrollView}>
             <View
@@ -1290,7 +1360,14 @@ const MapScreen = (props: any) => {
 
   const GirlInputStateModal = () => {
     return (
-      <Modal animationType="slide" transparent={true} visible={ModalVisiable}>
+
+      <Modal
+        animationIn="slideInUp"
+        // transparent={true}
+        isVisible={ModalVisiable}
+        coverScreen={false}
+        onBackdropPress={() => setModalVisiable(false)}>
+        
         <SafeAreaView style={MapScreenStyles.Memomodal}>
           <Text
             style={{
@@ -1530,133 +1607,121 @@ const MapScreen = (props: any) => {
     }
     return Result;
   };
-
-  const moveToMyLocation = () => {
-    const region = {...location, ...LOCATION_DELTA};
-    console.log(region);
-    mapRef.current.animateToRegion(region);
-    console.log('[MapScreen] moveToMyLocation called');
-  };
-
   return (
     <View style={{width: '100%', height: '100%'}}>
       {/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
       {ShowMyProfileModal()}
       {GirlInputStateModal()}
       {ShowClickedUserDataModal()}
-      {
-        location && (
-          <MapView
-            style={{width: '100%', height: '100%'}}
-            ref={mapRef}
-            initialRegion={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-            showsUserLocation={true}
-            loadingEnabled={true}
-            // userInterfaceStyle="light"
-            userInterfaceStyle="dark"
-            minZoomLevel={10}
-            maxZoomLevel={17}>
-            {GpsOn == true && Platform.OS === 'android'
-              ? AnimationMarker(UserData.ProfileImageUrl)
-              : null}
+      {location && (
+        <MapView
+          style={{width: '100%', height: '100%'}}
+          initialRegion={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+          ref={mapRef}
+          showsUserLocation={true}
+          loadingEnabled={true}
+          userInterfaceStyle="light"
+          // userInterfaceStyle="dark"
+          minZoomLevel={10}
+          maxZoomLevel={17}>
+          {GpsOn == true && Platform.OS === 'android'
+            ? AnimationMarker(UserData.ProfileImageUrl)
+            : null}
 
-            {isLoading == false
-              ? data?.map((data, index) => {
-                  return (
-                    <Marker
-                      key={data.latitude}
-                      coordinate={{
-                        latitude: data.latitude,
-                        longitude: data.longitude,
-                      }}
-                      // title={data?.Memo}
-                      tracksViewChanges={false}
-                      // description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
-                      onPress={() => {
-                        GirlMarkerOnPress(
-                          data.ProfileImageUrl,
-                          data.UserEmail,
-                          data.Memo,
-                          data.PeopleNum,
-                          data.CanPayit,
-                          data.NickName,
-                        );
-                      }}>
-                      <View
-                        style={[
-                          MarkerAnimationStyles.dot,
-                          MarkerAnimationStyles.center,
-                          {},
-                        ]}>
-                        {[...Array(3).keys()].map((_, index) => (
-                          <OtherRing key={index} index={index} />
-                        ))}
-                        <Image
-                          style={MapScreenStyles.GirlsMarker}
-                          source={{uri: data.ProfileImageUrl}}
-                          resizeMode="cover"
-                        />
-                      </View>
-                    </Marker>
-                  );
-                })
-              : null}
+          {isLoading == false
+            ? data?.map((data, index) => {
+                return (
+                  <Marker
+                    key={data.latitude}
+                    coordinate={{
+                      latitude: data.latitude,
+                      longitude: data.longitude,
+                    }}
+                    // title={data?.Memo}
+                    tracksViewChanges={false}
+                    // description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
+                    onPress={() => {
+                      GirlMarkerOnPress(
+                        data.ProfileImageUrl,
+                        data.UserEmail,
+                        data.Memo,
+                        data.PeopleNum,
+                        data.CanPayit,
+                        data.NickName,
+                        data.latitude,
+                        data.longitude,
+                      );
+                    }}>
+                    <View
+                      style={[
+                        MarkerAnimationStyles.dot,
+                        MarkerAnimationStyles.center,
+                        {},
+                      ]}>
+                      {/* {[...Array(3).keys()].map((_, index) => (
+                <OtherRing key={index} index={index} />
+                ))} */}
+                      <Image
+                        style={MapScreenStyles.GirlsMarker}
+                        source={{uri: data.ProfileImageUrl}}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  </Marker>
+                );
+              })
+            : null}
 
-            {isLoadingMansLocations == false && UserData.Gender == 2
-              ? MansLocations.map((MansData, index) => {
-                  return (
-                    <Marker
-                      key={MansData.latitude}
-                      coordinate={{
-                        latitude: MansData.latitude,
-                        longitude: MansData.longitude,
-                      }}
-                      tracksViewChanges={false}
-                      onPress={() => {
-                        GirlMarkerOnPress(
-                          MansData.ProfileImageUrl,
-                          MansData.UserEmail,
-                          '',
-                          0,
-                          '',
-                          MansData.NickName,
-                        );
-                      }}>
-                      <View>
-                        <Image
-                          source={{uri: MansData.ProfileImageUrl}}
-                          style={MapScreenStyles.GirlsMarker}
-                          resizeMode="cover"
-                        />
-                      </View>
-                    </Marker>
-                  );
-                })
-              : null}
+          {isLoadingMansLocations == false && UserData.Gender == 2
+            ? MansLocations.map((MansData, index) => {
+                return (
+                  <Marker
+                    key={MansData.latitude}
+                    coordinate={{
+                      latitude: MansData.latitude,
+                      longitude: MansData.longitude,
+                    }}
+                    tracksViewChanges={false}
+                    onPress={() => {
+                      GirlMarkerOnPress(
+                        MansData.ProfileImageUrl,
+                        MansData.UserEmail,
+                        '',
+                        0,
+                        '',
+                        MansData.NickName,
+                      );
+                    }}>
+                    <View>
+                      <Image
+                        source={{uri: MansData.ProfileImageUrl}}
+                        style={MapScreenStyles.GirlsMarker}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  </Marker>
+                );
+              })
+            : null}
 
-            {itaewon_HotPlaceListisLoading == false
-              ? HPMarker(itaewon_HotPlaceList)
-              : null}
+          {itaewon_HotPlaceListisLoading == false
+            ? HPMarker(itaewon_HotPlaceList)
+            : null}
 
-            {GangNam_HotPlaceListisLoading == false
-              ? HPMarker(GangNam_HotPlaceList)
-              : null}
+          {GangNam_HotPlaceListisLoading == false
+            ? HPMarker(GangNam_HotPlaceList)
+            : null}
 
-            {Sinsa_HotPlaceListisLoading == false
-              ? HPMarker(Sinsa_HotPlaceList)
-              : null}
-          </MapView>
-        )
-        // ||
-        // <View>
-        //   <Text>위치권한을 허용해주세요.</Text>
-        // </View>
-      }
+          {Sinsa_HotPlaceListisLoading == false
+            ? HPMarker(Sinsa_HotPlaceList)
+            : null}
+        </MapView>
+      )}
 
       {UserData.Gender == 2 ? (
         <SafeAreaView
@@ -1752,10 +1817,10 @@ const MapScreen = (props: any) => {
 
       <View>
         <TouchableOpacity
+          style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}
           onPress={() => {
             moveToMyLocation();
-          }}
-          style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}>
+          }}>
           <MaterialIcons name="my-location" size={27} color="#6713D2" />
         </TouchableOpacity>
       </View>

@@ -11,12 +11,16 @@ module.exports = {
             rootPathPrefix: '~/',
           },
           {
-            rootPathSuffix: './UsefulFunctions',
+            rootPathSuffix: './src/UsefulFunctions',
             rootPathPrefix: '^/',
           },
           {
             rootPathSuffix: './src/component',
             rootPathPrefix: 'sc/',
+          },
+          {
+            rootPathSuffix: './src/reducer',
+            rootPathPrefix: 'reducer/',
           },
         ],
       },

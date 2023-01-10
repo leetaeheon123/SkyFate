@@ -14,8 +14,9 @@
       "baseUrl": "./", 
       "paths": {
         "~/*": ["./styles/*"],
-        "^/*": ["./UsefulFunctions/*"],
-        "sc/*": ["./src/component/*"]
+        "^/*": ["./src/UsefulFunctions/*"],
+        "sc/*": ["./src/component/*"],
+        "reducer/*": ["./src/reducer/*"],
       }
     },
     "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"]

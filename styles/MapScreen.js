@@ -6,10 +6,11 @@ let NS2 = height * 0.7;
 
 export const MapScreenStyles = StyleSheet.create({
   ProfileModalParent: {
-    height: '95%',
+    height: '100%',
     width: '100%',
     backgroundColor: 'black',
-    top: '5%',
+    top: '10%',
+    right: '5%',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
   },
@@ -203,5 +204,22 @@ export const MapScreenStyles = StyleSheet.create({
 
   WhiteText: {
     color: 'white',
+  },
+  MyLocationBtn: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    position: 'absolute',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowRadius: 3.84,
+    elevation: 3,
+    right: '3%',
+    bottom: 130,
+    backgroundColor: 'white',
   },
 });
