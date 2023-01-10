@@ -352,9 +352,8 @@ const TwoMapScreen = (props: any) => {
 
     SendBird.addConnectionHandler('channels', connectionHandler);
     SendBird.addChannelHandler('channels', channelHandler);
-    
-    // const unsubscribe = AppState.addEventListener('change', handleStateChange)
 
+    // const unsubscribe = AppState.addEventListener('change', handleStateChange)
 
     if (!SendBird.currentUser) {
       // userId를 커낵트시킨 뒤
@@ -491,8 +490,6 @@ const TwoMapScreen = (props: any) => {
       UserData,
     });
   };
-
-  const mapRef = useRef(null);
 
   const [GpsOn, setGpsOn] = useState(false);
 
@@ -1045,7 +1042,6 @@ const TwoMapScreen = (props: any) => {
           <Text style={{color:'white'}}>{location.longitude}</Text>
         </TouchableOpacity>
       )} */}
-
     </View>
   );
 };

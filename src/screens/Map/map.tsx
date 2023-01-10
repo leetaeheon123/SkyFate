@@ -43,8 +43,6 @@ import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import firestore from '@react-native-firebase/firestore';
 import AntDesgin from 'react-native-vector-icons/AntDesign';
 
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
 import {fcmService} from '../../UsefulFunctions/push.fcm';
@@ -298,11 +296,6 @@ const ImagePicker = (fun: Function) => {
       fun(LocalImagePath);
     },
   );
-};
-
-const GetEpochTime = () => {
-  const EpochTime = +new Date();
-  return EpochTime;
 };
 
 const GenderNumToStr = (GenderNum: Number) => {
@@ -559,8 +552,6 @@ const MapScreen = (props: any) => {
     latlng: {},
   });
 
-  const mapRef = useRef(null);
-
   const [token, setToken] = useState('');
 
   const onRegister = (tk: string) => {
@@ -614,7 +605,7 @@ const MapScreen = (props: any) => {
       );
       // 현재위치를 state화 &추적
 
-      UpdateMyLocationWatch(setLocation, locationdispatch)
+      UpdateMyLocationWatch(setLocation, locationdispatch);
       if (UserData.Gender == '1') {
         let Result = ShowManLocationForGM(
           UserData.UserEmail,
@@ -810,7 +801,6 @@ const MapScreen = (props: any) => {
     if (query.hasNext) {
       query.limit = 20;
       query.next((fetchedChannels: any, err: Error) => {
-
         console.log('fetchedChannels Type:', typeof fetchedChannels);
         console.log('fetchedChannels Length:', fetchedChannels.length);
 
@@ -918,7 +908,6 @@ const MapScreen = (props: any) => {
     NickName: string,
     latitude: Number,
     longitude: Number,
-
   ) => {
     setProfileForGtoM({
       ProfileImageUrl: ProfileImageUrl,
@@ -929,7 +918,6 @@ const MapScreen = (props: any) => {
       NickName: NickName,
       latitude: latitude,
       longitude: longitude,
-
     });
   };
   const GirlMarkerOnPress = async (
@@ -1020,12 +1008,11 @@ const MapScreen = (props: any) => {
   };
 
   const chat = (channel: any) => {
-  
     // const otherUserData:Object = {
     //   UserEmail:ProfileForGtoM?.UserEmail,
     //   ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl
     // }
-    
+
     setProfileModalVisiable(false);
     navigation.navigate('ChatScreen', {
       channel,
@@ -1079,7 +1066,6 @@ const MapScreen = (props: any) => {
       </Marker>
     );
   };
-     
 
   const MinusIcon = (
     <TouchableOpacity
@@ -1122,7 +1108,6 @@ const MapScreen = (props: any) => {
         isVisible={ShowUserModal}
         coverScreen={false}
         onBackdropPress={() => setShowUserModal(false)}>
-        
         <ScrollView style={MapScreenStyles.Memomodal}>
           <Text
             style={{
@@ -1360,14 +1345,12 @@ const MapScreen = (props: any) => {
 
   const GirlInputStateModal = () => {
     return (
-
       <Modal
         animationIn="slideInUp"
         // transparent={true}
         isVisible={ModalVisiable}
         coverScreen={false}
         onBackdropPress={() => setModalVisiable(false)}>
-        
         <SafeAreaView style={MapScreenStyles.Memomodal}>
           <Text
             style={{
