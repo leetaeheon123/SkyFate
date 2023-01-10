@@ -42,12 +42,14 @@ import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import firestore from '@react-native-firebase/firestore';
 import AntDesgin from 'react-native-vector-icons/AntDesign';
 
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import messaging from '@react-native-firebase/messaging';
 
 import {fcmService} from '../../UsefulFunctions/push.fcm';
 import {localNotificationService} from '../../UsefulFunctions/push.noti';
 import axios from 'axios';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import {MapScreenStyles} from '../../../styles/MapScreen';
 import MarkerAnimationStyles from '../../../styles/MarkerAnimation';
 import Ring from '../Ring/Ring';
@@ -227,6 +229,8 @@ const TwoMapScreen = (props: any) => {
     longitudeDelta: 0.0421,
   };
 
+  const mapRef = React.useRef(null);
+
   const navigation = useNavigation();
 
   const UserData = props.route.params.CurrentUser;
@@ -348,8 +352,9 @@ const TwoMapScreen = (props: any) => {
 
     SendBird.addConnectionHandler('channels', connectionHandler);
     SendBird.addChannelHandler('channels', channelHandler);
-
+    
     // const unsubscribe = AppState.addEventListener('change', handleStateChange)
+
 
     if (!SendBird.currentUser) {
       // userId를 커낵트시킨 뒤
@@ -841,6 +846,7 @@ const TwoMapScreen = (props: any) => {
       {location && (
         <MapView
           style={{width: '100%', height: '100%'}}
+          ref={mapRef}
           initialRegion={{
             latitude: location.latitude,
             longitude: location.longitude,
@@ -1023,6 +1029,16 @@ const TwoMapScreen = (props: any) => {
         </TouchableOpacity>
       ) : null}
 
+      <View>
+        <TouchableOpacity
+          onPress={() => {
+            moveToMyLocation();
+          }}
+          style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}>
+          <MaterialIcons name="my-location" size={27} color="#6713D2" />
+        </TouchableOpacity>
+      </View>
+
       {/* {location && (
         <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}>
           <Text style={{color:'white'}}>{location.latitude}</Text>
@@ -1030,15 +1046,6 @@ const TwoMapScreen = (props: any) => {
         </TouchableOpacity>
       )} */}
 
-      <View>
-        <TouchableOpacity
-          style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}
-          onPress={() => {
-            moveToMyLocation();
-          }}>
-          <MaterialIcons name="my-location" size={27} color="#6713D2" />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };

@@ -43,6 +43,8 @@ import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import firestore from '@react-native-firebase/firestore';
 import AntDesgin from 'react-native-vector-icons/AntDesign';
 
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
 import {fcmService} from '../../UsefulFunctions/push.fcm';
@@ -66,6 +68,7 @@ import Channel from 'sc/channel';
 import {withAppContext} from '../../contextReducer';
 import {isEmptyObj} from '../../UsefulFunctions/isEmptyObj';
 import {err} from 'react-native-svg/lib/typescript/xml';
+
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 
@@ -297,6 +300,11 @@ const ImagePicker = (fun: Function) => {
   );
 };
 
+const GetEpochTime = () => {
+  const EpochTime = +new Date();
+  return EpochTime;
+};
+
 const GenderNumToStr = (GenderNum: Number) => {
   let GenderStr: string;
 
@@ -473,6 +481,8 @@ const MapScreen = (props: any) => {
 
   const {width, height} = Dimensions.get('window');
 
+  const mapRef = useRef(null);
+
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
 
   const [InvitationCodeToFriend, setInvitationCodeToFriend] = useState([]);
@@ -604,7 +614,7 @@ const MapScreen = (props: any) => {
       );
       // 현재위치를 state화 &추적
 
-      UpdateMyLocationWatch(setLocation, locationdispatch);
+      UpdateMyLocationWatch(setLocation, locationdispatch)
       if (UserData.Gender == '1') {
         let Result = ShowManLocationForGM(
           UserData.UserEmail,
@@ -800,6 +810,7 @@ const MapScreen = (props: any) => {
     if (query.hasNext) {
       query.limit = 20;
       query.next((fetchedChannels: any, err: Error) => {
+
         console.log('fetchedChannels Type:', typeof fetchedChannels);
         console.log('fetchedChannels Length:', fetchedChannels.length);
 
@@ -814,10 +825,10 @@ const MapScreen = (props: any) => {
 
         console.log('distinctChannels:', distinctChannels);
 
-        console.log(
-          "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
-          fetchedChannels,
-        );
+        // console.log(
+        //   "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
+        //   fetchedChannels,
+        // );
         if (!err) {
           dispatch({
             type: 'fetch-channels',
@@ -907,6 +918,7 @@ const MapScreen = (props: any) => {
     NickName: string,
     latitude: Number,
     longitude: Number,
+
   ) => {
     setProfileForGtoM({
       ProfileImageUrl: ProfileImageUrl,
@@ -917,6 +929,7 @@ const MapScreen = (props: any) => {
       NickName: NickName,
       latitude: latitude,
       longitude: longitude,
+
     });
   };
   const GirlMarkerOnPress = async (
@@ -1007,11 +1020,12 @@ const MapScreen = (props: any) => {
   };
 
   const chat = (channel: any) => {
+  
     // const otherUserData:Object = {
     //   UserEmail:ProfileForGtoM?.UserEmail,
     //   ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl
     // }
-
+    
     setProfileModalVisiable(false);
     navigation.navigate('ChatScreen', {
       channel,
@@ -1065,6 +1079,7 @@ const MapScreen = (props: any) => {
       </Marker>
     );
   };
+     
 
   const MinusIcon = (
     <TouchableOpacity
@@ -1107,6 +1122,7 @@ const MapScreen = (props: any) => {
         isVisible={ShowUserModal}
         coverScreen={false}
         onBackdropPress={() => setShowUserModal(false)}>
+        
         <ScrollView style={MapScreenStyles.Memomodal}>
           <Text
             style={{
@@ -1344,12 +1360,14 @@ const MapScreen = (props: any) => {
 
   const GirlInputStateModal = () => {
     return (
+
       <Modal
         animationIn="slideInUp"
         // transparent={true}
         isVisible={ModalVisiable}
         coverScreen={false}
         onBackdropPress={() => setModalVisiable(false)}>
+        
         <SafeAreaView style={MapScreenStyles.Memomodal}>
           <Text
             style={{
@@ -1589,7 +1607,6 @@ const MapScreen = (props: any) => {
     }
     return Result;
   };
-
   return (
     <View style={{width: '100%', height: '100%'}}>
       {/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
