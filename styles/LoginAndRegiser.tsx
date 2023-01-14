@@ -10,13 +10,11 @@ export const LoginAndReigsterStyles = StyleSheet.create({
     height: '10%',
     justifyContent: 'center',
     alignItems: 'center',
-    
     backgroundColor: '#0064FF',
-
-
     borderRadius: 25,
     position: 'absolute',
     bottom: '8%',
+    // backgroundColor: linear
   },
   CheckText: {
     fontSize: 16,
@@ -38,7 +36,7 @@ export const LoginAndReigsterStyles = StyleSheet.create({
   Description: {
     height: '15%',
     width: '100%',
-    // backgroundColor: 'skyblue',
+    backgroundColor: 'skyblue',
     display: 'flex',
     justifyContent: 'flex-end',
   },
@@ -48,22 +46,23 @@ export const LoginAndReigsterStyles = StyleSheet.create({
   },
 });
 
-export const LoginAndRegisterTextInputStyle =  (BorderBottomColor:any) =>  StyleSheet.create({
-  TextInput: {
-    width: '100%',
-    height: '50%',
-    borderBottomColor: BorderBottomColor,
-    borderBottomWidth: 1,
-    fontSize:18,
-    fontWeight: '600',
-    color:'black'
-  },
-  ViewStyle:{
-    width: '100%',
+export const LoginAndRegisterTextInputStyle = (BorderBottomColor: any) =>
+  StyleSheet.create({
+    TextInput: {
+      width: '100%',
+      height: '50%',
+      // borderBottomColor: BorderBottomColor,
+      // borderBottomWidth: 1,
+      fontSize: 18,
+      fontWeight: '600',
+      color: 'black',
+    },
+    ViewStyle: {
+      width: '100%',
       // height: '40%',
-      height:144,
+      height: 144,
       marginTop: '5%',
       display: 'flex',
       justifyContent: 'center',
-  }
-})
+    },
+  });

@@ -62,7 +62,7 @@ import {Get_itaewon_HotPlaceList} from '../../UsefulFunctions/HotPlaceList';
 import {AppContext} from '../../UsefulFunctions//Appcontext';
 
 import {channelsReducer} from '../../reducer/channels';
-import Channel from 'sc/channel';
+import Channel from 'component/channel';
 import {withAppContext} from '../../contextReducer';
 import {isEmptyObj} from '../../UsefulFunctions/isEmptyObj';
 import {err} from 'react-native-svg/lib/typescript/xml';
@@ -72,9 +72,23 @@ import Modal from 'react-native-modal';
 
 import {GetEpochTime} from '../../../src/UsefulFunctions/GetTime';
 import {locationReducer} from 'reducer/location';
+import {ReplacedotInEmail} from '^/Replace';
+
+import {ChangeMyProfileImage, GenderNumToStr} from '^/ImageUpload';
 export interface ILocation {
   latitude: number;
   longitude: number;
+}
+
+interface ProfileForGtoM {
+  ProfileImageUrl: string;
+  UserEmail: string;
+  Memo: string;
+  PeopleNum: number;
+  CanPayit: string;
+  NickName: string;
+  latitude: Number;
+  longitude: Number;
 }
 
 export const reference = firebase
@@ -203,12 +217,7 @@ function Counter(callback: Function, delay: number | null, Reset: Function) {
   }, [delay]);
 }
 
-const ReplacedotInEmail = (UserEmail: string) => {
-  let ReplacedUserEmail = UserEmail.replace('.com', '');
-  return ReplacedUserEmail;
-};
-
-const GetMyCoords = async (
+export const GetMyCoords = async (
   callback: Function,
   errstring: String,
   successtring: string = '',
@@ -298,17 +307,6 @@ const ImagePicker = (fun: Function) => {
   );
 };
 
-const GenderNumToStr = (GenderNum: Number) => {
-  let GenderStr: string;
-
-  if (GenderNum == 1) {
-    GenderStr = 'Mans';
-  } else if (GenderNum == 2) {
-    GenderStr = 'Girls';
-  } else {
-    GenderStr = 'except';
-  }
-};
 const PutInStorage = async (
   LocalImagePath: any,
   UserEmail: string,
@@ -324,22 +322,6 @@ const PutInStorage = async (
   await reference.putFile(LocalImagePath);
   const StorageUrl = await reference.getDownloadURL();
   return StorageUrl;
-};
-
-const ChangeMyProfileImage = async (
-  UserEmail: string,
-  Gender: number,
-  navigation: any,
-) => {
-  let fun = async (LocalImagePath: string) => {
-    const StorageUrl = await PutInStorage(LocalImagePath, UserEmail, Gender);
-
-    await UpdateProfileImageUrl(UserEmail, StorageUrl);
-    // await SaveUserDataInDevice(UserEmail)
-    navigation.navigate('IndicatorScreen', {id: 20});
-  };
-
-  ImagePicker(fun);
 };
 
 const DeleteMyLocationAfter3Min = (UserEmail: string, Gender: number) => {
@@ -434,12 +416,17 @@ const AndroidPushNoti = () => {
 // 여자이면 남자위치데이터 불러와서 지도에 보여주는 로직 추가하기
 // 자주 바뀌는 데이터이므로 State화 하기
 
-export const UpdateMyLocationWatch = (setLocation: Function, dispatch: any) => {
+export const UpdateMyLocationWatch = (
+  // setLocation: Function,
+  dispatch: any,
+  UpdateMyLocation: Function = Function(),
+) => {
   const _watchId = Geolocation.watchPosition(
     (position) => {
       const {latitude, longitude} = position.coords;
-      setLocation({latitude, longitude});
+      // setLocation({latitude, longitude});
       dispatch({type: 'update', payload: {latitude, longitude}});
+      UpdateMyLocation(latitude, longitude);
       console.log('state location change');
     },
     (error) => {
@@ -447,9 +434,9 @@ export const UpdateMyLocationWatch = (setLocation: Function, dispatch: any) => {
     },
     {
       enableHighAccuracy: true,
-      distanceFilter: 3,
+      distanceFilter: 2,
       interval: 5000,
-      fastestInterval: 2000,
+      fastestInterval: 500,
     },
   );
 
@@ -603,9 +590,21 @@ const MapScreen = (props: any) => {
         'SetMyLocation Function In MapScreen',
         'Success SetMyLocation',
       );
+
+      const locaidw = (latitude: number, longitude: number) => {
+        locationdispatch({type: 'update', payload: {latitude, longitude}});
+      };
+      await GetMyCoords(
+        locaidw,
+        'SetMyLocation Reducer Error Function In MapScreen',
+        'Success SetMyLocation Reducer',
+      );
+
       // 현재위치를 state화 &추적
 
-      UpdateMyLocationWatch(setLocation, locationdispatch);
+      // UpdateMyLocationWatch(setLocation, locationdispatch);
+      UpdateMyLocationWatch(locationdispatch);
+
       if (UserData.Gender == '1') {
         let Result = ShowManLocationForGM(
           UserData.UserEmail,
@@ -848,7 +847,7 @@ const MapScreen = (props: any) => {
   const [ModalVisiable, setModalVisiable] = useState(false);
   const [ProfileModalVisiable, setProfileModalVisiable] = useState(false);
   const [ShowUserModal, setShowUserModal] = useState(false);
-  const [ProfileForGtoM, setProfileForGtoM] = useState({});
+  const [ProfileForGtoM, setProfileForGtoM] = useState<Object>({});
 
   const [Memo, setMemo] = useState('');
   const [PeopleNum, setPeopleNum] = useState(1);
@@ -899,49 +898,12 @@ const MapScreen = (props: any) => {
     setShowUserModal(!ShowUserModal);
   };
 
-  const Stateize = async (
-    ProfileImageUrl: string,
-    UserEmail: string,
-    Memo: string,
-    PeopleNum: number,
-    CanPayit: string,
-    NickName: string,
-    latitude: Number,
-    longitude: Number,
-  ) => {
-    setProfileForGtoM({
-      ProfileImageUrl: ProfileImageUrl,
-      UserEmail: UserEmail,
-      Memo: Memo,
-      PeopleNum: PeopleNum,
-      CanPayit: CanPayit,
-      NickName: NickName,
-      latitude: latitude,
-      longitude: longitude,
-    });
+  const Stateize = async (Obj: ProfileForGtoM) => {
+    setProfileForGtoM(Obj);
   };
-  const GirlMarkerOnPress = async (
-    ProfileImageUrl: string,
-    UserEmail: string,
-    Memo: string,
-    PeopleNum: number,
-    CanPayit: string,
-    NickName: string,
-    latitude: Number,
-    longitude: Number,
-  ) => {
-    console.log(Memo, PeopleNum, CanPayit);
 
-    await Stateize(
-      ProfileImageUrl,
-      UserEmail,
-      Memo,
-      PeopleNum,
-      CanPayit,
-      NickName,
-      latitude,
-      longitude,
-    );
+  const GirlMarkerOnPress = async (Obj: ProfileForGtoM) => {
+    await Stateize(Obj);
     SwitchShowUserModal();
   };
 
@@ -974,16 +936,36 @@ const MapScreen = (props: any) => {
     console.log('StartChatingBetweenGirls In TwoMapScreen');
     let params = new SendBird.GroupChannelParams();
 
+    // 추가로 고려할거 : 이미 채팅하기를 눌러 채팅방이 생성된 상태와 처음 채팅하기를 눌러서 채팅방이 생성되는 상황을 분기처리 하기
     if (isEmptyObj(ProfileForGtoM) == false) {
-      // let Member = [`${ProfileForGtoM.UserEmail}`, `${UserData.UserEmail}`]
       let Member = [ProfileForGtoM.UserEmail, UserData.UserEmail];
-      let MemberNickNames = [ProfileForGtoM.NickName, UserData.NickName];
+      let NickNames = [ProfileForGtoM.NickName, UserData.NickName];
+
+      const Latlng = {
+        latitude: ProfileForGtoM.latitude,
+        longitude: ProfileForGtoM.longitude,
+      };
+      // let MemberLatlng = {
+      //   ProfileForGtoM.UserEmail=Latlng
+      //   UserData.UserEmail=location
+      // }
+
+      // let MemberLatlng = {
+      //   Member[0]:Latlng,
+      //   Member[1]:location,
+      // }
+
+      // console.log(MemberLatlng)
 
       params.addUserIds(Member);
       params.coverUrl = ProfileForGtoM.ProfileImageUrl;
-      params.name = 'TestName';
+      params.name = NickNames[0];
       params.operatorUserIds = Member;
       (params.isDistinct = true), (params.isPublic = false);
+      // params.data = {
+      //   a: 10,
+      //   b: 20,
+      // };
 
       SendBird.GroupChannel.createChannel(
         params,
@@ -995,7 +977,10 @@ const MapScreen = (props: any) => {
             SwitchShowUserModal();
             chat(groupChannel);
             // 10분 경과시 채팅방을 삭제하기 위한 코드 추가
-            DeleteChannelAfter10Minutes(groupChannel);
+
+            // 1/11) DeleteChannelAfter10Minutes 이외 다른 방식으로 구현함
+
+            // DeleteChannelAfter10Minutes(groupChannel);
 
             console.log(
               'groupChannel In CreateChating Function In MapScreen:',
@@ -1232,6 +1217,7 @@ const MapScreen = (props: any) => {
                     UserData.UserEmail,
                     UserData.Gender,
                     navigation,
+                    1,
                   );
                 }}>
                 {ProfileImage()}
@@ -1329,6 +1315,38 @@ const MapScreen = (props: any) => {
                 setProfileModalVisiable(!ProfileModalVisiable);
                 logout(navigation, SendBird);
               }}></Button>
+
+            <Button
+              title="남자로 변경"
+              onPress={() => {
+                firestore()
+                  .collection('UserList')
+                  .doc(UserData.UserEmail)
+                  .update({
+                    Gender: 1,
+                  });
+
+                navigation.navigate('IndicatorScreen', {
+                  From: 'Map',
+                });
+              }}
+            />
+
+            <Button
+              title="여자로 변경"
+              onPress={() => {
+                firestore()
+                  .collection('UserList')
+                  .doc(UserData.UserEmail)
+                  .update({
+                    Gender: 2,
+                  });
+
+                navigation.navigate('IndicatorScreen', {
+                  From: 'Map',
+                });
+              }}
+            />
 
             <Button
               title="L1으로 이동"
@@ -1608,16 +1626,16 @@ const MapScreen = (props: any) => {
           ref={mapRef}
           showsUserLocation={true}
           loadingEnabled={true}
-          userInterfaceStyle="light"
-          // userInterfaceStyle="dark"
+          // userInterfaceStyle="light"
+          userInterfaceStyle="dark"
           minZoomLevel={10}
           maxZoomLevel={17}>
           {GpsOn == true && Platform.OS === 'android'
             ? AnimationMarker(UserData.ProfileImageUrl)
             : null}
 
-          {isLoading == false
-            ? data?.map((data, index) => {
+          {isLoading == false && UserData.Gender == 1
+            ? data?.map((data: any, index) => {
                 return (
                   <Marker
                     key={data.latitude}
@@ -1629,16 +1647,26 @@ const MapScreen = (props: any) => {
                     tracksViewChanges={false}
                     // description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
                     onPress={() => {
-                      GirlMarkerOnPress(
-                        data.ProfileImageUrl,
-                        data.UserEmail,
-                        data.Memo,
-                        data.PeopleNum,
-                        data.CanPayit,
-                        data.NickName,
-                        data.latitude,
-                        data.longitude,
-                      );
+                      // let obj = {
+                      //   data.ProfileImageUrl,
+                      //   data.UserEmail,
+                      //   data.Memo,
+                      //   data.PeopleNum,
+                      //   data.CanPayit,
+                      //   data.NickName,
+                      //   data.latitude,
+                      //   data.longitude,
+                      // }
+                      GirlMarkerOnPress({
+                        ProfileImageUrl: data?.ProfileImageUrl,
+                        UserEmail: data?.UserEmail,
+                        Memo: data.Memo,
+                        PeopleNum: data.PeopleNum,
+                        CanPayit: data.CanPayit,
+                        NickName: data.NickName,
+                        latitude: data.latitude,
+                        longitude: data.longitude,
+                      });
                     }}>
                     <View
                       style={[
@@ -1646,9 +1674,12 @@ const MapScreen = (props: any) => {
                         MarkerAnimationStyles.center,
                         {},
                       ]}>
-                      {/* {[...Array(3).keys()].map((_, index) => (
-                <OtherRing key={index} index={index} />
-                ))} */}
+                      {Platform.OS == 'ios'
+                        ? [...Array(2).keys()].map((_, index) => (
+                            <OtherRing key={index} index={index} />
+                          ))
+                        : null}
+
                       <Image
                         style={MapScreenStyles.GirlsMarker}
                         source={{uri: data.ProfileImageUrl}}
@@ -1661,7 +1692,7 @@ const MapScreen = (props: any) => {
             : null}
 
           {isLoadingMansLocations == false && UserData.Gender == 2
-            ? MansLocations.map((MansData, index) => {
+            ? MansLocations.map((MansData: any, index) => {
                 return (
                   <Marker
                     key={MansData.latitude}
@@ -1671,14 +1702,16 @@ const MapScreen = (props: any) => {
                     }}
                     tracksViewChanges={false}
                     onPress={() => {
-                      GirlMarkerOnPress(
-                        MansData.ProfileImageUrl,
-                        MansData.UserEmail,
-                        '',
-                        0,
-                        '',
-                        MansData.NickName,
-                      );
+                      GirlMarkerOnPress({
+                        ProfileImageUrl: MansData?.ProfileImageUrl,
+                        UserEmail: MansData?.UserEmail,
+                        Memo: '',
+                        PeopleNum: 1,
+                        CanPayit: '',
+                        NickName: MansData.NickName,
+                        latitude: MansData.latitude,
+                        longitude: MansData.longitude,
+                      });
                     }}>
                     <View>
                       <Image

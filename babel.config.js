@@ -16,11 +16,15 @@ module.exports = {
           },
           {
             rootPathSuffix: './src/component',
-            rootPathPrefix: 'sc/',
+            rootPathPrefix: 'component/',
           },
           {
             rootPathSuffix: './src/reducer',
             rootPathPrefix: 'reducer/',
+          },
+          {
+            rootPathSuffix: './src/Assets',
+            rootPathPrefix: 'Assets/',
           },
         ],
       },
