@@ -12,7 +12,7 @@ import {
 
 import MapView, {Marker, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
 import {MapScreenStyles} from '~/MapScreen';
-import {reference} from './map';
+import {GetMyCoords, reference} from './map';
 import {chatReducer} from '../../reducer/chat';
 import {AppContext} from '../../UsefulFunctions/Appcontext';
 import Modal from 'react-native-modal';
@@ -20,13 +20,14 @@ import {ChatStyle} from '~/Chat';
 
 import {selectFile, sendUserMessage} from '^/Chat';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Message from 'sc/message';
+import Message from 'component/message';
 
 import {viewDetail, showContextMenu} from '^/Chat';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {locationReducer} from 'reducer/location';
 import {ILocation} from './map';
 import {UpdateMyLocationWatch} from './map';
+import {ReplacedotInEmail} from '^/Replace';
 
 const MeetMapScreen = ({route}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
@@ -37,11 +38,27 @@ const MeetMapScreen = ({route}: any, props: any) => {
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
+  const uid = channel.url;
+
   const [Mylocation, locationdispatch] = useReducer(locationReducer, {
     latlng: {},
   });
 
-  // console.log(Mylocation.latlng)
+  // console.log('Mylocation:', Mylocation);
+
+  const [OtherLocation, setOtherLocation] = useState<ILocation | undefined>(
+    undefined,
+  );
+  const [MyLocation, setMyLocation] = useState<ILocation | undefined>(
+    undefined,
+  );
+
+  let ReplaceUserEmail = ReplacedotInEmail(UserData.UserEmail);
+  let ReplaceOtherUserEmail = ReplacedotInEmail(otherUserData.UserEmail);
+  const MyDBUrlNode = `/1v1meet/${uid}/${ReplaceUserEmail}/Latlng`;
+  const MyDBUrl = `/1v1meet/${uid}/${ReplaceUserEmail}`;
+
+  const OtherDBUrl = `/1v1meet/${uid}/${ReplaceOtherUserEmail}`;
 
   const [query, setQuery] = useState(null);
   const [state, dispatch] = useReducer(chatReducer, {
@@ -55,17 +72,19 @@ const MeetMapScreen = ({route}: any, props: any) => {
     error: '',
   });
 
-  const [location, setLocation] = useState<ILocation | undefined>(undefined);
+  // const [location, setLocation] = useState<ILocation | undefined>(undefined);
 
   useEffect(() => {
     // SendBird.addConnectionHandler('chat', connectionHandler);
     // SendBird.addChannelHandler('chat', channelHandler);
     // const unsubscribe = AppState.addEventListener('change', handleStateChange);
 
-    // locationdispatch({type: 'update', payload: {x:10} });
-    console.log('L1 Screen UseEffect []');
+    StartLocation();
 
-    UpdateMyLocationWatch(setLocation, locationdispatch);
+    // locationdispatch({type: 'update', payload: {x:10} });
+
+    // UpdateMyLocationWatch(setLocation, locationdispatch, UpdateMyLocation);
+    UpdateMyLocationWatch(locationdispatch, UpdateMyLocation);
 
     if (!SendBird.currentUser) {
       SendBird.connect(UserData.userId, (_, err) => {
@@ -85,7 +104,36 @@ const MeetMapScreen = ({route}: any, props: any) => {
       refresh();
     }
 
+    const MyUpdate = reference.ref(MyDBUrl).on('child_changed', (snapshot) => {
+      console.log('MyUpdate child_changed snapshot:', snapshot.val());
+      setMyLocation(snapshot.val());
+    });
+
+    const OtherUpdate = reference
+      .ref(OtherDBUrl)
+      .on('child_changed', (snapshot) => {
+        console.log('OtherUpdate child_changed snapshot:', snapshot.val());
+        setOtherLocation(snapshot.val());
+      });
+
+    const MyStart = reference.ref(MyDBUrl).on('child_added', (snapshot) => {
+      console.log('MyStart child_added snapshot:', snapshot.val());
+      setMyLocation(snapshot.val());
+    });
+
+    const OtherStart = reference
+      .ref(OtherDBUrl)
+      .on('child_added', (snapshot) => {
+        console.log('OtherStart child_added snapshot:', snapshot.val());
+        setOtherLocation(snapshot.val());
+      });
+
     return () => {
+      reference.ref(MyDBUrl).off('child_changed', MyUpdate);
+      reference.ref(OtherDBUrl).off('child_changed', OtherUpdate);
+      reference.ref(MyDBUrl).off('child_added', MyStart);
+      reference.ref(OtherDBUrl).off('child_added', OtherStart);
+
       // SendBird.removeConnectionHandler('chat');
       // SendBird.removeChannelHandler('chat');
       // unsubscribe.remove();
@@ -127,20 +175,32 @@ const MeetMapScreen = ({route}: any, props: any) => {
     }
   }, [query]);
 
-  useEffect(() => {
-    console.log('L1 Screen UseEffect [UserData]');
-  }, [props.route]);
+  // useEffect(() => {
+  //   console.log('L1 Screen UseEffect [UserData]');
+  //   console.log(Mylocation.latlng);
+  // }, [props.route]);
 
-  const Test = () => {
-    const DBUrl = '/1v1meet/123uid';
-    reference.ref(DBUrl).update({
-      ManLang: origin,
-      GirlLang: destination,
+  const StartLocation = () => {
+    GetMyCoords(
+      UpdateMyLocation,
+      'Error In StartLocation Fun In L1Screen',
+      'Sucees StartLocation Fun In L1 Screen',
+    );
+  };
+
+  const UpdateMyLocation = (latitude: Number, longitude: Number) => {
+    reference.ref(MyDBUrlNode).update({
+      latitude: latitude,
+      longitude: longitude,
     });
   };
 
-  const origin = {latitude: 37.522623, longitude: 127.028021};
-  const destination = {latitude: 37.522621, longitude: 127.026001};
+  const UpdateSpicLocation = () => {
+    reference.ref(MyDBUrlNode).update({
+      latitude: 37.6041558,
+      longitude: 126.9456834,
+    });
+  };
 
   const ChatButton = () => {
     return (
@@ -232,45 +292,54 @@ const MeetMapScreen = ({route}: any, props: any) => {
           </TouchableOpacity>
         </View>
       </Modal>
-      <MapView
-        style={{width: '100%', height: '90%'}}
-        initialRegion={{
-          latitude: origin.latitude,
-          longitude: origin.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        showsUserLocation={false}
-        loadingEnabled={true}
-        userInterfaceStyle="light"
-        // userInterfaceStyle="dark"
-        minZoomLevel={5}
-        maxZoomLevel={17}>
-        <Marker coordinate={origin} tracksViewChanges={false}>
-          <View>
-            <Image
-              source={{uri: UserData.ProfileImageUrl}}
-              style={MapScreenStyles.GirlsMarker}
-              resizeMode="cover"
-            />
-          </View>
-        </Marker>
-        <Marker coordinate={destination} tracksViewChanges={false}>
-          <View>
-            <Image
-              source={{uri: UserData.ProfileImageUrl}}
-              style={MapScreenStyles.GirlsMarker}
-              resizeMode="cover"
-            />
-          </View>
-        </Marker>
+      {MyLocation && (
+        <MapView
+          style={{width: '100%', height: '90%'}}
+          initialRegion={{
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+            latitude: MyLocation.latitude,
+            longitude: MyLocation.longitude,
+          }}
+          showsUserLocation={false}
+          loadingEnabled={true}
+          userInterfaceStyle="light"
+          // userInterfaceStyle="dark"
+          minZoomLevel={5}
+          maxZoomLevel={17}>
+          {MyLocation && (
+            <Marker coordinate={MyLocation} tracksViewChanges={false}>
+              <View>
+                <Image
+                  source={{uri: UserData.ProfileImageUrl}}
+                  style={MapScreenStyles.GirlsMarker}
+                  resizeMode="cover"
+                />
+              </View>
+            </Marker>
+          )}
+          {OtherLocation && (
+            <Marker coordinate={OtherLocation} tracksViewChanges={false}>
+              <View>
+                <Image
+                  source={{uri: UserData.ProfileImageUrl}}
+                  style={MapScreenStyles.GirlsMarker}
+                  resizeMode="cover"
+                />
+              </View>
+            </Marker>
+          )}
 
-        <Polyline coordinates={[origin, destination]}></Polyline>
-      </MapView>
+          {OtherLocation && MyLocation && (
+            <Polyline coordinates={[MyLocation, OtherLocation]}></Polyline>
+          )}
+        </MapView>
+      )}
+
       <Button
         title="Test"
         onPress={() => {
-          Test();
+          UpdateSpicLocation();
         }}
       />
       {ChatButton()}

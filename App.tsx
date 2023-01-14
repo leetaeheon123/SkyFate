@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { Platform } from 'react-native';
+import {Platform} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import Routes from './route';
 import {QueryClient, QueryClientProvider} from 'react-query';
@@ -10,15 +10,20 @@ import {onRemoteMessage} from './src/utils.js';
 import messaging from '@react-native-firebase/messaging';
 
 import {AppContext} from './src/UsefulFunctions/Appcontext';
-import { NativeBaseProvider } from 'native-base';
+import {NativeBaseProvider} from 'native-base';
 import SendBird from 'sendbird';
+import FlipperAsyncStorage from 'rn-flipper-async-storage-advanced';
 
+if (__DEV__) {
+  import('react-query-native-devtools').then(({addPlugin}) => {
+    addPlugin({queryClient});
+  });
+}
 const queryClient = new QueryClient();
 
 // apk8269@gmail -> rendevous 계정
 // const appId = '68EBE580-772D-4BF6-AB5E-0C2AF43EC263';
 const appId = 'B0BDC2B5-FF59-4D00-98C2-BADBAA9215E7';
-
 
 const sendbird = new SendBird({appId});
 
@@ -26,14 +31,12 @@ const initialState = {
   sendbird,
 };
 
-
 const App = () => {
-
   const savedUserKey = 'UserData';
 
   useEffect(() => {
     AsyncStorage.getItem(savedUserKey)
-      .then(async user => {
+      .then(async (user) => {
         try {
           if (user) {
             const authorizationStatus = await messaging().requestPermission();
@@ -57,7 +60,7 @@ const App = () => {
           console.error(err);
         }
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
 
     if (Platform.OS !== 'ios') {
       const unsubscribeHandler = messaging().onMessage(onRemoteMessage);
@@ -65,18 +68,17 @@ const App = () => {
     }
   }, []);
 
-  
   return (
     <QueryClientProvider client={queryClient}>
-        <NavigationContainer>
-          <AppContext.Provider value={initialState}>
-            <NativeBaseProvider>
-              <Routes></Routes>
-            </NativeBaseProvider>
-          </AppContext.Provider>
-        </NavigationContainer>
+      <FlipperAsyncStorage />
+      <NavigationContainer>
+        <AppContext.Provider value={initialState}>
+          <NativeBaseProvider>
+            <Routes></Routes>
+          </NativeBaseProvider>
+        </AppContext.Provider>
+      </NavigationContainer>
     </QueryClientProvider>
-
   );
 };
 

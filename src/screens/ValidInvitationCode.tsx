@@ -27,6 +27,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from './RootStackParamList';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {LoginAndReigsterStyles} from '../../styles/LoginAndRegiser';
+import LinearGradient from 'react-native-linear-gradient';
 
 export type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -236,7 +237,35 @@ const ValidInvitationCodeScreen = () => {
             // backgroundColor:'gray'
           }}>
           {InvitationCode()}
+
+          <Button
+            title="닉네임 입력창 이동"
+            onPress={() => {
+              navigation.navigate('NickNameSelectScreen', {
+                UserEmail: '8269apk@naver.com',
+              });
+            }}
+          />
+
+          <Button
+            title="나이 입력창 이동"
+            onPress={() => {
+              navigation.navigate('AgeSelectScreen', {
+                UserEmail: '8269apk@naver.com',
+                Gender: 2,
+              });
+            }}
+          />
         </View>
+        <Button
+          title="이미지 업로드로 이동"
+          onPress={() => {
+            navigation.navigate('ProfileImageSelectScreen', {
+              UserEmail: '8269apk@naver.com',
+              Gender: 2,
+            });
+          }}
+        />
 
         <Button
           title="즉시 이용약관 페이지로 이동"
@@ -257,14 +286,7 @@ const ValidInvitationCodeScreen = () => {
           }}
         />
 
-        <Button
-          title="닉네임 입력창 이동"
-          onPress={() => {
-            navigation.navigate('NickNameSelectScreen');
-          }}
-        />
-
-        <View style={LoginAndReigsterStyles.CheckBox}>
+        {/* <View style={LoginAndReigsterStyles.CheckBox}>
           <Pressable
             style={LoginAndReigsterStyles.CheckBt}
             onPress={() => {
@@ -272,7 +294,19 @@ const ValidInvitationCodeScreen = () => {
             }}>
             <Text style={InvitationCodeStyles.CheckText}>다음</Text>
           </Pressable>
-        </View>
+        </View> */}
+        {/* 108.4deg, #7373F6 1.75%, #8B70F7 37.27%, #956EF6 64.1%, #A869F7 100% */}
+        <LinearGradient
+          colors={['#7373F6', '#8B70F7', '#956EF6', '#A869F7']}
+          style={LoginAndReigsterStyles.CheckBox}>
+          <Pressable
+            style={LoginAndReigsterStyles.CheckBt}
+            onPress={() => {
+              ValidateInvitationCode(TextInputInvitationCode, navigation);
+            }}>
+            <Text style={InvitationCodeStyles.CheckText}>다음</Text>
+          </Pressable>
+        </LinearGradient>
 
         <View
           style={[

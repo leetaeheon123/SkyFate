@@ -7,10 +7,8 @@ export const locationReducer = (state, action) => {
         latitude,
         longitude,
       };
-
-      // console.log(latlng);
       // const { content } = action.payload || {};
-      return {...state, latlng: latlng};
+      return {...state, latlng};
     }
     // case 'start-update': {
     //   return { ...state, updating: true, error: '' };

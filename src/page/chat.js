@@ -41,9 +41,6 @@ const ChatScreen = (props) => {
 
   const {channel} = route.params;
   const {UserData} = route.params;
-  // const {otherUserData} = route.params;
-
-  // console.log(channel.members[0].plainProfileUrl)
 
   // members 배열에서 UserEmail 값이 UserData.UserEmail과 동일한 요소를 제거함
 
@@ -54,18 +51,15 @@ const ChatScreen = (props) => {
   // console.log(otherUserData[0].userId);
   // console.log(otherUserData[0].plainProfileUrl);
 
-  // const otherUserDataObj = {
-  //   UserEmail: otherUserData[0].userId,
-  //   ProfileImageUrl: otherUserData[0].plainProfileUrl,
-  // };
-
-  // console.log('otherUserData In Chat.js:', otherUserData);
-
+  const otherUserDataObj = {
+    UserEmail: otherUserData[0].userId,
+    ProfileImageUrl: otherUserData[0].plainProfileUrl,
+  };
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
   // console.log('In Chat Page SendBird:', SendBird);
-  // console.log('In Chat Page channel:', channel);
+  console.log('In Chat Page channel:', channel.members);
 
   const [query, setQuery] = useState(null);
   const [state, dispatch] = useReducer(chatReducer, {
@@ -432,10 +426,7 @@ const ChatScreen = (props) => {
       } else if (message.customType == 'L1_Res') {
         navigation.navigate('MeetMapScreen', {
           UserData: UserData,
-          otherUserData: {
-            UserEmail: otherUserData[0].userId,
-            ProfileImageUrl: otherUserData[0].plainProfileUrl,
-          },
+          otherUserData: otherUserDataObj,
           channel: channel,
         });
       } else {
