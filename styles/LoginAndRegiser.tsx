@@ -7,14 +7,18 @@ export const LoginAndReigsterStyles = StyleSheet.create({
   },
   CheckBox: {
     width: '100%',
-    height: '10%',
+    // height: '10%',
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#0064FF',
     borderRadius: 25,
     position: 'absolute',
     bottom: '8%',
-    // backgroundColor: linear
+  },
+  Btn_Clickable: {
+    position: 'absolute',
+    bottom: '8%',
   },
   CheckText: {
     fontSize: 16,
@@ -51,8 +55,8 @@ export const LoginAndRegisterTextInputStyle = (BorderBottomColor: any) =>
     TextInput: {
       width: '100%',
       height: '50%',
-      // borderBottomColor: BorderBottomColor,
-      // borderBottomWidth: 1,
+      borderBottomColor: BorderBottomColor,
+      borderBottomWidth: 1,
       fontSize: 18,
       fontWeight: '600',
       color: 'black',

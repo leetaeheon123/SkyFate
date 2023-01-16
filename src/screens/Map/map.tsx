@@ -459,6 +459,9 @@ const MapScreen = (props: any) => {
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
+  const [ProfileImageUrl, setProfileImageUrl] = useState(
+    UserData.ProfileImageUrl,
+  );
   const {width, height} = Dimensions.get('window');
 
   const mapRef = useRef(null);
@@ -842,10 +845,15 @@ const MapScreen = (props: any) => {
     DirectDeleteMyLocation(UserData.UserEmail);
   };
 
-  const [GpsOn, setGpsOn] = useState(false);
+  const StopShowMyLocationMan = () => {
+    setGpsOn((previousState) => !previousState);
+  };
+
+  const [GpsOn, setGpsOn] = useState(UserData.Gender == 1);
 
   const [ModalVisiable, setModalVisiable] = useState(false);
   const [ProfileModalVisiable, setProfileModalVisiable] = useState(false);
+  const [ChatListModal, setChatListModal] = useState(false);
   const [ShowUserModal, setShowUserModal] = useState(false);
   const [ProfileForGtoM, setProfileForGtoM] = useState<Object>({});
 
@@ -999,6 +1007,7 @@ const MapScreen = (props: any) => {
     // }
 
     setProfileModalVisiable(false);
+    setChatListModal(false);
     navigation.navigate('ChatScreen', {
       channel,
       UserData,
@@ -1079,7 +1088,7 @@ const MapScreen = (props: any) => {
   const ProfileImage = () => {
     return (
       <Image
-        source={{uri: UserData.ProfileImageUrl}}
+        source={{uri: ProfileImageUrl}}
         style={{width: 100, height: 100, borderRadius: 10}}
       />
     );
@@ -1200,6 +1209,24 @@ const MapScreen = (props: any) => {
           <View style={MapScreenStyles.ProfileModalScrollView}>
             <View
               style={{
+                width: '100%',
+                height: 2,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+              }}>
+              <View
+                style={{
+                  height: 2,
+                  width: 80,
+                  backgroundColor: 'gray',
+                  borderRadius: 25,
+                }}
+              />
+            </View>
+
+            <View
+              style={{
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
@@ -1218,6 +1245,7 @@ const MapScreen = (props: any) => {
                     UserData.Gender,
                     navigation,
                     1,
+                    setProfileImageUrl,
                   );
                 }}>
                 {ProfileImage()}
@@ -1244,41 +1272,6 @@ const MapScreen = (props: any) => {
               onPress={() => {
                 setProfileModalVisiable(false);
               }}
-            />
-            <FlatList
-              data={state.channels}
-              renderItem={({item}) => (
-                <Channel
-                  key={item.url}
-                  channel={item}
-                  sendbird={SendBird}
-                  onPress={(channel) => chat(channel)}
-                />
-              )}
-              keyExtractor={(item) => item.url}
-              refreshControl={
-                <RefreshControl
-                  refreshing={state.loading}
-                  colors={['#742ddd']}
-                  tintColor={'#742ddd'}
-                  onRefresh={refresh}
-                />
-              }
-              contentContainerStyle={{flexGrow: 1}}
-              // ListHeaderComponent={
-              //   state.error && (
-              //     <View style={style.errorContainer}>
-              //       <Text style={style.error}>{state.error}</Text>
-              //     </View>
-              //   )
-              // }
-              // ListEmptyComponent={
-              //   <View style={style.emptyContainer}>
-              //     <Text style={style.empty}>{state.empty}</Text>
-              //   </View>
-              // }
-              onEndReached={() => next()}
-              onEndReachedThreshold={0.5}
             />
 
             <Text style={[styles.WhiteColor]}>
@@ -1352,6 +1345,78 @@ const MapScreen = (props: any) => {
               title="L1으로 이동"
               onPress={() => {
                 navigation.navigate('MeetMapScreen', {});
+                setProfileModalVisiable(false);
+              }}
+            />
+            <Button
+              title="ChatListModal on"
+              onPress={() => {
+                setProfileModalVisiable(false);
+                setTimeout(() => {
+                  setChatListModal(true);
+                }, 500);
+              }}
+            />
+          </View>
+        </SafeAreaView>
+      </Modal>
+    );
+  };
+
+  const ShowChatListModal = () => {
+    return (
+      <Modal
+        // animationType='slide'
+        animationIn={'slideInUp'}
+        isVisible={ChatListModal}
+        onBackdropPress={() => setChatListModal(false)}
+        // visible={ProfileModalVisiable}
+        transparent={true}
+        style={{width: '100%', height: '100%'}}
+        // onSwipeComplete={() => setChatListModal(false)}
+        // swipeDirection="down"
+        // coverScreen={false}
+      >
+        <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
+          <View style={MapScreenStyles.ProfileModalScrollView}>
+            <FlatList
+              data={state.channels}
+              renderItem={({item}) => (
+                <Channel
+                  key={item.url}
+                  channel={item}
+                  sendbird={SendBird}
+                  onPress={(channel) => chat(channel)}
+                />
+              )}
+              keyExtractor={(item) => item.url}
+              refreshControl={
+                <RefreshControl
+                  refreshing={state.loading}
+                  colors={['#742ddd']}
+                  tintColor={'#742ddd'}
+                  onRefresh={refresh}
+                />
+              }
+              contentContainerStyle={{flexGrow: 1}}
+              // ListHeaderComponent={
+              //   state.error && (
+              //     <View style={style.errorContainer}>
+              //       <Text style={style.error}>{state.error}</Text>
+              //     </View>
+              //   )
+              // }
+              // ListEmptyComponent={
+              //   <View style={style.emptyContainer}>
+              //     <Text style={style.empty}>{state.empty}</Text>
+              //   </View>
+              // }
+              onEndReached={() => next()}
+              onEndReachedThreshold={0.5}
+            />
+            <Button
+              title="X"
+              onPress={() => {
                 setProfileModalVisiable(false);
               }}
             />
@@ -1608,9 +1673,95 @@ const MapScreen = (props: any) => {
     }
     return Result;
   };
+
+  const GpsOnOffSwitch = (onValueChangeFun: Function) => {
+    return (
+      <Switch
+        trackColor={{false: '#202124', true: '#202124'}}
+        thumbColor={GpsOn ? '#28FF98' : '#f4f3f4'}
+        ios_backgroundColor="#202124"
+        onValueChange={onValueChangeFun}
+        value={GpsOn}
+      />
+    );
+  };
+
+  const View_GpsOff = () => {
+    return (
+      <View
+        style={[
+          styles.NoFlexDirectionCenter,
+          {
+            width: 38,
+            height: 22,
+            backgroundColor: '#B4B4B4',
+            borderRadius: 4,
+          },
+        ]}>
+        <Text style={{fontWeight: '500', fontSize: 14}}>OFF</Text>
+      </View>
+    );
+  };
+
+  const View_GpsOn = () => {
+    return (
+      <View
+        style={[
+          styles.NoFlexDirectionCenter,
+          {
+            width: 33,
+            height: 22,
+            backgroundColor: '#28FF98',
+            borderRadius: 4,
+          },
+        ]}>
+        <Text style={{fontWeight: '500', fontSize: 14}}>ON</Text>
+      </View>
+    );
+  };
+
+  const GirlTabBar = () => {
+    return (
+      <SafeAreaView
+        style={[styles.Row_OnlyColumnCenter, MapScreenStyles.TopView]}>
+        <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+          나의위치 표시하기
+        </Text>
+
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            color: GpsOn == false ? '#9F9F9F' : '#28FF98',
+          }}>
+          {Math.floor(second / 60)} : {second % 60}
+        </Text>
+
+        {GpsOn == true ? GpsOnOffSwitch(StopShowMyLocation) : null}
+
+        {GpsOn == false ? View_GpsOff() : View_GpsOn()}
+      </SafeAreaView>
+    );
+  };
+
+  const ManTabBar = () => {
+    return (
+      <SafeAreaView
+        style={[styles.Row_OnlyColumnCenter, MapScreenStyles.TopView]}>
+        <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+          나의위치 표시하기
+        </Text>
+        {GpsOnOffSwitch(StopShowMyLocationMan)}
+
+        {GpsOn == false ? View_GpsOff() : View_GpsOn()}
+      </SafeAreaView>
+    );
+  };
+
   return (
     <View style={{width: '100%', height: '100%'}}>
       {/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
+      {ShowChatListModal()}
       {ShowMyProfileModal()}
       {GirlInputStateModal()}
       {ShowClickedUserDataModal()}
@@ -1630,11 +1781,9 @@ const MapScreen = (props: any) => {
           userInterfaceStyle="dark"
           minZoomLevel={10}
           maxZoomLevel={17}>
-          {GpsOn == true && Platform.OS === 'android'
-            ? AnimationMarker(UserData.ProfileImageUrl)
-            : null}
+          {GpsOn == true ? AnimationMarker(ProfileImageUrl) : null}
 
-          {isLoading == false && UserData.Gender == 1
+          {isLoading == false && UserData.Gender == 1 && GpsOn == true
             ? data?.map((data: any, index) => {
                 return (
                   <Marker
@@ -1739,62 +1888,7 @@ const MapScreen = (props: any) => {
         </MapView>
       )}
 
-      {UserData.Gender == 2 ? (
-        <SafeAreaView
-          style={[styles.Row_OnlyColumnCenter, MapScreenStyles.TopView]}>
-          <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-            나의위치 표시하기
-          </Text>
-
-          {GpsOn == false ? (
-            <Text style={{color: '#9F9F9F', fontSize: 16, fontWeight: '500'}}>
-              {Math.floor(second / 60)} : {second % 60}
-            </Text>
-          ) : (
-            <Text style={{color: '#28FF98', fontSize: 16, fontWeight: '500'}}>
-              {Math.floor(second / 60)} : {second % 60}
-            </Text>
-          )}
-
-          {GpsOn == true ? (
-            <Switch
-              trackColor={{false: '#202124', true: '#202124'}}
-              thumbColor={GpsOn ? '#28FF98' : '#f4f3f4'}
-              ios_backgroundColor="#202124"
-              onValueChange={StopShowMyLocation}
-              value={GpsOn}
-            />
-          ) : null}
-
-          {GpsOn == false ? (
-            <View
-              style={[
-                styles.NoFlexDirectionCenter,
-                {
-                  width: 38,
-                  height: 22,
-                  backgroundColor: '#B4B4B4',
-                  borderRadius: 4,
-                },
-              ]}>
-              <Text style={{fontWeight: '500', fontSize: 14}}>OFF</Text>
-            </View>
-          ) : (
-            <View
-              style={[
-                styles.NoFlexDirectionCenter,
-                {
-                  width: 33,
-                  height: 22,
-                  backgroundColor: '#28FF98',
-                  borderRadius: 4,
-                },
-              ]}>
-              <Text style={{fontWeight: '500', fontSize: 14}}>ON</Text>
-            </View>
-          )}
-        </SafeAreaView>
-      ) : null}
+      {UserData.Gender == 2 ? GirlTabBar() : ManTabBar()}
 
       <View
         style={[
@@ -1812,9 +1906,10 @@ const MapScreen = (props: any) => {
           onPress={() => {
             // RemoveIdentityToken()
             setProfileModalVisiable(!ProfileModalVisiable);
+            // setChatListModal(!ChatListModal);
           }}>
           <Image
-            source={{uri: UserData.ProfileImageUrl}}
+            source={{uri: ProfileImageUrl}}
             style={{width: 43, height: 43, borderRadius: 35}}
           />
         </TouchableOpacity>

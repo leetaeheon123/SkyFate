@@ -62,7 +62,7 @@ const IndicatorScreen = (props: any) => {
         if (user) {
           const UserEmail = user;
           const UserData = await GetUserData(user);
-          const Gender = UserData?.Gender
+          const Gender = UserData?.Gender;
           // console.log("UserData In Indicator", UserData)
 
           const ValidNickName = UserData?.hasOwnProperty('NickName');
@@ -85,14 +85,18 @@ const IndicatorScreen = (props: any) => {
 
           const ValidAge = UserData?.hasOwnProperty('Age');
           if (!ValidAge) {
-            GotoProfileInputScreen('AgeSelectScreen', UserEmail,Gender);
+            GotoProfileInputScreen('AgeSelectScreen', UserEmail, Gender);
             return;
           }
 
           const ValidProfileImageUrl =
             UserData?.hasOwnProperty('ProfileImageUrl');
           if (!ValidProfileImageUrl) {
-            GotoProfileInputScreen('ProfileImageSelectScreen', UserEmail,Gender);
+            GotoProfileInputScreen(
+              'ProfileImageSelectScreen',
+              UserEmail,
+              Gender,
+            );
             return;
           }
 
@@ -126,7 +130,7 @@ const IndicatorScreen = (props: any) => {
   ) => {
     navigation.navigate(`${ScreenName}`, {
       UserEmail,
-      Gender
+      Gender,
     });
   };
 
@@ -138,6 +142,10 @@ const IndicatorScreen = (props: any) => {
 
         //유저가 있는경우에 CurrentUUser에 savedUserKey 키를 통해 구해온값 저장
         if (user) {
+          console.log(
+            'setCurrentUser In UseEffect [params] In indicator Screen',
+            UserData,
+          );
           setCurrentUser(UserData);
         }
         setInitialized(true);

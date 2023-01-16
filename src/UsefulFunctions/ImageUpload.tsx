@@ -11,6 +11,7 @@ export const ChangeMyProfileImage = async (
   Gender: number,
   navigation: any,
   index: number,
+  setState: Function,
 ) => {
   let UploadCallback = async (LocalImagePath: string) => {
     const StorageUrl = await PutInStorage(LocalImagePath, UserEmail, Gender);
@@ -18,10 +19,10 @@ export const ChangeMyProfileImage = async (
     await UpdateProfileImageUrl(UserEmail, StorageUrl, navigation, index);
   };
 
-  ImagePicker(UploadCallback);
+  ImagePicker(UploadCallback, setState);
 };
 
-const ImagePicker = (callback: Function) => {
+const ImagePicker = (callback: Function, setState: Function) => {
   const back: string = 'back';
   const duration: number = 10;
   const result = launchImageLibrary(
@@ -42,6 +43,7 @@ const ImagePicker = (callback: Function) => {
     async (res) => {
       if (res.didCancel) return;
       let LocalImagePath = res.assets[0].uri;
+      setState(LocalImagePath);
       callback(LocalImagePath);
     },
   );
@@ -140,9 +142,9 @@ const UpdateProfileImageUrl = async (
   let UpdateProfileImageUrl = Obj[index];
 
   await UpdateProfileImageUrl(UserEmail, StorageUrl);
-  navigation.navigate('IndicatorScreen', {
-    From: 'ImageUpload',
-  });
+  // navigation.navigate('IndicatorScreen', {
+  //   From: 'ImageUpload',
+  // });
 };
 
 export const GenderNumToStr = (GenderNum: Number) => {

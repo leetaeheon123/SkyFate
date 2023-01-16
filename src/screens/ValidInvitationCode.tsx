@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Pressable,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import {
   AppleButton,
@@ -25,7 +26,6 @@ import firestore from '@react-native-firebase/firestore';
 import styles from '../../styles/ManToManBoard';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from './RootStackParamList';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import {LoginAndReigsterStyles} from '../../styles/LoginAndRegiser';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -316,13 +316,13 @@ const ValidInvitationCodeScreen = () => {
               width: '100%',
             },
           ]}>
-          <Pressable
-            style={[styles.RowCenter]}
+          <TouchableOpacity
+            style={[styles.RowCenter, {backgroundColor: 'red', height: 30}]}
             onPress={() => {
               navigation.navigate('LoginScreen');
             }}>
             <Text>이미 계정이 있습니다 &gt;</Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
