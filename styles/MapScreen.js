@@ -187,6 +187,23 @@ export const MapScreenStyles = StyleSheet.create({
     borderRadius: 10,
   },
 
+  Btn_MatchStart: {
+    position: 'absolute',
+    left: '5%',
+    bottom: '6%',
+  },
+
+  Btn_Match: {
+    position: 'absolute',
+    left: '15%',
+    bottom: '30%',
+  },
+  Btn_RandomMatch: {
+    position: 'absolute',
+    right: '15%',
+    bottom: '30%',
+  },
+
   GirlsMarker: {
     width: 35,
     height: 35,

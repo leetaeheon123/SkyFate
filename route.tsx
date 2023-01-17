@@ -1,36 +1,37 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import ManToManBoardWriteScreen from './src/screens/ManBoard/ManToManBoardWrite';
-import ValidInvitationCodeScreen from './src/screens/ValidInvitationCode';
-import RegisterScreen from './src/screens/SignInUp/Register';
-import LoginScreen from './src/screens/SignInUp/Login';
+import ManToManBoardWriteScreen from 'Screens/ManBoard/ManToManBoardWrite';
+import ValidInvitationCodeScreen from 'Screens/ValidInvitationCode';
+import RegisterScreen from 'Screens/SignInUp/Register';
+import LoginScreen from 'Screens/SignInUp/Login';
+import WithdrawalScreen from 'Screens/SignInUp/Withdrawal';
 
-import IndicatorScreen from './src/screens/Indicator';
+import IndicatorScreen from 'Screens/Indicator';
 
-import ManToManBoardScreen from './src/screens/ManBoard/ManToManBorad';
-import ManToManBoardViewScreen from './src/screens/ManBoard/ManToManBoradView';
-import AnimationTestScreen from './src/screens/AnimationTest/AnimationTest';
-import AnimationTestScreen2 from './src/screens/AnimationTest/AnimationTest2';
+import ManToManBoardScreen from 'Screens/ManBoard/ManToManBorad';
+import ManToManBoardViewScreen from 'Screens/ManBoard/ManToManBoradView';
+import AnimationTestScreen from 'Screens/AnimationTest/AnimationTest';
+import AnimationTestScreen2 from 'Screens/AnimationTest/AnimationTest2';
 
-import ImageUploadSample from './src/screens/ImageUploadSample';
-import PhoneRing from './src/screens/Ring/PhoneRing';
+import ImageUploadSample from 'Screens/ImageUploadSample';
+import PhoneRing from 'Screens/Ring/PhoneRing';
 
-import CertificationScreen from './src/screens/Certification/Certification';
-import CertificationResultScreen from './src/screens/Certification/CertificationResult';
+import CertificationScreen from 'Screens/Certification/Certification';
+import CertificationResultScreen from 'Screens/Certification/CertificationResult';
 
-import {RootStackParamList} from './src/screens/RootStackParamList';
+import {RootStackParamList} from 'Screens/RootStackParamList';
 
 import BottomTabScreen from './bottomstack';
 import ChatScreen from './src/page/chat';
-import MbtiSelectScreen from './src/screens/ProfileInput/MbtiSelect';
-import GenderSelectScreen from './src/screens/ProfileInput/GenderSelect';
-import AgeSelectScreen from './src/screens/ProfileInput/AgeSelect';
-import NickNameSelectScreen from './src/screens/ProfileInput/NickNameSelect';
+import MbtiSelectScreen from 'Screens/ProfileInput/MbtiSelect';
+import GenderSelectScreen from 'Screens/ProfileInput/GenderSelect';
+import AgeSelectScreen from 'Screens/ProfileInput/AgeSelect';
+import NickNameSelectScreen from 'Screens/ProfileInput/NickNameSelect';
 
-import ProfileImageSelectScreen from './src/screens/ProfileInput/ProfileImageSelect';
-import AgreementScreen from './src/screens/AgreementScreen';
-import WebViewScreen from './src/screens/WebViewScreen';
+import ProfileImageSelectScreen from 'Screens/ProfileInput/ProfileImageSelect';
+import AgreementScreen from 'Screens/AgreementScreen';
+import WebViewScreen from 'Screens/WebViewScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -89,6 +90,12 @@ const Routes = (props: any) => {
       <Stack.Screen
         name="LoginScreen"
         component={LoginScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="WithdrawalScreen"
+        component={WithdrawalScreen}
         options={{headerShown: false}}
       />
 

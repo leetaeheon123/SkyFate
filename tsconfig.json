@@ -17,7 +17,8 @@
       "^/*": ["./src/UsefulFunctions/*"],
       "component/*": ["./src/component/*"],
       "reducer/*": ["./src/reducer/*"],
-      "Assets/*": ["./src/Assets/*"]
+      "Assets/*": ["./src/Assets/*"],
+      "Screens/*": ["./src/screens/*"]
     }
   },
   "exclude": [
