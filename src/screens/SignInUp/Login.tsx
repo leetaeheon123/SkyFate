@@ -1,57 +1,70 @@
 import React, {useState, useContext} from 'react';
-import {View, Button, Platform, Text, SafeAreaView, Alert,TextInput, StyleSheet , Pressable} from 'react-native';
+import {
+  View,
+  Button,
+  Platform,
+  Text,
+  SafeAreaView,
+  Alert,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  KeyboardAvoidingView,
+} from 'react-native';
 
-import { signIn, signUp } from "../../UsefulFunctions/FirebaseAuth"
+import {signIn, signUp} from '../../UsefulFunctions/FirebaseAuth';
 
-import {NativeStackScreenProps} from "@react-navigation/native-stack"
-import { RootStackParamList } from '../RootStackParamList';
-import {AppContext} from '../../UsefulFunctions/Appcontext'
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../RootStackParamList';
+import {AppContext} from '../../UsefulFunctions/Appcontext';
 
-import { LoginAndReigsterStyles } from '../../../styles/LoginAndRegiser';
-import { LoginUserEmail } from "../../UsefulFunctions/SaveUserDataInDevice"
+import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
+import {LoginUserEmail} from '../../UsefulFunctions/SaveUserDataInDevice';
 
-import { LoginAndRegisterTextInputStyle } from '../../../styles/LoginAndRegiser';
-export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCode">;
+import {LoginAndRegisterTextInputStyle} from '../../../styles/LoginAndRegiser';
+export type Register2ScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  'InvitationCode'
+>;
 
-const LoginWithEmail = async (navigation:any, Email:string, Password:string ,SendBird:Object) => {
-
+const LoginWithEmail = async (
+  navigation: any,
+  Email: string,
+  Password: string,
+  SendBird: Object,
+) => {
   try {
-    const result = await signIn({email: Email, password:Password})
-    let UserEmail = result.user.email
-    LoginUserEmail(UserEmail, navigation, SendBird)
-  } 
-  catch (error) {
-    if(error.code === "auth/wrong-password") {
-      Alert.alert("이메일은 존재하나 비밀번호가 다릅니다.")
-      //  == 추천인 코드가 다른상황 
+    const result = await signIn({email: Email, password: Password});
+    let UserEmail = result.user.email;
+    LoginUserEmail(UserEmail, navigation, SendBird);
+  } catch (error) {
+    if (error.code === 'auth/wrong-password') {
+      Alert.alert('이메일은 존재하나 비밀번호가 다릅니다.');
+      //  == 추천인 코드가 다른상황
     }
-    if(error.code === "auth/user-not-found") {
-      Alert.alert("해당 이메일이 없습니다. 다시한번 이메일을 확인해주세요")
-      // 추천인 코드는 있으나, 
+    if (error.code === 'auth/user-not-found') {
+      Alert.alert('해당 이메일이 없습니다. 다시한번 이메일을 확인해주세요');
+      // 추천인 코드는 있으나,
     }
-    
   }
-}
+};
 
-const LoginScreen = (props:any) => {
+const LoginScreen = (props: any) => {
   const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
   const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
 
-  const [TextInputEmail , setTextInputEmail] = useState("8269apk@naver.com")
-  const [TextInputPassword , setTextInputPassword] = useState("123456")
-  
-  const Context = useContext(AppContext);
-  const SendBird = Context.sendbird
+  const [TextInputEmail, setTextInputEmail] = useState('8269apk@naver.com');
+  const [TextInputPassword, setTextInputPassword] = useState('123456');
 
-  const navigation = props.navigation
+  const Context = useContext(AppContext);
+  const SendBird = Context.sendbird;
+
+  const navigation = props.navigation;
 
   // const navigation = useNavigation()
-  
-
 
   const EmailTextInput = () => (
-    <View
-      style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
+    <View style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -69,7 +82,7 @@ const LoginScreen = (props:any) => {
           setBorderBottomColor2('lightgray');
         }}
         value={TextInputEmail}
-        onChangeText={value => {
+        onChangeText={(value) => {
           setTextInputEmail(value);
         }}
       />
@@ -77,8 +90,7 @@ const LoginScreen = (props:any) => {
   );
 
   const PasswordTextInput = () => (
-    <View
-    style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
+    <View style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -96,7 +108,7 @@ const LoginScreen = (props:any) => {
           setBorderBottomColor3('lightgray');
         }}
         value={TextInputPassword}
-        onChangeText={value => {
+        onChangeText={(value) => {
           setTextInputPassword(value);
         }}
       />
@@ -104,17 +116,14 @@ const LoginScreen = (props:any) => {
   );
 
   return (
-    <SafeAreaView
-      style={LoginAndReigsterStyles.Body}>
-      <View
-        style={LoginAndReigsterStyles.Main}>
-        <View
-          style={LoginAndReigsterStyles.Description}>
+    <SafeAreaView style={LoginAndReigsterStyles.Body}>
+      <View style={LoginAndReigsterStyles.Main}>
+        <View style={LoginAndReigsterStyles.Description}>
           <Text
             style={{
               fontSize: 22,
               fontWeight: 'bold',
-              color:'black'
+              color: 'black',
             }}>
             로그인을 시작해주세요
           </Text>
@@ -129,20 +138,22 @@ const LoginScreen = (props:any) => {
         </View>
 
         <View style={LoginAndReigsterStyles.CheckBox}>
-        <Pressable
-          style={LoginAndReigsterStyles.CheckBt}
-          onPress={() => {
-            LoginWithEmail(navigation, TextInputEmail, TextInputPassword,SendBird)
-          }}>
-          <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
-        </Pressable>
-      </View>
-     
+          <Pressable
+            style={LoginAndReigsterStyles.CheckBt}
+            onPress={() => {
+              LoginWithEmail(
+                navigation,
+                TextInputEmail,
+                TextInputPassword,
+                SendBird,
+              );
+            }}>
+            <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
+          </Pressable>
+        </View>
       </View>
     </SafeAreaView>
   );
 };
-
-
 
 export default LoginScreen;

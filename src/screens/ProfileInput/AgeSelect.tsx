@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Button,
@@ -9,24 +9,39 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
+  TouchableOpacity,
+  Keyboard,
+  Dimensions,
 } from 'react-native';
 
 import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
 import firestore from '@react-native-firebase/firestore';
 import {
   AgeLine,
+  Btn_ClickableComponent,
+  Btn_NotClickableComponent,
   SubTextComponent,
   TextComponent,
 } from 'component/Profile/ProfileSvg';
 import styles from '~/ManToManBoard';
 import {AgeStyles} from '~/ProfileInput';
 const AgeSelectScreen = ({navigation, route}: any) => {
+  const {width, height} = Dimensions.get('window');
+  console.log(width);
   console.log(route.params.UserEmail);
   const {UserEmail, Gender} = route.params;
 
+  const ValidNum = (value: any) => {
+    return !isNaN(parseFloat(value));
+  };
+
   const UpdateAge = async () => {
+    let YearOfBirthStr = `${focusone}${focustwo}${focusthree}${focusfour}`;
+    let YearOfBirth = Number(YearOfBirthStr);
+
+    let Age = 2023 - YearOfBirth + 1;
     await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
-      Age: 22,
+      Age: Age,
     });
 
     navigation.navigate('ProfileImageSelectScreen', {
@@ -35,25 +50,79 @@ const AgeSelectScreen = ({navigation, route}: any) => {
     });
   };
 
-  const TextInputGen = () => {
+  const ValidComponent = () => {
+    let onevalid = ValidNum(focusone);
+    let twovalid = ValidNum(focustwo);
+    let threevalid = ValidNum(focusthree);
+    let fourvalid = ValidNum(focusfour);
+
+    if (onevalid && twovalid && threevalid && fourvalid) {
+      return (
+        <TouchableOpacity
+          style={LoginAndReigsterStyles.Btn_Clickable}
+          onPress={() => {
+            UpdateAge();
+          }}>
+          {Btn_ClickableComponent(width * 0.9)}
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <View style={LoginAndReigsterStyles.CheckBox}>
+          {Btn_NotClickableComponent(width * 0.9)}
+        </View>
+      );
+    }
+  };
+  const [focusone, setfocusone] = useState<string>('');
+  const [focustwo, setfocustwo] = useState<string>('');
+  const [focusthree, setfocusthree] = useState<string>('');
+  const [focusfour, setfocusfour] = useState<string>('');
+
+  const ref_input1 = useRef(null);
+  const ref_input2 = useRef(null);
+  const ref_input3 = useRef(null);
+  const ref_input4 = useRef(null);
+
+  const TextInputGen = (
+    setvalue: Function,
+    ref: any,
+    nextref: any = null,
+    afterref: any = null,
+    value: any,
+  ) => {
     return (
       <View
         style={{
           display: 'flex',
           flexDirection: 'column',
-          // backgroundColor: 'black',
         }}>
         <View style={AgeStyles.TextInput}>
           <TextInput
+            style={{
+              // backgroundColor: 'gray',
+              width: 36,
+              height: 36,
+            }}
+            value={value}
+            onChangeText={(newValue) => setvalue(newValue)}
+            ref={ref}
             textAlign={'center'}
             maxLength={1}
-            underlineColorAndroid="red"
-            onKeyPress={() => {
-              // console.log("Hello")
+            onKeyPress={(keyPress) => {
+              const key = keyPress.nativeEvent.key;
+              if (key == 'Backspace') {
+                if (afterref) {
+                  afterref.current.focus();
+                }
+              } else {
+                if (nextref) {
+                  nextref.current.focus();
+                }
+              }
             }}
-            onEndEditing={() => {
-              console.log('Hello');
-            }}
+            keyboardType="numeric"
+            autoFocus={ref == ref_input1 ? true : false}
           />
         </View>
         {AgeLine()}
@@ -67,10 +136,13 @@ const AgeSelectScreen = ({navigation, route}: any) => {
         <View style={LoginAndReigsterStyles.Description}>
           {TextComponent('Age')}
         </View>
-        <View
+        <Pressable
           style={{
             height: '50%',
             width: '100%',
+          }}
+          onPress={() => {
+            Keyboard.dismiss();
           }}>
           <View
             style={{
@@ -78,24 +150,34 @@ const AgeSelectScreen = ({navigation, route}: any) => {
               flexDirection: 'row',
               justifyContent: 'space-around',
             }}>
-            {TextInputGen()}
-            {TextInputGen()}
-            {TextInputGen()}
-            {TextInputGen()}
+            {TextInputGen(setfocusone, ref_input1, ref_input2, null, focusone)}
+            {TextInputGen(
+              setfocustwo,
+              ref_input2,
+              ref_input3,
+              ref_input1,
+              focustwo,
+            )}
+            {TextInputGen(
+              setfocusthree,
+              ref_input3,
+              ref_input4,
+              ref_input2,
+              focusthree,
+            )}
+            {TextInputGen(
+              setfocusfour,
+              ref_input4,
+              null,
+              ref_input3,
+              focusfour,
+            )}
           </View>
 
           {SubTextComponent('Age')}
-        </View>
+        </Pressable>
 
-        <View style={LoginAndReigsterStyles.CheckBox}>
-          <Pressable
-            style={LoginAndReigsterStyles.CheckBt}
-            onPress={() => {
-              UpdateAge();
-            }}>
-            <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
-          </Pressable>
-        </View>
+        {ValidComponent()}
       </View>
     </SafeAreaView>
   );

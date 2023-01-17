@@ -46,6 +46,9 @@ import SubTextProfileImage from 'Assets/Profile/ProfileImage/ProfileImageSubText
 
 import ProfileImageUpload from 'Assets/Profile/ProfileImage/ProfileImageUpload.svg';
 
+import Btn_Clickable from 'Assets/Profile/All/Btn_Clickable.svg';
+import Btn_NotClickable from 'Assets/Profile/All/Btn_NotClickable.svg';
+
 const excute = (Name) => {
   switch (Name) {
     case 'Mbti':
@@ -138,4 +141,26 @@ export const SubTextComponent = (Name) => {
 
 export const ProfileImageUploadComponent = () => {
   return <WithLocalSvg asset={ProfileImageUpload}></WithLocalSvg>;
+};
+
+export const Btn_ClickableComponent = (width) => {
+  let height = width * 0.22;
+
+  return (
+    <WithLocalSvg
+      width={width}
+      height={height}
+      asset={Btn_Clickable}></WithLocalSvg>
+  );
+};
+
+export const Btn_NotClickableComponent = (width) => {
+  let height = width * 0.22;
+  return (
+    <WithLocalSvg
+      width={width}
+      height={height}
+      // fill="Black"
+      asset={Btn_NotClickable}></WithLocalSvg>
+  );
 };
