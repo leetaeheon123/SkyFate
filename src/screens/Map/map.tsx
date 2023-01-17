@@ -75,6 +75,12 @@ import {locationReducer} from 'reducer/location';
 import {ReplacedotInEmail} from '^/Replace';
 
 import {ChangeMyProfileImage, GenderNumToStr} from '^/ImageUpload';
+import {
+  Enter_MatchSvg,
+  Entered_MatchSvg,
+  GeneralMatchSvg,
+  RandomMatchSvg,
+} from 'component/Map/MapSvg';
 export interface ILocation {
   latitude: number;
   longitude: number;
@@ -855,6 +861,8 @@ const MapScreen = (props: any) => {
   const [ProfileModalVisiable, setProfileModalVisiable] = useState(false);
   const [ChatListModal, setChatListModal] = useState(false);
   const [ShowUserModal, setShowUserModal] = useState(false);
+  const [Btn_MatchVis, setBtn_MatchVis] = useState(false);
+
   const [ProfileForGtoM, setProfileForGtoM] = useState<Object>({});
 
   const [Memo, setMemo] = useState('');
@@ -865,6 +873,10 @@ const MapScreen = (props: any) => {
 
   const ChangeModalVisiable = () => {
     setModalVisiable((previousState) => !previousState);
+  };
+
+  const ChangeBtn_MacthVisiable = () => {
+    setBtn_MatchVis((previousState) => !previousState);
   };
 
   Counter(
@@ -1357,6 +1369,16 @@ const MapScreen = (props: any) => {
                 }, 500);
               }}
             />
+
+            <Button
+              title="회원탈퇴 하기"
+              color={'red'}
+              onPress={() => {
+                navigation.navigate('WithdrawalScreen', {
+                  logout: logout,
+                  UserEmail: UserData.UserEmail,
+                });
+              }}></Button>
           </View>
         </SafeAreaView>
       </Modal>
@@ -1758,6 +1780,82 @@ const MapScreen = (props: any) => {
     );
   };
 
+  const TouchableBtn_EnterMatch = () => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          ChangeBtn_MacthVisiable();
+        }}>
+        {Entered_MatchSvg(50)}
+      </TouchableOpacity>
+    );
+  };
+
+  const MatchBar = () => {
+    return (
+      <View
+        style={[
+          MapScreenStyles.StartView,
+          styles.Row_OnlyColumnCenter,
+          {justifyContent: 'space-around'},
+        ]}>
+        {TouchableBtn_EnterMatch()}
+        {TouchableBtn_EnterMatch()}
+        {TouchableBtn_EnterMatch()}
+        {TouchableBtn_EnterMatch()}
+        {TouchableBtn_EnterMatch()}
+      </View>
+    );
+  };
+
+  const Btn_MatchComponent = () => {
+    return (
+      <TouchableOpacity
+        style={MapScreenStyles.Btn_Match}
+        onPress={() => {
+          ChangeModalVisiable();
+        }}>
+        {GeneralMatchSvg(120)}
+      </TouchableOpacity>
+    );
+  };
+
+  const Btn_RandomMatchComponent = () => {
+    return (
+      <TouchableOpacity
+        style={MapScreenStyles.Btn_RandomMatch}
+        onPress={() => {
+          // ChangeModalVisiable();
+        }}>
+        {RandomMatchSvg(120)}
+      </TouchableOpacity>
+    );
+  };
+
+  // const Btn_MatchStart = () => {
+  //   return (
+  //     <TouchableOpacity
+  //       style={MapScreenStyles.Btn_MatchStart}
+  //       onPress={() => {
+  //         ChangeModalVisiable();
+  //       }}>
+  //       {Btn_MatchStartSvg(142)}
+  //     </TouchableOpacity>
+  //   );
+  // };
+
+  // const Btn_MatchStarted = () => {
+  //   return (
+  //     <TouchableOpacity
+  //       style={MapScreenStyles.Btn_MatchStart}
+  //       onPress={() => {
+  //         ChangeModalVisiable();
+  //       }}>
+  //       {Btn_MatchStartedSvg(142)}
+  //     </TouchableOpacity>
+  //   );
+  // };
+
   return (
     <View style={{width: '100%', height: '100%'}}>
       {/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
@@ -1915,20 +2013,13 @@ const MapScreen = (props: any) => {
         </TouchableOpacity>
       </View>
 
-      {UserData.Gender == 2 ? (
-        <TouchableOpacity
-          style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter]}
-          onPress={() => {
-            // AndroidPushNoti()
-            ChangeModalVisiable();
-          }}>
-          <Text style={{color: 'white'}}>시작하기</Text>
-        </TouchableOpacity>
-      ) : null}
+      {UserData.Gender == 2 ? MatchBar() : null}
+      {Btn_MatchVis == true ? Btn_MatchComponent() : null}
+      {Btn_MatchVis == true ? Btn_RandomMatchComponent() : null}
 
       <View>
         <TouchableOpacity
-          style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}
+          style={[MapScreenStyles.MyLocationBtsn, styles.NoFlexDirectionCenter]}
           onPress={() => {
             moveToMyLocation();
           }}>
