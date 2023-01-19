@@ -1,127 +1,131 @@
 import React, {useContext, useState} from 'react';
-import {View, Text, SafeAreaView, Alert,TextInput , Pressable} from 'react-native';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  Alert,
+  TextInput,
+  Pressable,
+} from 'react-native';
 
-import { signUp } from "../../UsefulFunctions/FirebaseAuth"
+import {signUp} from '../../UsefulFunctions/FirebaseAuth';
 import firestore from '@react-native-firebase/firestore';
 
-import {NativeStackScreenProps} from "@react-navigation/native-stack"
-import { RootStackParamList } from '..//RootStackParamList';
-import { LoginAndRegisterTextInputStyle, LoginAndReigsterStyles } from '../../../styles/LoginAndRegiser';
-import { RegisterUserEmail } from '../../UsefulFunctions/SaveUserDataInDevice';
-import {AppContext} from "../../UsefulFunctions/Appcontext"
-import qs from 'qs'
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '..//RootStackParamList';
+import {
+  LoginAndRegisterTextInputStyle,
+  LoginAndReigsterStyles,
+} from '../../../styles/LoginAndRegiser';
+import {RegisterUserEmail} from '../../UsefulFunctions/SaveUserDataInDevice';
+import {AppContext} from '../../UsefulFunctions/Appcontext';
+import qs from 'qs';
+import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+export type Register2ScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  'InvitationCodeSet'
+>;
 
-
-export type Register2ScreenProps = NativeStackScreenProps<RootStackParamList, "InvitationCodeSet">;
-
-const SignUpWithEmail = async (navigation:any, Email:string, Password:string , InvitationCode:string, PkNumber:number
-  , SendBird:any) => {
+const SignUpWithEmail = async (
+  navigation: any,
+  Email: string,
+  Password: string,
+  InvitationCode: string,
+  PkNumber: number,
+  SendBird: any,
+) => {
   // let BasicImageUrl = BasicImage(Gender)
-  
+
   try {
-    const result = await signUp({email: Email, password:Password})
-    Alert.alert("회원가입 완료")
-    // await InvitationCodeToFriend를 서버로부터 가져오는 함수 
-    let UserEmail:string = result.user.email
-    await SignUpFirestore(UserEmail, InvitationCode,PkNumber)
-    await UpdateInvitationCodeToFriend(InvitationCode)
-    await RegisterUserEmail(UserEmail, navigation, SendBird)
-  } 
-  catch (error) {
+    const result = await signUp({email: Email, password: Password});
+    Alert.alert('회원가입 완료');
+    // await InvitationCodeToFriend를 서버로부터 가져오는 함수
+    let UserEmail: string = result.user.email;
+    await SignUpFirestore(UserEmail, InvitationCode, PkNumber);
+    await UpdateInvitationCodeToFriend(InvitationCode);
+    await RegisterUserEmail(UserEmail, navigation, SendBird);
+  } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
-      Alert.alert("이메일이 이미 사용되었습니다")
+      Alert.alert('이메일이 이미 사용되었습니다');
     }
     if (error.code === 'auth/invalid-email') {
-      Alert.alert("해당 이메일값이 유효하지 않습니다. 다시한번 이메일을 확인해주세요")
+      Alert.alert(
+        '해당 이메일값이 유효하지 않습니다. 다시한번 이메일을 확인해주세요',
+      );
     }
-    if (error.code ==='auth/weak-password') {
-      Alert.alert('비밀번호가 6자리 이상이여야 합니다.')
+    if (error.code === 'auth/weak-password') {
+      Alert.alert('비밀번호가 6자리 이상이여야 합니다.');
     }
-    console.log("error In SignUp:", error) 
+    console.log('error In SignUp:', error);
   }
-}
+};
 
-const SignUpFirestore = async (Email:string, 
-  InvitationCode:string,
-  PkNumber:number) => {
-
-
-  firestore().collection("UserList").doc(Email).set({
-    UserEmail:Email,
+const SignUpFirestore = async (
+  Email: string,
+  InvitationCode: string,
+  PkNumber: number,
+) => {
+  firestore().collection('UserList').doc(Email).set({
+    UserEmail: Email,
     InvitationCode: InvitationCode,
     PkNumber: PkNumber,
-    Grade:0,
-    TensionGrade:0,
-    MannerGrade:0,
-    SocialGrade:0
-  })
-}
+    Grade: 0,
+    TensionGrade: 0,
+    MannerGrade: 0,
+    SocialGrade: 0,
+  });
+};
 
-const BasicImage = (Gender:number) => {
-  if(Gender == 1){
-    return "https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FMans%2FBasicSetting%2FBasicSettingM.jpeg?alt=media&token=1e7d09a6-81e7-42bf-a01c-ad36fab58069"
-  }else if(Gender == 2){
-    return "https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FGrils%2FBasicSetting%2FBasicSetting.jpeg?alt=media&token=fd69ef3f-cde5-4a36-a657-765f8ba9d42d"
+const BasicImage = (Gender: number) => {
+  if (Gender == 1) {
+    return 'https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FMans%2FBasicSetting%2FBasicSettingM.jpeg?alt=media&token=1e7d09a6-81e7-42bf-a01c-ad36fab58069';
+  } else if (Gender == 2) {
+    return 'https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FGrils%2FBasicSetting%2FBasicSetting.jpeg?alt=media&token=fd69ef3f-cde5-4a36-a657-765f8ba9d42d';
   }
-  return ""
-}
+  return '';
+};
 
-
-
-const UpdateInvitationCodeToFriend = async (InvitationCode:string) => {
- 
+const UpdateInvitationCodeToFriend = async (InvitationCode: string) => {
   fetch('http:/13.124.209.97/invitation/InvitationCode', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: qs.stringify({
-      'InvitationCode': `${InvitationCode}`
-    })
-  
-  }).then((Result)=>{
-    console.log("Result In UpdateInvitationCodeToFriend Function:", Result)
+      InvitationCode: `${InvitationCode}`,
+    }),
+  }).then((Result) => {
+    console.log('Result In UpdateInvitationCodeToFriend Function:', Result);
+  });
+};
 
-  })
-
-}
- 
-    
-
-
-const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
-  const {InvitationCode} = route.params
+const ReigsterScreen = ({navigation, route}: Register2ScreenProps) => {
+  const {InvitationCode} = route.params;
   // const {Gender} = route.params
   // const GenderNumber = Number(Gender)
   // const {NickName} = route.params
 
-
-  const {PkNumber} = route.params
+  const {PkNumber} = route.params;
 
   // console.log("Gender In RegisterScreen:",Gender)
-  console.log("InvitationCode In RegisterScreen:",InvitationCode)
-  console.log("PkNumber In RegisterScreen:",PkNumber)
+  console.log('InvitationCode In RegisterScreen:', InvitationCode);
+  console.log('PkNumber In RegisterScreen:', PkNumber);
   // console.log('imp_uid In RegisterScreen', imp_uid)
 
-  const Context = useContext(AppContext)
-  const SendBird = Context.sendbird
+  const Context = useContext(AppContext);
+  const SendBird = Context.sendbird;
   // console.log("SendBird In RegisterScreen:", SendBird)
-
-
 
   // console.log(InvitationCode)
 
   const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
   const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
 
-  const [TextInputEmail , setTextInputEmail] = useState("8269apk9@naver.com")
-  const [TextInputPassword , setTextInputPassword] = useState("123456")
-
-
+  const [TextInputEmail, setTextInputEmail] = useState('8269apk9@naver.com');
+  const [TextInputPassword, setTextInputPassword] = useState('123456');
 
   const EmailTextInput = () => (
-    <View
-      style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
+    <View style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -139,7 +143,7 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
           setBorderBottomColor2('lightgray');
         }}
         value={TextInputEmail}
-        onChangeText={value => {
+        onChangeText={(value) => {
           setTextInputEmail(value);
         }}
       />
@@ -147,8 +151,7 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
   );
 
   const PasswordTextInput = () => (
-    <View
-    style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
+    <View style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
       <Text
         style={{
           color: 'lightgray',
@@ -166,27 +169,22 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
           setBorderBottomColor3('lightgray');
         }}
         value={TextInputPassword}
-        onChangeText={value => {
+        onChangeText={(value) => {
           setTextInputPassword(value);
         }}
       />
     </View>
   );
 
-
-
   return (
-    <SafeAreaView
-      style={LoginAndReigsterStyles.Body}>
-      <View
-        style={LoginAndReigsterStyles.Main}>
-        <View
-          style={LoginAndReigsterStyles.Description}>
+    <SafeAreaView style={LoginAndReigsterStyles.Body}>
+      <View style={LoginAndReigsterStyles.Main}>
+        <View style={LoginAndReigsterStyles.Description}>
           <Text
             style={{
               fontSize: 22,
               fontWeight: 'bold',
-              color:'black'
+              color: 'black',
             }}>
             회원가입을 시작해주세요
           </Text>
@@ -199,40 +197,41 @@ const ReigsterScreen = ({navigation, route}:Register2ScreenProps) => {
           {EmailTextInput()}
           {PasswordTextInput()}
         </View>
-       
-
-        <View style={LoginAndReigsterStyles.CheckBox}>
-        <Pressable
-          style={LoginAndReigsterStyles.CheckBt}
-          onPress={() => {
-              SignUpWithEmail(navigation, TextInputEmail, TextInputPassword,InvitationCode, PkNumber, SendBird)
-          }}>
-          <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
-        </Pressable>
-      </View>
-     
+        {TextInputPassword.length >= 6 && TextInputEmail.length >= 6 ? (
+          <Btn_ClickableNext
+            onPress={() => {
+              SignUpWithEmail(
+                navigation,
+                TextInputEmail,
+                TextInputPassword,
+                InvitationCode,
+                PkNumber,
+                SendBird,
+              );
+            }}
+          />
+        ) : (
+          <Btn_NotClickableNext />
+        )}
       </View>
     </SafeAreaView>
   );
 };
 
-
-
 export default ReigsterScreen;
-
 
 // function RegisterScreen() {
 
 //   const KaKaoLoginButton = () => {
 //     return (
-//       <Button 
+//       <Button
 //       title="kakao login"
 //       onPress={async () => {
 //         signInWithKakao(navigation);
 //       }}>
 //       </Button>
 //     )
-   
+
 //   }
 
 //   const AppleLoginButton =  <AppleButton
@@ -245,7 +244,6 @@ export default ReigsterScreen;
 //   onPress={() => onAppleButtonPress(navigation)}
 //   />
 
-  
 //   const navigation = useNavigation();
 
 //   const [TextInputEmail , setTextInputEmail] = useState("")

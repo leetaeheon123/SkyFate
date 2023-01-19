@@ -5,18 +5,26 @@ import {GetEpochTime} from './GetTime';
 import storage from '@react-native-firebase/storage';
 
 import firestore from '@react-native-firebase/firestore';
-
+import {SendBirdUpdateUserInfo} from 'Screens/Indicator';
 export const ChangeMyProfileImage = async (
   UserEmail: string,
   Gender: number,
   navigation: any,
   index: number,
   setState: Function,
+  NickName: string,
+  SendBird: any = null,
 ) => {
   let UploadCallback = async (LocalImagePath: string) => {
     const StorageUrl = await PutInStorage(LocalImagePath, UserEmail, Gender);
-
-    await UpdateProfileImageUrl(UserEmail, StorageUrl, navigation, index);
+    await UpdateProfileImageUrl(
+      UserEmail,
+      StorageUrl,
+      navigation,
+      index,
+      NickName,
+      SendBird,
+    );
   };
 
   ImagePicker(UploadCallback, setState);
@@ -69,6 +77,8 @@ const PutInStorage = async (
 const UpdateProfileImage1UrlInFT = async (
   UserEmail: string,
   StorageUrl: string,
+  NickName: string,
+  SendBird: any,
 ) => {
   await firestore()
     .collection(`UserList`)
@@ -79,6 +89,9 @@ const UpdateProfileImage1UrlInFT = async (
     .then(() => {
       console.log('Scuessful UpdateProfileImageUrl');
     });
+  if (SendBird) {
+    SendBirdUpdateUserInfo(SendBird, NickName, StorageUrl);
+  }
 };
 
 const UpdateProfileImage2UrlInFT = async (
@@ -138,10 +151,12 @@ const UpdateProfileImageUrl = async (
   StorageUrl: string,
   navigation: any,
   index: number,
+  NickName: string,
+  SendBird: any,
 ) => {
   let UpdateProfileImageUrl = Obj[index];
 
-  await UpdateProfileImageUrl(UserEmail, StorageUrl);
+  await UpdateProfileImageUrl(UserEmail, StorageUrl, NickName, SendBird);
   // navigation.navigate('IndicatorScreen', {
   //   From: 'ImageUpload',
   // });

@@ -74,12 +74,14 @@ import {GetEpochTime} from '../../../src/UsefulFunctions/GetTime';
 import {locationReducer} from 'reducer/location';
 import {ReplacedotInEmail} from '^/Replace';
 
-import {ChangeMyProfileImage, GenderNumToStr} from '^/ImageUpload';
+import {ChangeMyProfileImage} from '^/ImageUpload';
 import {
   Enter_MatchSvg,
   Entered_MatchSvg,
   GeneralMatchSvg,
   RandomMatchSvg,
+  Enter_ChatSvg,
+  Enter_SettingSvg,
 } from 'component/Map/MapSvg';
 export interface ILocation {
   latitude: number;
@@ -273,61 +275,6 @@ const ShowManLocationForGM = async (
   }, 20000);
 
   return id;
-};
-
-const UpdateProfileImageUrl = async (UserEmail: string, StorageUrl: string) => {
-  firestore()
-    .collection(`UserList`)
-    .doc(UserEmail)
-    .update({
-      ProfileImageUrl: StorageUrl,
-    })
-    .then(() => {
-      console.log('Scuessful UpdateProfileImageUrl');
-    });
-};
-
-const ImagePicker = (fun: Function) => {
-  const back: string = 'back';
-  const duration: number = 10;
-  const result = launchImageLibrary(
-    {
-      mediaType: 'photo',
-      maxWidth: 512,
-      maxHeight: 512,
-      videoQuality: 'high',
-      durationLimit: duration,
-      quality: 1,
-      cameraType: back,
-      includeBase64: Platform.OS === 'android',
-      includeExtra: false,
-      saveToPhots: false,
-      selectionLimit: 1,
-      // presentationStyle:'fullScreen'
-    },
-    async (res) => {
-      if (res.didCancel) return;
-      let LocalImagePath = res.assets[0].uri;
-      fun(LocalImagePath);
-    },
-  );
-};
-
-const PutInStorage = async (
-  LocalImagePath: any,
-  UserEmail: string,
-  Gender: any,
-) => {
-  const EpochTime = GetEpochTime();
-
-  let GenderStr = GenderNumToStr(Gender);
-  const DBUrl = `/ProfileImage/${GenderStr}/${UserEmail}`;
-  // console.log("DBUrl:" , DBUrl)
-  const reference = storage().ref(`${DBUrl}/${EpochTime}/ProfileImage`);
-  // console.log("LocalImagePath",LocalImagePath)
-  await reference.putFile(LocalImagePath);
-  const StorageUrl = await reference.getDownloadURL();
-  return StorageUrl;
 };
 
 const DeleteMyLocationAfter3Min = (UserEmail: string, Gender: number) => {
@@ -1258,6 +1205,8 @@ const MapScreen = (props: any) => {
                     navigation,
                     1,
                     setProfileImageUrl,
+                    UserData.NickName,
+                    SendBird,
                   );
                 }}>
                 {ProfileImage()}
@@ -1360,15 +1309,6 @@ const MapScreen = (props: any) => {
                 setProfileModalVisiable(false);
               }}
             />
-            <Button
-              title="ChatListModal on"
-              onPress={() => {
-                setProfileModalVisiable(false);
-                setTimeout(() => {
-                  setChatListModal(true);
-                }, 500);
-              }}
-            />
 
             <Button
               title="회원탈퇴 하기"
@@ -1439,7 +1379,7 @@ const MapScreen = (props: any) => {
             <Button
               title="X"
               onPress={() => {
-                setProfileModalVisiable(false);
+                setChatListModal(false);
               }}
             />
           </View>
@@ -1791,6 +1731,25 @@ const MapScreen = (props: any) => {
     );
   };
 
+  const Btn_EnterChat = () => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          setChatListModal(true);
+        }}>
+        {Enter_ChatSvg(50)}
+      </TouchableOpacity>
+    );
+  };
+
+  const Btn_EnterSetting = () => {
+    return (
+      <TouchableOpacity onPress={() => {}}>
+        {Enter_SettingSvg(50)}
+      </TouchableOpacity>
+    );
+  };
+
   const MatchBar = () => {
     return (
       <View
@@ -1799,8 +1758,8 @@ const MapScreen = (props: any) => {
           styles.Row_OnlyColumnCenter,
           {justifyContent: 'space-around'},
         ]}>
-        {TouchableBtn_EnterMatch()}
-        {TouchableBtn_EnterMatch()}
+        {Btn_EnterSetting()}
+        {Btn_EnterChat()}
         {TouchableBtn_EnterMatch()}
         {TouchableBtn_EnterMatch()}
         {TouchableBtn_EnterMatch()}

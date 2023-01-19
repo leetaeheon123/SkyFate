@@ -21,13 +21,12 @@ import {useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-community/async-storage';
 import {login, getProfile} from '@react-native-seoul/kakao-login';
-import {signIn, signUp} from '../UsefulFunctions/FirebaseAuth';
 import firestore from '@react-native-firebase/firestore';
 import styles from '../../styles/ManToManBoard';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from './RootStackParamList';
 import {LoginAndReigsterStyles} from '../../styles/LoginAndRegiser';
-import LinearGradient from 'react-native-linear-gradient';
+import {Btn_ClickableNext} from 'component/Profile';
 
 export type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -286,27 +285,11 @@ const ValidInvitationCodeScreen = () => {
           }}
         />
 
-        {/* <View style={LoginAndReigsterStyles.CheckBox}>
-          <Pressable
-            style={LoginAndReigsterStyles.CheckBt}
-            onPress={() => {
-              ValidateInvitationCode(TextInputInvitationCode, navigation);
-            }}>
-            <Text style={InvitationCodeStyles.CheckText}>다음</Text>
-          </Pressable>
-        </View> */}
-        {/* 108.4deg, #7373F6 1.75%, #8B70F7 37.27%, #956EF6 64.1%, #A869F7 100% */}
-        <LinearGradient
-          colors={['#7373F6', '#8B70F7', '#956EF6', '#A869F7']}
-          style={LoginAndReigsterStyles.CheckBox}>
-          <Pressable
-            style={LoginAndReigsterStyles.CheckBt}
-            onPress={() => {
-              ValidateInvitationCode(TextInputInvitationCode, navigation);
-            }}>
-            <Text style={InvitationCodeStyles.CheckText}>다음</Text>
-          </Pressable>
-        </LinearGradient>
+        <Btn_ClickableNext
+          onPress={() => {
+            ValidateInvitationCode(TextInputInvitationCode, navigation);
+          }}
+        />
 
         <View
           style={[
