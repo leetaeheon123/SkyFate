@@ -9,6 +9,7 @@ export const MapScreenStyles = StyleSheet.create({
     height: '100%',
     width: '100%',
     backgroundColor: 'black',
+    backgroundColor: '#37375B',
     top: '10%',
     right: '5%',
     borderTopLeftRadius: 15,

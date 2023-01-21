@@ -479,18 +479,6 @@ const MapScreen = (props: any) => {
       });
   };
 
-  const [query, setQuery] = useState(null);
-
-  const [state, dispatch] = useReducer(channelsReducer, {
-    SendBird,
-    UserData,
-    channels: [],
-    channelMap: {},
-    loading: false,
-    empty: '',
-    error: null,
-  });
-
   const [locationState, locationdispatch] = useReducer(locationReducer, {
     latlng: {},
   });
@@ -616,28 +604,7 @@ const MapScreen = (props: any) => {
 
     //   })
 
-    SendBird.addConnectionHandler('channels', connectionHandler);
-    SendBird.addChannelHandler('channels', channelHandler);
-    SendBird.addUserEventHandler('users', userEventHandler);
-
     const unsubscribe = AppState.addEventListener('change', handleStateChange);
-
-    if (!SendBird.currentUser) {
-      // userId를 커낵트시킨 뒤
-      SendBird.connect(UserData.UserEmail, (_: any, err: Error) => {
-        if (!err) {
-          // 에러가 없으면 리프레쉬부분을 실행
-          refresh();
-        } else {
-          // 에러 발생시 리덕스를 통해 로딩 끝남을 알리고, 에러메세지를 보냄
-          Alert.alert('Connection failed. Please check the network status.');
-        }
-      });
-    } else {
-      // console.log("SendBird.currentUser value In Map Screen UseEffect Function:", SendBird.currentUser)
-      // 샌드버드에 등록된 유저값이 존재하면 리프래쉬!
-      refresh();
-    }
 
     // Stop listening for updates when no longer required
     return () => {
@@ -654,79 +621,7 @@ const MapScreen = (props: any) => {
     };
   }, []);
 
-  useEffect(() => {
-    if (query) {
-      next();
-    }
-  }, [query]);
-
   /// on connection event
-  const connectionHandler = new SendBird.ConnectionHandler();
-
-  connectionHandler.onReconnectStarted = () => {
-    dispatch({
-      type: 'error',
-      payload: {
-        error: 'Connecting..',
-      },
-    });
-  };
-  connectionHandler.onReconnectSucceeded = () => {
-    dispatch({type: 'error', payload: {error: null}});
-    refresh();
-
-    //  handleNotificationAction(
-    //    navigation,
-    //    sendbird,
-    //    currentUser,
-    //    'channels',
-    //  ).catch(err => console.error(err));
-  };
-  connectionHandler.onReconnectFailed = () => {
-    dispatch({
-      type: 'error',
-      payload: {
-        error: 'Connection failed. Please check the network status.',
-      },
-    });
-  };
-
-  /// on channel event
-  const channelHandler = new SendBird.ChannelHandler();
-  channelHandler.onUserJoined = (channel, user) => {
-    if (user.userId === SendBird.currentUser.userId) {
-      dispatch({type: 'join-channel', payload: {channel}});
-    }
-  };
-  channelHandler.onUserLeft = (channel, user) => {
-    if (user.userId === SendBird.currentUser.userId) {
-      dispatch({type: 'leave-channel', payload: {channel}});
-    }
-  };
-  channelHandler.onChannelChanged = (channel) => {
-    dispatch({type: 'update-channel', payload: {channel}});
-    console.log('channelHandler.onChannelChanged');
-  };
-  channelHandler.onChannelDeleted = (channel) => {
-    console.log('channel in channelHandler.onChannelDeleted:', channel);
-    dispatch({type: 'delete-channel', payload: {channel}});
-    navigation.navigate('IndicatorScreen', {
-      action: 'deleteInServer',
-      data: {channel},
-    });
-  };
-  const userEventHandler = new SendBird.UserEventHandler();
-
-  userEventHandler.onTotalUnreadMessageCountUpdated = (
-    totalCount: any,
-    countByCustomTypes: any,
-  ) => {
-    console.log(
-      'totalCount And countByCustomTypes:',
-      totalCount,
-      countByCustomTypes,
-    );
-  };
 
   const handleStateChange = (newState: any) => {
     // ios - active - inactive
@@ -737,58 +632,6 @@ const MapScreen = (props: any) => {
       SendBird.setForegroundState();
     } else {
       SendBird.setBackgroundState();
-    }
-  };
-
-  const refresh = () => {
-    // state값에 sendbird.groupchannel. 그룹채널리스트 만들기 쿼리를 실행한 뒤 리턴값을 state에 저장
-    console.log(
-      'createMyGroupChannelListQuery:',
-      SendBird.GroupChannel.createMyGroupChannelListQuery(),
-    );
-    setQuery(SendBird.GroupChannel.createMyGroupChannelListQuery());
-    dispatch({type: 'refresh'});
-  };
-
-  const next = () => {
-    // query.hasNext가 존재할 때
-    console.log('query.hasNext', query.hasNext);
-    if (query.hasNext) {
-      query.limit = 20;
-      query.next((fetchedChannels: any, err: Error) => {
-        console.log('fetchedChannels Type:', typeof fetchedChannels);
-        console.log('fetchedChannels Length:', fetchedChannels.length);
-
-        const distinctChannels = fetchedChannels.filter((data: any) => {
-          let now = GetEpochTime();
-          let milis = now - data?.createdAt;
-          let second = Math.floor(milis / 1000);
-
-          console.log('second In distn:', second);
-          return second < 600;
-        });
-
-        console.log('distinctChannels:', distinctChannels);
-
-        // console.log(
-        //   "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
-        //   fetchedChannels,
-        // );
-        if (!err) {
-          dispatch({
-            type: 'fetch-channels',
-            // payload: {channels: distinctChannels},
-            payload: {channels: fetchedChannels},
-          });
-        } else {
-          dispatch({
-            type: 'error',
-            payload: {
-              error: 'Failed to get the channels.',
-            },
-          });
-        }
-      });
     }
   };
 
@@ -806,7 +649,6 @@ const MapScreen = (props: any) => {
 
   const [ModalVisiable, setModalVisiable] = useState(false);
   const [ProfileModalVisiable, setProfileModalVisiable] = useState(false);
-  const [ChatListModal, setChatListModal] = useState(false);
   const [ShowUserModal, setShowUserModal] = useState(false);
   const [Btn_MatchVis, setBtn_MatchVis] = useState(false);
 
@@ -960,17 +802,9 @@ const MapScreen = (props: any) => {
   };
 
   const chat = (channel: any) => {
-    // const otherUserData:Object = {
-    //   UserEmail:ProfileForGtoM?.UserEmail,
-    //   ProfileImageUrl: ProfileForGtoM?.ProfileImageUrl
-    // }
-
-    setProfileModalVisiable(false);
-    setChatListModal(false);
     navigation.navigate('ChatScreen', {
       channel,
       UserData,
-      // otherUserData
     });
   };
 
@@ -1156,16 +990,8 @@ const MapScreen = (props: any) => {
         swipeDirection="down"
         // coverScreen={false}
       >
-        {/* <Pressable style={{
-          flex:1,
-          backgroundColor:'red'
-        }}
-        onPress={()=>{
-          setProfileModalVisiable(false)
-        }}
-        /> */}
         <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
-          <View style={MapScreenStyles.ProfileModalScrollView}>
+          <View style={styles.W90ML5}>
             <View
               style={{
                 width: '100%',
@@ -1319,69 +1145,6 @@ const MapScreen = (props: any) => {
                   UserEmail: UserData.UserEmail,
                 });
               }}></Button>
-          </View>
-        </SafeAreaView>
-      </Modal>
-    );
-  };
-
-  const ShowChatListModal = () => {
-    return (
-      <Modal
-        // animationType='slide'
-        animationIn={'slideInUp'}
-        isVisible={ChatListModal}
-        onBackdropPress={() => setChatListModal(false)}
-        // visible={ProfileModalVisiable}
-        transparent={true}
-        style={{width: '100%', height: '100%'}}
-        // onSwipeComplete={() => setChatListModal(false)}
-        // swipeDirection="down"
-        // coverScreen={false}
-      >
-        <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
-          <View style={MapScreenStyles.ProfileModalScrollView}>
-            <FlatList
-              data={state.channels}
-              renderItem={({item}) => (
-                <Channel
-                  key={item.url}
-                  channel={item}
-                  sendbird={SendBird}
-                  onPress={(channel) => chat(channel)}
-                />
-              )}
-              keyExtractor={(item) => item.url}
-              refreshControl={
-                <RefreshControl
-                  refreshing={state.loading}
-                  colors={['#742ddd']}
-                  tintColor={'#742ddd'}
-                  onRefresh={refresh}
-                />
-              }
-              contentContainerStyle={{flexGrow: 1}}
-              // ListHeaderComponent={
-              //   state.error && (
-              //     <View style={style.errorContainer}>
-              //       <Text style={style.error}>{state.error}</Text>
-              //     </View>
-              //   )
-              // }
-              // ListEmptyComponent={
-              //   <View style={style.emptyContainer}>
-              //     <Text style={style.empty}>{state.empty}</Text>
-              //   </View>
-              // }
-              onEndReached={() => next()}
-              onEndReachedThreshold={0.5}
-            />
-            <Button
-              title="X"
-              onPress={() => {
-                setChatListModal(false);
-              }}
-            />
           </View>
         </SafeAreaView>
       </Modal>
@@ -1735,7 +1498,9 @@ const MapScreen = (props: any) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          setChatListModal(true);
+          navigation.navigate('ChatListScreen', {
+            UserData,
+          });
         }}>
         {Enter_ChatSvg(50)}
       </TouchableOpacity>
@@ -1818,7 +1583,6 @@ const MapScreen = (props: any) => {
   return (
     <View style={{width: '100%', height: '100%'}}>
       {/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
-      {ShowChatListModal()}
       {ShowMyProfileModal()}
       {GirlInputStateModal()}
       {ShowClickedUserDataModal()}
@@ -1840,7 +1604,8 @@ const MapScreen = (props: any) => {
           maxZoomLevel={17}>
           {GpsOn == true ? AnimationMarker(ProfileImageUrl) : null}
 
-          {isLoading == false && UserData.Gender == 1 && GpsOn == true
+          {/* {isLoading == false && UserData.Gender == 2 && GpsOn == true */}
+          {isLoading == false
             ? data?.map((data: any, index) => {
                 return (
                   <Marker
@@ -1963,7 +1728,6 @@ const MapScreen = (props: any) => {
           onPress={() => {
             // RemoveIdentityToken()
             setProfileModalVisiable(!ProfileModalVisiable);
-            // setChatListModal(!ChatListModal);
           }}>
           <Image
             source={{uri: ProfileImageUrl}}
@@ -1972,7 +1736,7 @@ const MapScreen = (props: any) => {
         </TouchableOpacity>
       </View>
 
-      {UserData.Gender == 2 ? MatchBar() : null}
+      {UserData.Gender == 2 ? MatchBar() : MatchBar()}
       {Btn_MatchVis == true ? Btn_MatchComponent() : null}
       {Btn_MatchVis == true ? Btn_RandomMatchComponent() : null}
 

@@ -9,7 +9,9 @@ import {
   TextInput,
 } from 'react-native';
 
-import MapView, {Marker, Polyline, Geojson} from 'react-native-maps';
+import styles from '~/ManToManBoard';
+import MapView, {Marker, PROVIDER_GOOGLE, Polyline, Geojson} from 'react-native-maps';
+
 import {MapScreenStyles} from '~/MapScreen';
 import {GetMyCoords, reference} from './map';
 import {chatReducer} from '../../reducer/chat';
@@ -336,7 +338,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
             <Marker coordinate={OtherLocation} tracksViewChanges={false}>
               <View>
                 <Image
-                  source={{uri: UserData.ProfileImageUrl}}
+                  source={{uri: otherUserData.ProfileImageUrl}}
                   style={MapScreenStyles.GirlsMarker}
                   resizeMode="cover"
                 />
