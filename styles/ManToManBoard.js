@@ -116,6 +116,16 @@ styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  Column_OnlyRowCenter: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  Column_OnlyColumnCenter: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
 
   NoFlexDirectionCenter: {
     display: 'flex',

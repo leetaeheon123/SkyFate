@@ -11,7 +11,7 @@ import {
 
 const LAST_MESSAGE_ELLIPSIS = 45;
 
-const Channel = props => {
+const Channel = (props) => {
   const {sendbird, channel, onPress} = props;
   const [name, setName] = useState('');
   const [lastMessage, setLastMessage] = useState('');
@@ -19,7 +19,7 @@ const Channel = props => {
   const [updatedAt, setUpdatedAt] = useState('');
 
   const channelHandler = new sendbird.ChannelHandler();
-  channelHandler.onChannelChanged = updatedChannel => {
+  channelHandler.onChannelChanged = (updatedChannel) => {
     if (updatedChannel.url === channel.url) {
       updateChannelName(updatedChannel);
       updateLastMessage(updatedChannel);
@@ -42,10 +42,10 @@ const Channel = props => {
     }
   };
 
-  const updateChannelName = channel => {
+  const updateChannelName = (channel) => {
     setName(createChannelName(channel));
   };
-  const updateLastMessage = channel => {
+  const updateLastMessage = (channel) => {
     if (channel.lastMessage) {
       const message = channel.lastMessage;
       if (message.isUserMessage()) {
@@ -56,17 +56,17 @@ const Channel = props => {
     }
   };
 
-  const updateUnreadMessageCount = channel => {
+  const updateUnreadMessageCount = (channel) => {
     setUnreadMessageCount(createUnreadMessageCount(channel));
   };
 
-  const DecrementUnreadMessageCount = channel => {
+  const DecrementUnreadMessageCount = (channel) => {
     console.log('DecrementUnreadMessageCount');
     // channel.unreadMessageCount = 0;
     channel.markAsRead();
   };
 
-  const updateUpdatedAt = channel => {
+  const updateUpdatedAt = (channel) => {
     setUpdatedAt(
       moment(
         channel.lastMessage ? channel.lastMessage.createdAt : channel.createdAt,
@@ -124,11 +124,13 @@ const style = {
   container: {
     flexDirection: 'row',
     backgroundColor: '#f1f2f6',
-    // paddingHorizontal: 20,
+    paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: 'black',
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: 'white',
+    borderRadius: 17,
+    marginTop: 18,
   },
   profileImage: {
     width: 44,
@@ -136,7 +138,8 @@ const style = {
     borderWidth: 1,
     borderRadius: 22,
     marginRight: 15,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
+    backgroundColor: '#D46060',
   },
   contentContainer: {
     flex: 1,
@@ -145,15 +148,18 @@ const style = {
     paddingBottom: 2,
   },
   name: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontSize: 15,
+    fontWeight: '700',
+    // color: '#333',
+    // color: 'black',
     marginBottom: 2,
-    color: 'white',
+    // color: 'white',
   },
   lastMessage: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: 15,
+    fontWeight: '500',
+    // color: '#999',
+    color: '#8F8585',
   },
   propertyContainer: {
     alignItems: 'center',
@@ -172,7 +178,9 @@ const style = {
   },
   updatedAt: {
     fontSize: 12,
-    color: '#999',
+    // color: '#999',
+    color: '#888282',
+    fontWeight: '700',
     marginTop: 2,
     marginBottom: 4,
   },

@@ -5,7 +5,7 @@ import {createMaterialBottomTabNavigator} from '@react-navigation/material-botto
 import {withAppContext} from './src/contextReducer';
 
 import MeetMapScreen from './src/screens/Map/meetmap';
-
+import ChatListScreen from 'Screens/Map/ChatList';
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
@@ -85,6 +85,11 @@ const BottomTabScreen = (props: any) => {
         initialParams={{
           CurrentUser: props.currentUser,
         }}
+      />
+      <BottomTab.Screen
+        name="ChatListScreen"
+        component={ChatListScreen}
+        initialParams={{}}
       />
     </BottomTab.Navigator>
   );
