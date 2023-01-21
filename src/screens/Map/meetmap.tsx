@@ -1,6 +1,5 @@
 import React, {useEffect, useState, useReducer, useContext} from 'react';
 import {
-  SafeAreaView,
   Text,
   View,
   Button,
@@ -9,8 +8,10 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+
 import styles from '~/ManToManBoard';
-import MapView, {Marker, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE, Polyline, Geojson} from 'react-native-maps';
+
 import {MapScreenStyles} from '~/MapScreen';
 import {GetMyCoords, reference} from './map';
 import {chatReducer} from '../../reducer/chat';
@@ -28,6 +29,7 @@ import {locationReducer} from 'reducer/location';
 import {ILocation} from './map';
 import {UpdateMyLocationWatch} from './map';
 import {ReplacedotInEmail} from '^/Replace';
+import {parseLineString, tMapNavigate} from '../../utils';
 
 const MeetMapScreen = ({route}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
@@ -71,6 +73,8 @@ const MeetMapScreen = ({route}: any, props: any) => {
     empty: '',
     error: '',
   });
+
+  const [geoJson, setGeoJson] = useState(null);
 
   // const [location, setLocation] = useState<ILocation | undefined>(undefined);
 
@@ -218,6 +222,18 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
   const [ChatModal, setChatModal] = useState(true);
 
+  const drawRoute = async () => {
+    const coordinates = {
+      startX: MyLocation?.longitude.toString(),
+      startY: MyLocation?.latitude.toString(),
+      endX: OtherLocation?.longitude.toString(),
+      endY: OtherLocation?.latitude.toString(),
+    };
+    const data = await tMapNavigate(coordinates);
+    data.features = parseLineString(data.features);
+    setGeoJson(data);
+  };
+
   return (
     <View style={{width: '100%', height: '100%'}}>
       <Modal
@@ -333,6 +349,15 @@ const MeetMapScreen = ({route}: any, props: any) => {
           {OtherLocation && MyLocation && (
             <Polyline coordinates={[MyLocation, OtherLocation]}></Polyline>
           )}
+
+          {geoJson && (
+            <Geojson
+              geojson={geoJson}
+              strokeColor="red"
+              fillColor="green"
+              strokeWidth={2}
+            />
+          )}
         </MapView>
       )}
 
@@ -340,6 +365,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
         title="Test"
         onPress={() => {
           UpdateSpicLocation();
+          drawRoute();
         }}
       />
       {ChatButton()}
