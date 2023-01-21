@@ -1,6 +1,7 @@
 import notifee from '@notifee/react-native';
+import axios from 'axios';
 
-export const onRemoteMessage = async remoteMessage => {
+export const onRemoteMessage = async (remoteMessage) => {
   // Set the channel for Android
 
   const channelId = await notifee.createChannel({
@@ -62,9 +63,9 @@ export const handleNotificationAction = async (
         const channel = await sendbird.GroupChannel.getChannel(
           message.channel.channel_url,
         );
-        navigation.dispatch(state => {
+        navigation.dispatch((state) => {
           const lobbyIndex = state.routes.findIndex(
-            route => route.name === 'IndicatorScreen',
+            (route) => route.name === 'IndicatorScreen',
           );
           const newRoute = {name: 'Chat', params: {channel, currentUser}};
           const routes = [...state.routes.slice(0, lobbyIndex + 1), newRoute];
@@ -74,7 +75,7 @@ export const handleNotificationAction = async (
             index: routes.length - 1,
           });
 
-          const chatRoute = state.routes.find(route => route.name === 'Chat');
+          const chatRoute = state.routes.find((route) => route.name === 'Chat');
           if (chatRoute && chatRoute.params && chatRoute.params.channel) {
             if (chatRoute.params.channel.url === channel.url) {
               // Navigate from same channel
@@ -92,4 +93,45 @@ export const handleNotificationAction = async (
       }
     }
   }
+};
+
+export const tMapNavigate = async (coordinates) => {
+  const url = 'https://apis.openapi.sk.com/tmap/routes/pedestrian';
+  const appKey = 'l7xx6d195b0058424a0e96b0a60793bd66d2'; // TODO: remove
+
+  const payload = {
+    version: 1,
+    format: 'json',
+    reqCoordType: 'WGS84GEO',
+    resCoordType: 'WGS84GEO',
+    startName: 'user1',
+    endName: 'user2',
+    ...coordinates,
+  };
+
+  const header = {
+    headers: {
+      appKey,
+    },
+  };
+
+  try {
+    const result = await axios.post(url, payload, header);
+    console.log('GeoJson:', result.data);
+    return result.data;
+  } catch (error) {
+    console.error(error.response);
+    return null;
+  }
+  // return result.data;
+};
+
+export const parseLineString = (features) => {
+  let newFeatures = [];
+  features.forEach((feature) => {
+    if (feature.geometry.type === 'LineString') {
+      newFeatures.push(feature);
+    }
+  });
+  return newFeatures;
 };
