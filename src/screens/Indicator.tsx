@@ -10,11 +10,29 @@ import {handleNotificationAction} from '../utils';
 import {GetUserData} from '../UsefulFunctions/SaveUserDataInDevice';
 // import { SBConnect } from '../UsefulFunctions/SaveUserDataInDevice';
 
+export const SendBirdUpdateUserInfo = (
+  SendBird: any,
+  NickName: string,
+  ProfileImageUrl: string,
+) => {
+  SendBird.updateCurrentUserInfo(
+    NickName,
+    ProfileImageUrl,
+    async (user: any, err: any) => {
+      console.log('In sendbird.updateCurrentUserInfo User:', user);
+      if (!err) {
+        console.log('Succes updateCurrentUserInfo SendBird In SBconnect Function In Indicator Screen');
+      } else {
+        Alert.alert(
+          `SbConnect Function In RegisterScreen에서에러가 난 이유 : ${err.message}`,
+        );
+      }
+    },
+  );
+};
 const IndicatorScreen = (props: any) => {
   const [initialized, setInitialized] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-
-  const savedUserKey = 'UserData';
 
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
@@ -28,27 +46,12 @@ const IndicatorScreen = (props: any) => {
     ProfileImageUrl: string,
   ) => {
     SendBird.connect(UserEmail, (user: any, err: any) => {
-      // console.log('In Sendbird.connect CallbackFunction User:', user);
+      console.log('In Sendbird.connect CallbackFunction User:', user);
       // 에러가 존재하지 않으면
       if (!err) {
         // 유저가 샌드버드에 등록 안되있으면 등록하는 로직
         if (user.nickname !== NickName) {
-          SendBird.updateCurrentUserInfo(
-            NickName,
-            ProfileImageUrl,
-            async (user: any, err: any) => {
-              console.log('In sendbird.updateCurrentUserInfo User:', user);
-              if (!err) {
-                console.log(
-                  'Succes connect SendBird In Register SBconnect Function',
-                );
-              } else {
-                Alert.alert(
-                  `SbConnect Function In RegisterScreen에서에러가 난 이유 : ${err.message}`,
-                );
-              }
-            },
-          );
+          SendBirdUpdateUserInfo(SendBird, NickName, ProfileImageUrl);
         }
       } else {
         Alert.alert(`에러가 난 이유 : ${err.message}`);
@@ -135,6 +138,7 @@ const IndicatorScreen = (props: any) => {
   };
 
   useEffect(() => {
+    // setCurrentUser(null);
     console.log('params In Indicator Screen: ', props.route.params);
     AsyncStorage.getItem('UserEmail')
       .then(async (user) => {
@@ -147,7 +151,14 @@ const IndicatorScreen = (props: any) => {
             UserData,
           );
           setCurrentUser(UserData);
+          SBConnect(
+            SendBird,
+            UserData?.UserEmail,
+            UserData?.NickName,
+            UserData?.ProfileImageUrl,
+          );
         }
+
         setInitialized(true);
 
         // return handleNotificationAction(

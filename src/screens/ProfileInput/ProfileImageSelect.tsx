@@ -1,21 +1,13 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {
   View,
-  Button,
-  Platform,
-  Text,
   SafeAreaView,
-  Alert,
-  TextInput,
-  StyleSheet,
-  Pressable,
   TouchableOpacity,
   Image,
   Dimensions,
 } from 'react-native';
 
 import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
-import firestore from '@react-native-firebase/firestore';
 import {
   ProfileImageUploadComponent,
   SubTextComponent,
@@ -24,11 +16,16 @@ import {
 
 import {ChangeMyProfileImage} from '^/ImageUpload';
 import styles from '~/ManToManBoard';
-import {Btn_NotClickableComponent} from 'component/Profile/ProfileSvg';
-import {Btn_ClickableComponent} from 'component/Profile/ProfileSvg';
+import {Btn_ClickableNextSvg} from 'component/Profile/ProfileSvg';
+import {Btn_NotClickableNextSvg} from 'component/Profile/ProfileSvg';
+
+import {AppContext} from '^/Appcontext';
 const ProfileImageSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
-  const {UserEmail, Gender} = route.params;
+  const Context = useContext(AppContext);
+  const SendBird = Context.sendbird;
+
+  const {UserEmail, Gender, NickName} = route.params;
 
   const [Url, setUrl] = useState('');
   const [Url2, setUrl2] = useState('');
@@ -66,13 +63,13 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
           onPress={() => {
             goToNext();
           }}>
-          {Btn_ClickableComponent(width * 0.9)}
+          {Btn_ClickableNextSvg(width * 0.9)}
         </TouchableOpacity>
       );
     } else {
       return (
         <View style={LoginAndReigsterStyles.CheckBox}>
-          {Btn_NotClickableComponent(width * 0.9)}
+          {Btn_NotClickableNextSvg(width * 0.9)}
         </View>
       );
     }
@@ -85,7 +82,15 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          ChangeMyProfileImage(UserEmail, Gender, navigation, index, setState);
+          ChangeMyProfileImage(
+            UserEmail,
+            Gender,
+            navigation,
+            index,
+            setState,
+            NickName,
+            // SendBird,
+          );
         }}>
         {ProfileImageUploadComponent()}
       </TouchableOpacity>

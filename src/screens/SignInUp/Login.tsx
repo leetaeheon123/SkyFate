@@ -22,6 +22,7 @@ import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
 import {LoginUserEmail} from '../../UsefulFunctions/SaveUserDataInDevice';
 
 import {LoginAndRegisterTextInputStyle} from '../../../styles/LoginAndRegiser';
+import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 export type Register2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'InvitationCode'
@@ -137,9 +138,8 @@ const LoginScreen = (props: any) => {
           {PasswordTextInput()}
         </View>
 
-        <View style={LoginAndReigsterStyles.CheckBox}>
-          <Pressable
-            style={LoginAndReigsterStyles.CheckBt}
+        {TextInputEmail.length >= 6 && TextInputPassword.length >= 6 ? (
+          <Btn_ClickableNext
             onPress={() => {
               LoginWithEmail(
                 navigation,
@@ -147,10 +147,11 @@ const LoginScreen = (props: any) => {
                 TextInputPassword,
                 SendBird,
               );
-            }}>
-            <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
-          </Pressable>
-        </View>
+            }}
+          />
+        ) : (
+          <Btn_NotClickableNext />
+        )}
       </View>
     </SafeAreaView>
   );

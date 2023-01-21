@@ -143,7 +143,7 @@ export const ProfileImageUploadComponent = () => {
   return <WithLocalSvg asset={ProfileImageUpload}></WithLocalSvg>;
 };
 
-export const Btn_ClickableComponent = (width) => {
+export const Btn_ClickableNextSvg = (width) => {
   let height = width * 0.22;
 
   return (
@@ -154,7 +154,7 @@ export const Btn_ClickableComponent = (width) => {
   );
 };
 
-export const Btn_NotClickableComponent = (width) => {
+export const Btn_NotClickableNextSvg = (width) => {
   let height = width * 0.22;
   return (
     <WithLocalSvg

@@ -16,15 +16,12 @@ import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
 import firestore from '@react-native-firebase/firestore';
 import {TextComponent} from 'component/Profile/ProfileSvg';
 import {GenderBtnComponent} from 'component/Profile/ProfileSvg';
+import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 const GenderSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
-  const {UserEmail} = route.params;
+  const {UserEmail, NickName} = route.params;
 
   const UpdateGender = async () => {
-    if (Gender == 0) {
-      Alert.alert('선택해주세요');
-      return;
-    }
     await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
       Gender: Gender,
     });
@@ -32,6 +29,7 @@ const GenderSelectScreen = ({navigation, route}: any) => {
     navigation.navigate('MbtiSelectScreen', {
       UserEmail: UserEmail,
       Gender: Gender,
+      NickName: NickName,
     });
   };
 
@@ -80,15 +78,15 @@ const GenderSelectScreen = ({navigation, route}: any) => {
           )}
         </View>
 
-        <View style={LoginAndReigsterStyles.CheckBox}>
-          <Pressable
-            style={LoginAndReigsterStyles.CheckBt}
+        {Gender == 0 ? (
+          <Btn_NotClickableNext />
+        ) : (
+          <Btn_ClickableNext
             onPress={() => {
               UpdateGender();
-            }}>
-            <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
-          </Pressable>
-        </View>
+            }}
+          />
+        )}
       </View>
     </SafeAreaView>
   );

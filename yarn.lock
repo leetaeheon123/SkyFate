@@ -7872,10 +7872,10 @@
   "resolved" "https://registry.npmjs.org/react-native-fast-image/-/react-native-fast-image-8.6.1.tgz"
   "version" "8.6.1"
 
-"react-native-flipper@*", "react-native-flipper@^0.127.0", "react-native-flipper@0.176.1":
-  "integrity" "sha512-kioHzO9JzA2ReW9LfopIEUXeD6gDp3Mw6KjQbELvoLVIEMvCfGz59akezw4l/S8i6qkFVcnwh5c/7Z+L3nthQA=="
-  "resolved" "https://registry.npmjs.org/react-native-flipper/-/react-native-flipper-0.176.1.tgz"
-  "version" "0.176.1"
+"react-native-flipper@*", "react-native-flipper@^0.127.0", "react-native-flipper@0.177.0":
+  "integrity" "sha512-8fFJs1ekyJ/W5HqTCpkX7n8qcFNevPFD6OLJ/jMBPpyVU5q6j/yIGlrxoDCUgyZIn2GXm5e3heGQtruSTxD/xA=="
+  "resolved" "https://registry.npmjs.org/react-native-flipper/-/react-native-flipper-0.177.0.tgz"
+  "version" "0.177.0"
 
 "react-native-geolocation-service@5.3.0":
   "integrity" "sha512-imK/yjxqPMIydSjZLpqPh7U073Fpe1JAaZHiIzLzWnzv89OGey6t4Zj/POg3+xtmGcbDoMcEOx8hbNY/fXaD9Q=="

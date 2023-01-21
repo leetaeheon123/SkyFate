@@ -18,18 +18,14 @@ import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
 import firestore from '@react-native-firebase/firestore';
 import {
   AgeLine,
-  Btn_ClickableComponent,
-  Btn_NotClickableComponent,
   SubTextComponent,
   TextComponent,
 } from 'component/Profile/ProfileSvg';
-import styles from '~/ManToManBoard';
 import {AgeStyles} from '~/ProfileInput';
+import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+
 const AgeSelectScreen = ({navigation, route}: any) => {
-  const {width, height} = Dimensions.get('window');
-  console.log(width);
-  console.log(route.params.UserEmail);
-  const {UserEmail, Gender} = route.params;
+  const {UserEmail, Gender, NickName} = route.params;
 
   const ValidNum = (value: any) => {
     return !isNaN(parseFloat(value));
@@ -47,6 +43,7 @@ const AgeSelectScreen = ({navigation, route}: any) => {
     navigation.navigate('ProfileImageSelectScreen', {
       UserEmail: UserEmail,
       Gender: Gender,
+      NickName: NickName,
     });
   };
 
@@ -58,20 +55,14 @@ const AgeSelectScreen = ({navigation, route}: any) => {
 
     if (onevalid && twovalid && threevalid && fourvalid) {
       return (
-        <TouchableOpacity
-          style={LoginAndReigsterStyles.Btn_Clickable}
+        <Btn_ClickableNext
           onPress={() => {
             UpdateAge();
-          }}>
-          {Btn_ClickableComponent(width * 0.9)}
-        </TouchableOpacity>
+          }}
+        />
       );
     } else {
-      return (
-        <View style={LoginAndReigsterStyles.CheckBox}>
-          {Btn_NotClickableComponent(width * 0.9)}
-        </View>
-      );
+      return <Btn_NotClickableNext />;
     }
   };
   const [focusone, setfocusone] = useState<string>('');

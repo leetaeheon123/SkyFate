@@ -18,9 +18,10 @@ import {TextComponent} from 'component/Profile/ProfileSvg';
 import {SubTextComponent} from 'component/Profile/ProfileSvg';
 import {MbtiBtn} from 'component/Profile/ProfileSvg';
 import styles from '~/ManToManBoard';
+import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 const MbtiSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
-  const {UserEmail, Gender} = route.params;
+  const {UserEmail, Gender, NickName} = route.params;
 
   const [one, setone] = useState('');
   const [two, settwo] = useState('');
@@ -37,6 +38,7 @@ const MbtiSelectScreen = ({navigation, route}: any) => {
       navigation.navigate('AgeSelectScreen', {
         UserEmail: UserEmail,
         Gender: Gender,
+        NickName: NickName,
       });
     } else {
       Alert.alert('다 선택해주세요');
@@ -102,15 +104,15 @@ const MbtiSelectScreen = ({navigation, route}: any) => {
           </View>
         </View>
 
-        <View style={LoginAndReigsterStyles.CheckBox}>
-          <Pressable
-            style={LoginAndReigsterStyles.CheckBt}
+        {one && two && three && four ? (
+          <Btn_ClickableNext
             onPress={() => {
               UpdateMbti();
-            }}>
-            <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
-          </Pressable>
-        </View>
+            }}
+          />
+        ) : (
+          <Btn_NotClickableNext />
+        )}
       </View>
     </SafeAreaView>
   );

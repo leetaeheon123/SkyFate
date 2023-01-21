@@ -16,6 +16,7 @@ import {LoginAndRegisterTextInputStyle} from '../../../styles/LoginAndRegiser';
 import firestore from '@react-native-firebase/firestore';
 import {NickNameLine, TextComponent} from 'component/Profile/ProfileSvg';
 import {NickNameInput} from 'component/Profile/ProfileSvg';
+import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 const NickNameSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
   const {UserEmail} = route.params;
@@ -31,6 +32,7 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
 
     navigation.navigate('GenderSelectScreen', {
       UserEmail: UserEmail,
+      NickName: NickName,
     });
   };
 
@@ -66,19 +68,15 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
         </View>
         <View style={LoginAndReigsterStyles.Center}>{NickNameTextInput()}</View>
 
-        <View style={LoginAndReigsterStyles.CheckBox}>
-          <Pressable
-            style={LoginAndReigsterStyles.CheckBt}
+        {NickName.length >= 6 ? (
+          <Btn_ClickableNext
             onPress={() => {
-              if (NickName != '') {
-                UpdateNickName();
-              } else {
-                Alert.alert('닉네임을 입력해주세요');
-              }
-            }}>
-            <Text style={LoginAndReigsterStyles.CheckText}>다음</Text>
-          </Pressable>
-        </View>
+              UpdateNickName();
+            }}
+          />
+        ) : (
+          <Btn_NotClickableNext />
+        )}
       </View>
     </SafeAreaView>
   );
