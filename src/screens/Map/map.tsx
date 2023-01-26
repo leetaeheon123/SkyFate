@@ -61,11 +61,8 @@ import {Get_itaewon_HotPlaceList} from '../../UsefulFunctions/HotPlaceList';
 
 import {AppContext} from '../../UsefulFunctions//Appcontext';
 
-import {channelsReducer} from '../../reducer/channels';
-import Channel from 'component/channel';
 import {withAppContext} from '../../contextReducer';
 import {isEmptyObj} from '../../UsefulFunctions/isEmptyObj';
-import {err} from 'react-native-svg/lib/typescript/xml';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
@@ -77,12 +74,32 @@ import {ReplacedotInEmail} from '^/Replace';
 import {ChangeMyProfileImage} from '^/ImageUpload';
 import {
   Enter_MatchSvg,
-  Entered_MatchSvg,
+  ClickedEnter_MatchSvg,
   GeneralMatchSvg,
   RandomMatchSvg,
   Enter_ChatSvg,
   Enter_SettingSvg,
+  Enter_FriendMapSvg,
+  M3TopBackgroundSvg,
+  M3TopSvg,
+  M3Main_TopBarSvg,
+  Pay_PutoffSvg,
+  Pay_HalfSvg,
+  ClickedPay_HalfSvg,
 } from 'component/Map/MapSvg';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+  CheckSvg,
+  ClickedCompleteSvg,
+  CompleteSvg,
+  MinusSvg,
+  PeopleAddSvg,
+  PeopleSvg,
+  PlusSvg,
+  VerticalLineSvg,
+} from 'component/General/GeneralSvg';
+import {M5ChatSvg} from 'component/Chat/ChatSvg';
 export interface ILocation {
   latitude: number;
   longitude: number;
@@ -650,7 +667,6 @@ const MapScreen = (props: any) => {
   const [ModalVisiable, setModalVisiable] = useState(false);
   const [ProfileModalVisiable, setProfileModalVisiable] = useState(false);
   const [ShowUserModal, setShowUserModal] = useState(false);
-  const [Btn_MatchVis, setBtn_MatchVis] = useState(false);
 
   const [ProfileForGtoM, setProfileForGtoM] = useState<Object>({});
 
@@ -662,10 +678,6 @@ const MapScreen = (props: any) => {
 
   const ChangeModalVisiable = () => {
     setModalVisiable((previousState) => !previousState);
-  };
-
-  const ChangeBtn_MacthVisiable = () => {
-    setBtn_MatchVis((previousState) => !previousState);
   };
 
   Counter(
@@ -856,25 +868,23 @@ const MapScreen = (props: any) => {
 
   const MinusIcon = (
     <TouchableOpacity
-      style={[styles.RowCenter, MapScreenStyles.MinusPeopleNumber]}
       onPress={() => {
         if (PeopleNum > 1) {
           setPeopleNum(PeopleNum - 1);
         }
       }}>
-      <AntDesgin name="minus" size={16} color="black" />
+      {MinusSvg(15)}
     </TouchableOpacity>
   );
 
   const PlusIcon = (
     <TouchableOpacity
-      style={MapScreenStyles.PlusPeopleNumber}
       onPress={() => {
         if (PeopleNum < 10) {
           setPeopleNum(PeopleNum + 1);
         }
       }}>
-      <AntDesgin name="plus" size={16} color="black" />
+      {PlusSvg(15)}
     </TouchableOpacity>
   );
 
@@ -887,6 +897,73 @@ const MapScreen = (props: any) => {
     );
   };
 
+  const M5NickName = (
+    <Text
+      style={{
+        color: 'white',
+        fontSize: 22,
+        fontWeight: '500',
+        marginLeft: '5%',
+        marginBottom: 20,
+        marginTop: 20,
+      }}>
+      {ProfileForGtoM?.NickName}
+    </Text>
+  );
+
+  const MainImage = (
+    <Image
+      resizeMode="cover"
+      source={{uri: ProfileForGtoM?.ProfileImageUrl}}
+      style={{
+        width: '95%',
+        marginLeft: '2.5%',
+        height: '81%',
+        borderRadius: 31,
+        marginTop: 10,
+      }}
+    />
+  );
+
+  const Desc = (
+    <View style={{marginBottom: 10}}>
+      <Text
+        style={[
+          MapScreenStyles.WhiteText,
+          {marginBottom: 10, fontWeight: '700', fontSize: 20},
+        ]}>
+        👩🏼 인원수:{ProfileForGtoM?.PeopleNum}명
+      </Text>
+      <Text
+        style={[
+          MapScreenStyles.WhiteText,
+          {
+            marginBottom: 10,
+            fontSize: 16,
+            fontWeight: '600',
+            // color:'#efa5c8'
+          },
+        ]}>
+        💸 지불여부: {ProfileForGtoM?.CanPayit}
+      </Text>
+      <Text
+        style={[
+          MapScreenStyles.WhiteText,
+          {marginBottom: 10, fontSize: 16, fontWeight: '500'},
+        ]}>
+        💌 메모:{ProfileForGtoM?.Memo}
+      </Text>
+    </View>
+  );
+
+  const ChatView = (
+    <View style={MapScreenStyles.ChatView}>
+      <TouchableOpacity onPress={() => CreateChating()}>
+        {M5ChatSvg}
+      </TouchableOpacity>
+    </View>
+  );
+
   const ShowClickedUserDataModal = () => {
     return (
       <Modal
@@ -894,84 +971,19 @@ const MapScreen = (props: any) => {
         // transparent={true}
         isVisible={ShowUserModal}
         coverScreen={false}
-        onBackdropPress={() => setShowUserModal(false)}>
-        <ScrollView style={MapScreenStyles.Memomodal}>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 22,
-              fontWeight: '500',
-              marginLeft: '5%',
-              marginBottom: 20,
-              marginTop: 20,
-            }}>
-            {ProfileForGtoM?.NickName}
-          </Text>
-          <View style={[styles.W90ML5]}>
-            <Image
-              // resizeMode='center'
-              source={{uri: ProfileForGtoM?.ProfileImageUrl}}
-              style={{
-                width: '100%',
-                height: height * 0.35,
-                borderRadius: 10,
-                marginBottom: 20,
-              }}
-            />
-            {ProfileForGtoM.Memo != '' ? (
-              <View style={{marginBottom: 10}}>
-                <Text
-                  style={[
-                    MapScreenStyles.WhiteText,
-                    {marginBottom: 10, fontWeight: '700', fontSize: 20},
-                  ]}>
-                  👩🏼 인원수:{ProfileForGtoM?.PeopleNum}명
-                </Text>
-                <Text
-                  style={[
-                    MapScreenStyles.WhiteText,
-                    {
-                      marginBottom: 10,
-                      fontSize: 16,
-                      fontWeight: '600',
-                      // color:'#efa5c8'
-                    },
-                  ]}>
-                  💸 지불여부: {ProfileForGtoM?.CanPayit}
-                </Text>
-                <Text
-                  style={[
-                    MapScreenStyles.WhiteText,
-                    {marginBottom: 10, fontSize: 16, fontWeight: '500'},
-                  ]}>
-                  💌 메모:{ProfileForGtoM?.Memo}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-
-          <View style={[styles.Row_OnlyColumnCenter]}>
-            <TouchableOpacity
-              style={[styles.RowCenter, MapScreenStyles.CancelBoxView]}
-              onPress={() => {
-                SwitchShowUserModal();
-              }}>
-              <Text>취소</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.RowCenter,
-                MapScreenStyles.CheckBoxView,
-                {backgroundColor: '#28FF98'},
-              ]}
-              onPress={() => {
-                CreateChating();
-              }}>
-              <Text>채팅하기</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        onBackdropPress={() => setShowUserModal(false)}
+        onSwipeComplete={() => setShowUserModal(false)}
+        swipeDirection="down"
+        >
+        <View
+          style={[
+            styles.W95ML5,
+            {height: '65%', backgroundColor: '#313A5B', borderRadius: 26},
+          ]}>
+          {MainImage}
+          {ChatView}
+          {/* {ProfileForGtoM.Memo != '' ? Desc : null} */}
+        </View>
       </Modal>
     );
   };
@@ -1151,6 +1163,296 @@ const MapScreen = (props: any) => {
     );
   };
 
+  const M3Main_PeopleNumSelect = (
+    <View
+      style={[
+        styles.Row_OnlyColumnCenter,
+        {
+          width: '100%',
+          height: '21%',
+        },
+      ]}>
+      <View style={MapScreenStyles.M3MainAside}>
+        {VerticalLineSvg(width * 0.1)}
+      </View>
+      <View style={MapScreenStyles.M3MainSection}>
+        <Text>인원</Text>
+        <View style={[MapScreenStyles.PeopleNumOption]}>
+          {PeopleSvg(width * 0.08, {marginLeft: 10})}
+          <View
+            style={[
+              styles.Row_OnlyColumnCenter,
+              {
+                width: '40%',
+                justifyContent: 'space-around',
+                // backgroundColor: 'red',
+              },
+            ]}>
+            {MinusIcon}
+            <Text style={[MapScreenStyles.TotalPeopleNum]}>{PeopleNum}명</Text>
+            {PlusIcon}
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+
+  const M3Main_FriendSelect = (
+    <View style={[styles.Row_OnlyColumnCenter, styles.W100H25]}>
+      <View style={MapScreenStyles.M3MainAside}>
+        {VerticalLineSvg()}
+        {CheckSvg(22)}
+      </View>
+      <View style={MapScreenStyles.M3MainSection}>
+        <Text>인원 추가</Text>
+        <View style={[MapScreenStyles.FriendAdd]}>
+          {PeopleAddSvg(width * 0.08, {marginLeft: 10, marginRight: 10})}
+          <TextInput
+            value={Memo}
+            onChangeText={(text) => setMemo(text)}
+            style={MapScreenStyles.MemoTextInput}></TextInput>
+        </View>
+        <Text>랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요</Text>
+      </View>
+    </View>
+  );
+
+  const OnePress = () => {
+    if (MoenyRadioBox == 1) {
+      setMoneyRadioBox(0);
+    } else {
+      setMoneyRadioBox(1);
+    }
+  };
+
+  const TwoPress = () => {
+    if (MoenyRadioBox == 2) {
+      setMoneyRadioBox(0);
+    } else {
+      setMoneyRadioBox(2);
+    }
+  };
+
+  const M3Main_PaySelect = (
+    <View style={[styles.Row_OnlyColumnCenter, styles.W100H25]}>
+      <View style={MapScreenStyles.M3MainAside}>
+        {VerticalLineSvg()}
+        {CheckSvg(22)}
+      </View>
+      <View style={MapScreenStyles.M3MainSection}>
+        <Text>비용</Text>
+        <View style={[MapScreenStyles.PayOption]}>
+          <TouchableOpacity onPress={() => OnePress()}>
+            {Pay_PutoffSvg(92)}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => TwoPress()}>
+            {MoenyRadioBox == 2 ? ClickedPay_HalfSvg(92) : Pay_HalfSvg(92)}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+
+  const M3Main_legacy = (
+    <SafeAreaView style={MapScreenStyles.Memomodal}>
+      <Text
+        style={{
+          color: 'white',
+          fontSize: 22,
+          fontWeight: '500',
+          marginLeft: '5%',
+          marginBottom: 20,
+          marginTop: 20,
+        }}>
+        나의 상태 설정하기
+      </Text>
+      <View style={[{height: 96}, styles.W90ML5]}>
+        <Text
+          style={[
+            MapScreenStyles.WhiteText,
+            {fontSize: 14, fontWeight: '500', marginBottom: 8},
+          ]}>
+          메모로 상태알리기
+        </Text>
+        <Text
+          style={[
+            {
+              fontSize: 12,
+              fontWeight: '400',
+              color: '#6A6A6A',
+              marginBottom: 8,
+            },
+          ]}>
+          고객님의 상태, 위치, 정보를 50자 이내로 입력해주세요.
+        </Text>
+        <TextInput
+          value={Memo}
+          onChangeText={(text) => setMemo(text)}
+          style={MapScreenStyles.MemoTextInput}></TextInput>
+      </View>
+
+      <View
+        style={[styles.W90ML5, {height: 96, marginTop: 20, marginBottom: 20}]}>
+        <Text
+          style={[
+            MapScreenStyles.WhiteText,
+            styles.FW500FS14,
+            {marginBottom: 8},
+          ]}>
+          인원알려주기
+        </Text>
+        <Text
+          style={[
+            {
+              fontSize: 12,
+              fontWeight: '400',
+              color: '#6A6A6A',
+              marginBottom: 8,
+            },
+          ]}>
+          몇명이서 오셨나요?
+        </Text>
+
+        <View
+          style={[
+            MapScreenStyles.PeopleNumOption,
+            styles.Row_OnlyColumnCenter,
+          ]}>
+          <Text
+            style={[styles.WhiteColor, styles.FW500FS14, {marginLeft: '5%'}]}>
+            인원
+          </Text>
+          <View
+            style={[
+              styles.Row_OnlyColumnCenter,
+              {
+                width: '30%',
+                justifyContent: 'space-between',
+                marginRight: '5%',
+              },
+            ]}>
+            {MinusIcon}
+            <Text style={[styles.WhiteColor, MapScreenStyles.TotalPeopleNum]}>
+              {PeopleNum}명
+            </Text>
+            {PlusIcon}
+          </View>
+        </View>
+      </View>
+
+      <View style={[{height: 110, marginBottom: 10}, styles.W90ML5]}>
+        <Text
+          style={[
+            MapScreenStyles.WhiteText,
+            {fontSize: 14, fontWeight: '500', marginBottom: 8},
+          ]}>
+          비용 나눠 내기
+        </Text>
+        <Text
+          style={[
+            {
+              fontSize: 12,
+              fontWeight: '400',
+              color: '#6A6A6A',
+              marginBottom: 8,
+            },
+          ]}>
+          만남 후 비용을 나눠서 지불할 생각이 있으신가요?
+        </Text>
+        <View
+          style={[
+            styles.Row_OnlyColumnCenter,
+            MapScreenStyles.MoneyOptionView,
+            {marginTop: 10},
+          ]}>
+          <TouchableOpacity
+            onPress={() => {
+              setMoneyRadioBox(1);
+            }}
+            style={
+              MoenyRadioBox == 1
+                ? MapScreenStyles.SelectedMoneyIconBox
+                : MapScreenStyles.MoneyIconBox
+            }>
+            <Text
+              style={
+                MoenyRadioBox == 1
+                  ? {color: '#606060', fontWeight: '600'}
+                  : {color: '#202124', fontWeight: '600'}
+              }>
+              보고결정
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setMoneyRadioBox(2);
+            }}
+            style={
+              MoenyRadioBox == 2
+                ? MapScreenStyles.SelectedMoneyIconBox
+                : MapScreenStyles.MoneyIconBox
+            }>
+            <Text
+              style={
+                MoenyRadioBox == 2
+                  ? {color: '#606060', fontWeight: '600'}
+                  : {color: '#202124', fontWeight: '600'}
+              }>
+              생각있음
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setMoneyRadioBox(3);
+            }}
+            style={
+              MoenyRadioBox == 3
+                ? MapScreenStyles.SelectedMoneyIconBox
+                : MapScreenStyles.MoneyIconBox
+            }>
+            <Text
+              style={
+                MoenyRadioBox == 3
+                  ? {color: '#606060', fontWeight: '600'}
+                  : {color: '#202124', fontWeight: '600'}
+              }>
+              생각없음
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={[styles.Row_OnlyColumnCenter]}>
+        <TouchableOpacity
+          style={[styles.RowCenter, MapScreenStyles.CancelBoxView]}
+          onPress={() => {
+            ChangeModalVisiable();
+          }}>
+          <Text>취소</Text>
+        </TouchableOpacity>
+
+        {Memo == '' && MoenyRadioBox != 0 ? (
+          <TouchableOpacity
+            onPress={() => {
+              ShowMyLocation();
+            }}>
+            {ClickedCompleteSvg(width * 0.37)}
+          </TouchableOpacity>
+        ) : (
+          <View
+            style={[
+              styles.RowCenter,
+              MapScreenStyles.CheckBoxView,
+              {backgroundColor: '#565656'},
+            ]}>
+            <Text>완료</Text>
+          </View>
+        )}
+      </View>
+    </SafeAreaView>
+  );
+
   const GirlInputStateModal = () => {
     return (
       <Modal
@@ -1158,184 +1460,46 @@ const MapScreen = (props: any) => {
         // transparent={true}
         isVisible={ModalVisiable}
         coverScreen={false}
-        onBackdropPress={() => setModalVisiable(false)}>
-        <SafeAreaView style={MapScreenStyles.Memomodal}>
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 22,
-              fontWeight: '500',
-              marginLeft: '5%',
-              marginBottom: 20,
-              marginTop: 20,
-            }}>
-            나의 상태 설정하기
-          </Text>
-          <View style={[{height: 96}, styles.W90ML5]}>
-            <Text
-              style={[
-                MapScreenStyles.WhiteText,
-                {fontSize: 14, fontWeight: '500', marginBottom: 8},
-              ]}>
-              메모로 상태알리기
-            </Text>
-            <Text
-              style={[
-                {
-                  fontSize: 12,
-                  fontWeight: '400',
-                  color: '#6A6A6A',
-                  marginBottom: 8,
-                },
-              ]}>
-              고객님의 상태, 위치, 정보를 50자 이내로 입력해주세요.
-            </Text>
-            <TextInput
-              value={Memo}
-              onChangeText={(text) => setMemo(text)}
-              style={MapScreenStyles.MemoTextInput}></TextInput>
-          </View>
+        style={[
+          styles.W100H100,
+          {
+            // top: '-5%',
+            right: '5%',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-start',
+          },
+        ]}>
+        <SafeAreaView>{M3TopSvg(width)}</SafeAreaView>
+        <View
+          style={{
+            marginLeft: '8%',
+            marginTop: '8%',
+          }}>
+          {M3Main_TopBarSvg(width * 0.84)}
+        </View>
 
+        <View
+          style={{
+            width: '84%',
+            height: '55%',
+            marginLeft: '8%',
+            marginTop: '-3%',
+            backgroundColor: '#37375B',
+            borderBottomEndRadius: 48,
+            borderBottomStartRadius: 48,
+          }}>
+          {M3Main_PeopleNumSelect}
+          {M3Main_FriendSelect}
+          {M3Main_PaySelect}
           <View
             style={[
-              styles.W90ML5,
-              {height: 96, marginTop: 20, marginBottom: 20},
+              styles.Row_OnlyColumnCenter,
+              {
+                width: '100%',
+                height: '29%',
+              },
             ]}>
-            <Text
-              style={[
-                MapScreenStyles.WhiteText,
-                styles.FW500FS14,
-                {marginBottom: 8},
-              ]}>
-              인원알려주기
-            </Text>
-            <Text
-              style={[
-                {
-                  fontSize: 12,
-                  fontWeight: '400',
-                  color: '#6A6A6A',
-                  marginBottom: 8,
-                },
-              ]}>
-              몇명이서 오셨나요?
-            </Text>
-            <View
-              style={[
-                MapScreenStyles.PeopleNumOption,
-                styles.Row_OnlyColumnCenter,
-              ]}>
-              <Text
-                style={[
-                  styles.WhiteColor,
-                  styles.FW500FS14,
-                  {marginLeft: '5%'},
-                ]}>
-                인원
-              </Text>
-              <View
-                style={[
-                  styles.Row_OnlyColumnCenter,
-                  {
-                    width: '30%',
-                    justifyContent: 'space-between',
-                    marginRight: '5%',
-                  },
-                ]}>
-                {MinusIcon}
-                <Text
-                  style={[styles.WhiteColor, MapScreenStyles.TotalPeopleNum]}>
-                  {PeopleNum}명
-                </Text>
-                {PlusIcon}
-              </View>
-            </View>
-          </View>
-
-          <View style={[{height: 110, marginBottom: 10}, styles.W90ML5]}>
-            <Text
-              style={[
-                MapScreenStyles.WhiteText,
-                {fontSize: 14, fontWeight: '500', marginBottom: 8},
-              ]}>
-              비용 나눠 내기
-            </Text>
-            <Text
-              style={[
-                {
-                  fontSize: 12,
-                  fontWeight: '400',
-                  color: '#6A6A6A',
-                  marginBottom: 8,
-                },
-              ]}>
-              만남 후 비용을 나눠서 지불할 생각이 있으신가요?
-            </Text>
-            <View
-              style={[
-                styles.Row_OnlyColumnCenter,
-                MapScreenStyles.MoneyOptionView,
-                {marginTop: 10},
-              ]}>
-              <TouchableOpacity
-                onPress={() => {
-                  setMoneyRadioBox(1);
-                }}
-                style={
-                  MoenyRadioBox == 1
-                    ? MapScreenStyles.SelectedMoneyIconBox
-                    : MapScreenStyles.MoneyIconBox
-                }>
-                <Text
-                  style={
-                    MoenyRadioBox == 1
-                      ? {color: '#606060', fontWeight: '600'}
-                      : {color: '#202124', fontWeight: '600'}
-                  }>
-                  보고결정
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setMoneyRadioBox(2);
-                }}
-                style={
-                  MoenyRadioBox == 2
-                    ? MapScreenStyles.SelectedMoneyIconBox
-                    : MapScreenStyles.MoneyIconBox
-                }>
-                <Text
-                  style={
-                    MoenyRadioBox == 2
-                      ? {color: '#606060', fontWeight: '600'}
-                      : {color: '#202124', fontWeight: '600'}
-                  }>
-                  생각있음
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  setMoneyRadioBox(3);
-                }}
-                style={
-                  MoenyRadioBox == 3
-                    ? MapScreenStyles.SelectedMoneyIconBox
-                    : MapScreenStyles.MoneyIconBox
-                }>
-                <Text
-                  style={
-                    MoenyRadioBox == 3
-                      ? {color: '#606060', fontWeight: '600'}
-                      : {color: '#202124', fontWeight: '600'}
-                  }>
-                  생각없음
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={[styles.Row_OnlyColumnCenter]}>
             <TouchableOpacity
               style={[styles.RowCenter, MapScreenStyles.CancelBoxView]}
               onPress={() => {
@@ -1344,30 +1508,52 @@ const MapScreen = (props: any) => {
               <Text>취소</Text>
             </TouchableOpacity>
 
-            {Memo != '' && MoenyRadioBox != 0 ? (
+            {Memo == '' && MoenyRadioBox != 0 ? (
               <TouchableOpacity
-                style={[
-                  styles.RowCenter,
-                  MapScreenStyles.CheckBoxView,
-                  {backgroundColor: '#28FF98'},
-                ]}
+                style={MapScreenStyles.CheckBoxView}
                 onPress={() => {
                   ShowMyLocation();
                 }}>
-                <Text>완료</Text>
+                {ClickedCompleteSvg(width * 0.37)}
               </TouchableOpacity>
             ) : (
               <View
                 style={[
                   styles.RowCenter,
                   MapScreenStyles.CheckBoxView,
-                  {backgroundColor: '#565656'},
+                  {backgroundColor: '#DFE5F1'},
                 ]}>
                 <Text>완료</Text>
               </View>
             )}
           </View>
-        </SafeAreaView>
+        </View>
+        {/* {M3Main_legacy} */}
+      </Modal>
+    );
+  };
+
+  const [ShowEnter_MatchModal, setShowEnter_MatchModal] = useState(false);
+  const ChangeEnter_MatchVis = () => {
+    setShowEnter_MatchModal(!ShowEnter_MatchModal);
+  };
+  const Enter_MatchModal = () => {
+    return (
+      <Modal
+        animationIn="slideInUp"
+        isVisible={ShowEnter_MatchModal}
+        onBackdropPress={() => ChangeEnter_MatchVis()}
+        style={[
+          styles.W100H100,
+          {
+            right: '5%',
+          },
+        ]}>
+        {/* <View style={MapScreenStyles.MatchModal}> */}
+        {Btn_MatchComponent()}
+        {Btn_RandomMatchComponent()}
+        {ClickedBottomBar()}
+        {/* </View> */}
       </Modal>
     );
   };
@@ -1484,14 +1670,16 @@ const MapScreen = (props: any) => {
   };
 
   const TouchableBtn_EnterMatch = () => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          ChangeBtn_MacthVisiable();
-        }}>
-        {Entered_MatchSvg(50)}
-      </TouchableOpacity>
-    );
+    if (ShowEnter_MatchModal == false) {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            ChangeEnter_MatchVis();
+          }}>
+          {Enter_MatchSvg(80)}
+        </TouchableOpacity>
+      );
+    }
   };
 
   const Btn_EnterChat = () => {
@@ -1502,7 +1690,20 @@ const MapScreen = (props: any) => {
             UserData,
           });
         }}>
-        {Enter_ChatSvg(50)}
+        {Enter_ChatSvg(80)}
+      </TouchableOpacity>
+    );
+  };
+
+  const Btn_EnterFriendMap = () => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('FriendMapScreen', {
+            UserData,
+          });
+        }}>
+        {Enter_FriendMapSvg(80)}
       </TouchableOpacity>
     );
   };
@@ -1515,7 +1716,18 @@ const MapScreen = (props: any) => {
     );
   };
 
-  const MatchBar = () => {
+  const Btn_ClickedEnter_Match = () => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          ChangeEnter_MatchVis();
+        }}>
+        {ClickedEnter_MatchSvg(95)}
+      </TouchableOpacity>
+    );
+  };
+
+  const BottomBar_Girl = () => {
     return (
       <View
         style={[
@@ -1523,11 +1735,31 @@ const MapScreen = (props: any) => {
           styles.Row_OnlyColumnCenter,
           {justifyContent: 'space-around'},
         ]}>
-        {Btn_EnterSetting()}
         {Btn_EnterChat()}
         {TouchableBtn_EnterMatch()}
-        {TouchableBtn_EnterMatch()}
-        {TouchableBtn_EnterMatch()}
+        {Btn_EnterFriendMap()}
+      </View>
+    );
+  };
+
+  const BottomBar_Man = () => {
+    return (
+      <View
+        style={[
+          MapScreenStyles.StartView,
+          styles.Row_OnlyColumnCenter,
+          {justifyContent: 'space-around'},
+        ]}>
+        {Btn_EnterChat()}
+        {Btn_EnterFriendMap()}
+      </View>
+    );
+  };
+
+  const ClickedBottomBar = () => {
+    return (
+      <View style={[MapScreenStyles.ClickedBottomBar, styles.RowCenter]}>
+        {Btn_ClickedEnter_Match()}
       </View>
     );
   };
@@ -1537,7 +1769,10 @@ const MapScreen = (props: any) => {
       <TouchableOpacity
         style={MapScreenStyles.Btn_Match}
         onPress={() => {
-          ChangeModalVisiable();
+          ChangeEnter_MatchVis();
+          setTimeout(() => {
+            ChangeModalVisiable();
+          }, 500);
         }}>
         {GeneralMatchSvg(120)}
       </TouchableOpacity>
@@ -1586,6 +1821,7 @@ const MapScreen = (props: any) => {
       {ShowMyProfileModal()}
       {GirlInputStateModal()}
       {ShowClickedUserDataModal()}
+      {Enter_MatchModal()}
       {location && (
         <MapView
           style={{width: '100%', height: '100%'}}
@@ -1727,7 +1963,9 @@ const MapScreen = (props: any) => {
           ]}
           onPress={() => {
             // RemoveIdentityToken()
-            setProfileModalVisiable(!ProfileModalVisiable);
+            navigation.navigate('MyProfileScreen', {
+              UserData,
+            });
           }}>
           <Image
             source={{uri: ProfileImageUrl}}
@@ -1736,9 +1974,7 @@ const MapScreen = (props: any) => {
         </TouchableOpacity>
       </View>
 
-      {UserData.Gender == 2 ? MatchBar() : MatchBar()}
-      {Btn_MatchVis == true ? Btn_MatchComponent() : null}
-      {Btn_MatchVis == true ? Btn_RandomMatchComponent() : null}
+      {UserData.Gender == 2 ? BottomBar_Girl() : BottomBar_Man()}
 
       <View>
         <TouchableOpacity

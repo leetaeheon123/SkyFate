@@ -10,6 +10,8 @@ import {
   StyleSheet,
   Pressable,
   KeyboardAvoidingView,
+  Dimensions,
+  Keyboard,
 } from 'react-native';
 
 import {signIn, signUp} from '../../UsefulFunctions/FirebaseAuth';
@@ -23,6 +25,9 @@ import {LoginUserEmail} from '../../UsefulFunctions/SaveUserDataInDevice';
 
 import {LoginAndRegisterTextInputStyle} from '../../../styles/LoginAndRegiser';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+import {LongLineFixSvg, LongLineSvg} from 'component/General/GeneralSvg';
+import {withDecay} from 'react-native-reanimated';
+import {MainText_LoginSvg, SubText_EmailSvg, SubText_PasswordSvg} from 'component/SignInUp/SignInUp';
 export type Register2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'InvitationCode'
@@ -51,8 +56,7 @@ const LoginWithEmail = async (
 };
 
 const LoginScreen = (props: any) => {
-  const [BorderBottomColor2, setBorderBottomColor2] = useState('lightgray');
-  const [BorderBottomColor3, setBorderBottomColor3] = useState('lightgray');
+  const [Selected, setSelected] = useState('');
 
   const [TextInputEmail, setTextInputEmail] = useState('8269apk@naver.com');
   const [TextInputPassword, setTextInputPassword] = useState('123456');
@@ -65,54 +69,53 @@ const LoginScreen = (props: any) => {
   // const navigation = useNavigation()
 
   const EmailTextInput = () => (
-    <View style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
-      <Text
-        style={{
-          color: 'lightgray',
-        }}>
-        이메일 입력
-      </Text>
+    <View style={LoginAndRegisterTextInputStyle().ViewStyle}>
+      {SubText_EmailSvg()}
       <TextInput
-        style={LoginAndRegisterTextInputStyle(BorderBottomColor2).TextInput}
+        style={[
+          LoginAndRegisterTextInputStyle().TextInput,
+          {borderBottomColor: Selected == 'Email' ? 'white' : 'lightgray'},
+        ]}
         placeholder="가입하신 이메일을 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
-          setBorderBottomColor2('#0064FF');
+          setSelected('Email');
         }}
         onEndEditing={() => {
-          setBorderBottomColor2('lightgray');
+          setSelected('');
         }}
         value={TextInputEmail}
         onChangeText={(value) => {
           setTextInputEmail(value);
         }}
       />
+      {Selected == 'Email' ? LongLineFixSvg() : null}
     </View>
   );
 
   const PasswordTextInput = () => (
-    <View style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
-      <Text
-        style={{
-          color: 'lightgray',
-        }}>
-        비밀번호 입력
-      </Text>
+    <View style={LoginAndRegisterTextInputStyle().ViewStyle}>
+      {SubText_PasswordSvg()}
+
       <TextInput
-        style={LoginAndRegisterTextInputStyle(BorderBottomColor3).TextInput}
+        style={[
+          LoginAndRegisterTextInputStyle().TextInput,
+          {borderBottomColor: Selected == 'Password' ? 'white' : 'lightgray'},
+        ]}
         placeholder="비밀번호를 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
-          setBorderBottomColor3('#0064FF');
+          setSelected('Password');
         }}
         onEndEditing={() => {
-          setBorderBottomColor3('lightgray');
+          setSelected('');
         }}
         value={TextInputPassword}
         onChangeText={(value) => {
           setTextInputPassword(value);
         }}
       />
+      {Selected == 'Password' ? LongLineFixSvg() : null}
     </View>
   );
 
@@ -120,22 +123,22 @@ const LoginScreen = (props: any) => {
     <SafeAreaView style={LoginAndReigsterStyles.Body}>
       <View style={LoginAndReigsterStyles.Main}>
         <View style={LoginAndReigsterStyles.Description}>
-          <Text
-            style={{
-              fontSize: 22,
-              fontWeight: 'bold',
-              color: 'black',
-            }}>
-            로그인을 시작해주세요
-          </Text>
+          {MainText_LoginSvg()}
         </View>
         <View
           style={{
             height: '50%',
             width: '100%',
           }}>
-          {EmailTextInput()}
-          {PasswordTextInput()}
+          <Pressable
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+            onPress={() => Keyboard.dismiss()}>
+            {EmailTextInput()}
+            {PasswordTextInput()}
+          </Pressable>
         </View>
 
         {TextInputEmail.length >= 6 && TextInputPassword.length >= 6 ? (

@@ -9,6 +9,7 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
+  Keyboard,
 } from 'react-native';
 
 import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
@@ -17,14 +18,14 @@ import firestore from '@react-native-firebase/firestore';
 import {NickNameLine, TextComponent} from 'component/Profile/ProfileSvg';
 import {NickNameInput} from 'component/Profile/ProfileSvg';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+import {LongLineFixSvg} from 'component/General/GeneralSvg';
+import styles from '~/ManToManBoard';
 const NickNameSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
   const {UserEmail} = route.params;
 
-  const [NickNameBorderBottomColor, setNickNameBorderBottomColor] =
-    useState('lightgray');
   const [NickName, setNickName] = useState('Taeheon9');
-
+  const [Selected, setSelected] = useState(false);
   const UpdateNickName = async () => {
     await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
       NickName: NickName,
@@ -37,26 +38,30 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
   };
 
   const NickNameTextInput = () => (
-    <View style={LoginAndRegisterTextInputStyle(null).ViewStyle}>
+    <View style={LoginAndRegisterTextInputStyle().ViewStyle}>
       {NickNameInput()}
       <TextInput
-        style={
-          LoginAndRegisterTextInputStyle(NickNameBorderBottomColor).TextInput
-        }
+        style={[
+          LoginAndRegisterTextInputStyle().TextInput,
+          {
+            borderBottomColor:
+              Selected == true || NickName.length >= 1 ? 'white' : 'lightgray',
+          },
+        ]}
         placeholder="닉네임을 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
-          setNickNameBorderBottomColor('#0064FF');
+          setSelected(true);
         }}
         onEndEditing={() => {
-          setNickNameBorderBottomColor('lightgray');
+          setSelected(false);
         }}
         value={NickName}
         onChangeText={(value) => {
           setNickName(value);
         }}
       />
-      {NickNameLine()}
+      {Selected == true || NickName.length >= 1 ? LongLineFixSvg() : null}
     </View>
   );
 
@@ -66,9 +71,12 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
         <View style={LoginAndReigsterStyles.Description}>
           {TextComponent('NickName')}
         </View>
-        <View style={LoginAndReigsterStyles.Center}>{NickNameTextInput()}</View>
-
-        {NickName.length >= 6 ? (
+        <View style={LoginAndReigsterStyles.Center}>
+          <Pressable style={styles.W100H100} onPress={() => Keyboard.dismiss()}>
+            {NickNameTextInput()}
+          </Pressable>
+        </View>
+        {NickName.length >= 4 ? (
           <Btn_ClickableNext
             onPress={() => {
               UpdateNickName();

@@ -11,6 +11,7 @@ import {
   Pressable,
   Dimensions,
   TouchableOpacity,
+  Keyboard,
 } from 'react-native';
 import {
   AppleButton,
@@ -27,6 +28,12 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from './RootStackParamList';
 import {LoginAndReigsterStyles} from '../../styles/LoginAndRegiser';
 import {Btn_ClickableNext} from 'component/Profile';
+
+import {
+  MainText_InvitationSvg,
+  SubText_InvitationSvg,
+} from 'component/Profile/ProfileSvg';
+import {LineSvg, LongLineSvg} from 'component/General/GeneralSvg';
 
 export type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -164,8 +171,10 @@ const ValidateInvitationCode = (InvitationCode: string, navigation: any) => {
 };
 
 const ValidInvitationCodeScreen = () => {
-  const [BorderBottomColor, setBorderBottomColor] = useState('lightgray');
+  const [Selected, setSelected] = useState(false);
 
+  const {width} = Dimensions.get('window');
+  console.log(width);
   const [TextInputInvitationCode, setTextInputInvitationCode] =
     useState('AHfPqW');
   const navigation = useNavigation();
@@ -174,12 +183,12 @@ const ValidInvitationCodeScreen = () => {
     TextInput: {
       width: '100%',
       height: '50%',
-      borderBottomColor: BorderBottomColor,
+      borderBottomColor: Selected == true ? 'white' : 'lightgray',
       borderBottomWidth: 1,
       fontSize: 18,
       fontWeight: '600',
       color: 'black',
-      // backgroundColor:'skyblue'
+      // backgroundColor: 'skyblue',
     },
     ViewStyle: {
       width: '100%',
@@ -192,27 +201,25 @@ const ValidInvitationCodeScreen = () => {
 
   const InvitationCode = () => (
     <View style={TextInputStyle.ViewStyle}>
-      <Text
-        style={{
-          color: 'lightgray',
-        }}>
-        초대코드 입력
-      </Text>
+      {SubText_InvitationSvg()}
+
       <TextInput
         style={TextInputStyle.TextInput}
         placeholder="초대코드를 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
-          setBorderBottomColor('#0064FF');
+          setSelected(true);
         }}
         onEndEditing={() => {
-          setBorderBottomColor('lightgray');
+          setSelected(false);
         }}
         value={TextInputInvitationCode}
         onChangeText={(value) => {
           setTextInputInvitationCode(value);
         }}
       />
+
+      {Selected == true ? LongLineSvg(width * 0.9) : null}
     </View>
   );
 
@@ -220,42 +227,45 @@ const ValidInvitationCodeScreen = () => {
     <SafeAreaView style={LoginAndReigsterStyles.Body}>
       <View style={LoginAndReigsterStyles.Main}>
         <View style={LoginAndReigsterStyles.Description}>
-          <Text
-            style={{
-              fontSize: 22,
-              fontWeight: 'bold',
-              color: 'black',
-            }}>
-            초대받은 번호로 등록을 시작해주세요
-          </Text>
+          {MainText_InvitationSvg()}
         </View>
+
         <View
           style={{
             height: '50%',
             width: '100%',
-            // backgroundColor:'gray'
           }}>
-          {InvitationCode()}
-
-          <Button
-            title="닉네임 입력창 이동"
-            onPress={() => {
-              navigation.navigate('NickNameSelectScreen', {
-                UserEmail: '8269apk@naver.com',
-              });
+          <Pressable
+            style={{
+              height: '100%',
+              width: '100%',
             }}
-          />
-
-          <Button
-            title="나이 입력창 이동"
             onPress={() => {
-              navigation.navigate('AgeSelectScreen', {
-                UserEmail: '8269apk@naver.com',
-                Gender: 2,
-              });
-            }}
-          />
+              Keyboard.dismiss();
+            }}>
+            {InvitationCode()}
+
+            <Button
+              title="닉네임 입력창 이동"
+              onPress={() => {
+                navigation.navigate('NickNameSelectScreen', {
+                  UserEmail: '8269apk@naver.com',
+                });
+              }}
+            />
+
+            <Button
+              title="나이 입력창 이동"
+              onPress={() => {
+                navigation.navigate('AgeSelectScreen', {
+                  UserEmail: '8269apk@naver.com',
+                  Gender: 2,
+                });
+              }}
+            />
+          </Pressable>
         </View>
+
         <Button
           title="이미지 업로드로 이동"
           onPress={() => {

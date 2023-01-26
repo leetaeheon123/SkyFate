@@ -40,7 +40,7 @@ export const LoginAndReigsterStyles = StyleSheet.create({
   Description: {
     height: '15%',
     width: '100%',
-    backgroundColor: 'skyblue',
+    // backgroundColor: 'skyblue',
     display: 'flex',
     justifyContent: 'flex-end',
   },
@@ -50,12 +50,11 @@ export const LoginAndReigsterStyles = StyleSheet.create({
   },
 });
 
-export const LoginAndRegisterTextInputStyle = (BorderBottomColor: any) =>
+export const LoginAndRegisterTextInputStyle = () =>
   StyleSheet.create({
     TextInput: {
       width: '100%',
       height: '50%',
-      borderBottomColor: BorderBottomColor,
       borderBottomWidth: 1,
       fontSize: 18,
       fontWeight: '600',

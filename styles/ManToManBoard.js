@@ -11,6 +11,10 @@ styles = StyleSheet.create({
     width: '90%',
     marginLeft: '5%',
   },
+  W100H25: {
+    width: '100%',
+    height: '25%',
+  },
   FW500FS14: {
     fontWeight: '500',
     fontSize: 14,
@@ -134,6 +138,10 @@ styles = StyleSheet.create({
   },
   WhiteColor: {
     color: 'white',
+  },
+  W100H100: {
+    width: '100%',
+    height: '100%',
   },
 });
 

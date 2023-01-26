@@ -49,20 +49,8 @@ import ProfileImageUpload from 'Assets/Profile/ProfileImage/ProfileImageUpload.s
 import Btn_Clickable from 'Assets/Profile/All/Btn_Clickable.svg';
 import Btn_NotClickable from 'Assets/Profile/All/Btn_NotClickable.svg';
 
-const excute = (Name) => {
-  switch (Name) {
-    case 'Mbti':
-      return MbtiText;
-    case 'Gender':
-      return GenderText;
-    case 'NickName':
-      return NickNameText;
-    case 'Invalidation':
-      return InvalidationText;
-    case 'Register':
-      return RegisterText;
-  }
-};
+import InvitationText_Main from 'Assets/Invitation/Invitation_Main.svg';
+import InvitationText_Sub from 'Assets/Invitation/Invitation_Sub.svg';
 
 const excuteObj = {
   Mbti: MbtiText,
@@ -163,4 +151,12 @@ export const Btn_NotClickableNextSvg = (width) => {
       // fill="Black"
       asset={Btn_NotClickable}></WithLocalSvg>
   );
+};
+
+export const MainText_InvitationSvg = () => {
+  return <WithLocalSvg asset={InvitationText_Main}></WithLocalSvg>;
+};
+
+export const SubText_InvitationSvg = () => {
+  return <WithLocalSvg asset={InvitationText_Sub}></WithLocalSvg>;
 };

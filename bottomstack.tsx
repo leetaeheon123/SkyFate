@@ -1,16 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import MapScreen from './src/screens/Map/map';
-import TwoMapScreen from './src/screens/Map/twomap';
+import FriendMapScreen from './src/screens/Map/FriendMap';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {withAppContext} from './src/contextReducer';
 
 import MeetMapScreen from './src/screens/Map/meetmap';
 import ChatListScreen from 'Screens/Map/ChatList';
+
+import MyProfileScreen from 'Screens/MyProfile/MyProfile';
+
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
-  const [InvitationCodeToFriend, setInvitationCodeToFriend] =
-    useState<Object>(null);
   const {route, currentUser} = props;
 
   useEffect(() => {
@@ -71,8 +72,8 @@ const BottomTabScreen = (props: any) => {
       />
       {props.currentUser.Gender == 2 ? (
         <BottomTab.Screen
-          name="TwoMapScreen"
-          component={TwoMapScreen}
+          name="FriendMapScreen"
+          component={FriendMapScreen}
           initialParams={{
             CurrentUser: currentUser,
           }}
@@ -91,6 +92,7 @@ const BottomTabScreen = (props: any) => {
         component={ChatListScreen}
         initialParams={{}}
       />
+      <BottomTab.Screen name="MyProfileScreen" component={MyProfileScreen} />
     </BottomTab.Navigator>
   );
 };

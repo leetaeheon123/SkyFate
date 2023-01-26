@@ -2,7 +2,7 @@ import {StyleSheet, Dimensions} from 'react-native';
 import styles from './ManToManBoard';
 let {height} = Dimensions.get('window');
 height = Math.ceil(height);
-let NS2 = height * 0.7;
+let NS2 = height * 0.65;
 
 export const MapScreenStyles = StyleSheet.create({
   ProfileModalParent: {
@@ -39,29 +39,26 @@ export const MapScreenStyles = StyleSheet.create({
     top: '14%',
     width: '90%',
     position: 'absolute',
-    backgroundColor: 'black',
+    backgroundColor: '#313A5B',
     // backgroundColor: 'white',
     left: '5%',
     borderRadius: 14,
     display: 'flex',
     flexDirection: 'column',
   },
-  MinusPeopleNumber: {
-    width: 18,
-    height: 18,
-    backgroundColor: '#565656',
-  },
-
-  PlusPeopleNumber: {
-    width: 18,
-    height: 18,
-    backgroundColor: 'white',
-  },
-
   TotalPeopleNum: {
     fontSize: 14,
     fontWeight: 'bold',
+    color: '#37375B',
   },
+
+  ChatView: [
+    styles.RowCenter,
+    {
+      width: '100%',
+      height: '19%',
+    },
+  ],
 
   MoneyIconBox: [
     {
@@ -84,10 +81,8 @@ export const MapScreenStyles = StyleSheet.create({
   ],
 
   MemoTextInput: {
-    width: '100%',
+    width: '78%',
     height: 46,
-    backgroundColor: '#3E3E3E',
-    borderRadius: 6,
     padding: 15,
   },
 
@@ -103,33 +98,53 @@ export const MapScreenStyles = StyleSheet.create({
   },
 
   PeopleNumOption: {
-    width: '100%',
+    width: '90%',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     height: 46,
-    backgroundColor: '#3E3E3E',
-    borderRadius: 6,
+    // backgroundColor: '#3E3E3E',
+    backgroundColor: '#DFE5F1',
+    borderRadius: 8,
   },
 
-  MoneyOptionView: {
+  FriendAdd: {
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 46,
+    backgroundColor: '#DFE5F1',
+    borderRadius: 8,
+  },
+
+  Legacy_MoneyOptionView: {
     // height:'25%',
     width: '100%',
     justifyContent: 'space-between',
   },
 
+  PayOption: {
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 65,
+  },
+
   CheckBoxView: {
     height: 46,
     width: '42.5%',
-    borderRadius: 6,
+    borderRadius: 9,
     marginLeft: '5%',
+    backgroundColor: 'red',
   },
 
   CancelBoxView: {
     height: 46,
     width: '42.5%',
-    borderRadius: 6,
-    backgroundColor: '#F5F5F5',
+    borderRadius: 9,
+    backgroundColor: '#DFE5F1',
     marginLeft: '5%',
   },
   ChangeProfileView: {
@@ -139,12 +154,6 @@ export const MapScreenStyles = StyleSheet.create({
     position: 'absolute',
     right: '7%',
     top: '6%',
-    // 11/08) 여기는 젤리처럼 그레디언트 컬러 필요함.
-    // backgroundColor:'#0064FF',
-    // backgroundColor:'#202632',
-    // backgroundColor:'#4EB789',
-    // phonering 보라
-    // backgroundColor:'#6E01EF',
     borderWidth: 3,
     borderColor: '#202124',
     borderStyle: 'solid',
@@ -178,14 +187,21 @@ export const MapScreenStyles = StyleSheet.create({
   },
 
   StartView: {
-    width: '90%',
+    width: '70%',
     height: 50,
     // backgroundColor:'#202632',
-    backgroundColor: '#202124',
+    // backgroundColor: '#202124',
     position: 'absolute',
-    left: '5%',
+    left: '15%',
     bottom: '6%',
     borderRadius: 10,
+  },
+
+  ClickedBottomBar: {
+    width: '40%',
+    position: 'absolute',
+    left: '30%',
+    bottom: '15%',
   },
 
   Btn_MatchStart: {
@@ -197,12 +213,12 @@ export const MapScreenStyles = StyleSheet.create({
   Btn_Match: {
     position: 'absolute',
     left: '15%',
-    bottom: '30%',
+    bottom: '50%',
   },
   Btn_RandomMatch: {
     position: 'absolute',
     right: '15%',
-    bottom: '30%',
+    bottom: '50%',
   },
 
   GirlsMarker: {
@@ -240,4 +256,21 @@ export const MapScreenStyles = StyleSheet.create({
     bottom: 130,
     backgroundColor: 'white',
   },
+
+  MatchModal: [styles.W100H100, {backgroundColor: 'black'}],
+
+  M3MainAside: [
+    styles.Column_OnlyRowCenter,
+    {
+      width: '18%',
+      height: '100%',
+    },
+  ],
+  M3MainSection: [
+    styles.Column_OnlyColumnCenter,
+    {
+      width: '82%',
+      height: '100%',
+    },
+  ],
 });

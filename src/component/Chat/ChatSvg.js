@@ -4,6 +4,8 @@ import ExplainLimit_Main from 'Assets/Chat/ExplainLimit_Main.svg';
 import ExplainLimit_Sub from 'Assets/Chat/ExplainLimit_Sub.svg';
 import ExplainLimit_Bomb from 'Assets/Chat/ExplainLimit_Bomb.svg';
 
+import BombIcon from 'Assets/BombIcon.svg';
+import M5Chat from 'Assets/Chat/M5Chat.svg';
 export const Text_Message = (width) => {
   //   let height = width * 1.8;
   let height = width / 3;
@@ -30,3 +32,6 @@ export const ExplainLimit_BombSvg = (width) => {
     <WithLocalSvg asset={ExplainLimit_Bomb} width={width} height={height} />
   );
 };
+
+export const BombIconSvg = <WithLocalSvg asset={BombIcon}></WithLocalSvg>;
+export const M5ChatSvg = <WithLocalSvg asset={M5Chat} />;

@@ -12,6 +12,8 @@ import notifee, {AndroidImportance} from '@notifee/react-native';
 import {LogBox} from 'react-native';
 
 LogBox.ignoreLogs(['Non-serializable']);
+LogBox.ignoreLogs(['The native module']);
+
 function SendPushNotificationInforeground() {
   PushNotificationIOS.addNotificationRequest({
     id: '123',

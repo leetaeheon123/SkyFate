@@ -223,7 +223,7 @@ const RemoveIdentityToken = async () => {
 };
 // 자주 바뀌는 데이터이므로 State화 하기
 
-const TwoMapScreen = (props: any) => {
+const FriendMapScreen = (props: any) => {
   const LOCATION_DELTA = {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
@@ -1046,4 +1046,4 @@ const TwoMapScreen = (props: any) => {
   );
 };
 
-export default codePush(TwoMapScreen);
+export default codePush(FriendMapScreen);

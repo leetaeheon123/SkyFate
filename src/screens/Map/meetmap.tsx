@@ -10,7 +10,12 @@ import {
 } from 'react-native';
 
 import styles from '~/ManToManBoard';
-import MapView, {Marker, PROVIDER_GOOGLE, Polyline, Geojson} from 'react-native-maps';
+import MapView, {
+  Marker,
+  PROVIDER_GOOGLE,
+  Polyline,
+  Geojson,
+} from 'react-native-maps';
 
 import {MapScreenStyles} from '~/MapScreen';
 import {GetMyCoords, reference} from './map';
@@ -79,16 +84,15 @@ const MeetMapScreen = ({route}: any, props: any) => {
   // const [location, setLocation] = useState<ILocation | undefined>(undefined);
 
   useEffect(() => {
-    // SendBird.addConnectionHandler('chat', connectionHandler);
-    // SendBird.addChannelHandler('chat', channelHandler);
-    // const unsubscribe = AppState.addEventListener('change', handleStateChange);
-
     StartLocation();
-
     // locationdispatch({type: 'update', payload: {x:10} });
-
     // UpdateMyLocationWatch(setLocation, locationdispatch, UpdateMyLocation);
+
     UpdateMyLocationWatch(locationdispatch, UpdateMyLocation);
+
+    
+    SendBird.addChannelHandler('chat', channelHandler);
+    // SendBird.addUserEventHandler('users', userEventHandler);
 
     if (!SendBird.currentUser) {
       SendBird.connect(UserData.userId, (_, err) => {
@@ -204,6 +208,26 @@ const MeetMapScreen = ({route}: any, props: any) => {
       latitude: 37.6041558,
       longitude: 126.9456834,
     });
+  };
+
+  // const userEventHandler = new SendBird.UserEventHandler();
+
+  // userEventHandler.onTotalUnreadMessageCountUpdated = (
+  //   totalCount: any,
+  //   countByCustomTypes: any,
+  // ) => {
+  //   console.log(
+  //     'totalCount And countByCustomTypes:',
+  //     totalCount,
+  //     countByCustomTypes,
+  //   );
+  // };
+
+  const channelHandler = new SendBird.ChannelHandler();
+  channelHandler.onMessageReceived = (targetChannel:any, message:any) => {
+    if (targetChannel.url === channel.url) {
+      dispatch({type: 'receive-message', payload: {message, channel}});
+    }
   };
 
   const ChatButton = () => {

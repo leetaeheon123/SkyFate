@@ -36,6 +36,9 @@ import {GetTime} from '../../1108backup/src/UsefulFunctions/GetTime';
 import firestore from '@react-native-firebase/firestore';
 import {GetEpochTime} from '^/GetTime';
 import {MilisToMinutes} from '^/GetTime';
+
+import {BombIconSvg, ExplainLimit_BombSvg} from 'component/Chat/ChatSvg';
+import styles from '~/ManToManBoard';
 const ChatScreen = (props) => {
   const {route, navigation} = props;
 
@@ -102,7 +105,7 @@ const ChatScreen = (props) => {
               width: 30,
               height: 30,
             }}
-            source={require('../Assets/security.png')}
+            source={require('../Assets/Send.png')}
           />
         </TouchableOpacity>
 
@@ -124,6 +127,10 @@ const ChatScreen = (props) => {
     navigation.setOptions({
       title: createChannelName(channel),
       headerRight: () => right,
+      headerStyle: {
+        backgroundColor: '#7373F6',
+      },
+      headerTintColor: '#fff',
     });
   });
   // on state change
@@ -582,6 +589,8 @@ const ChatScreen = (props) => {
   //   );
   // };
 
+  const BombIcons = <View>{BombIconSvg}</View>;
+
   return (
     <>
       <StatusBar backgroundColor="#742ddd" barStyle="light-content" />
@@ -611,6 +620,12 @@ const ChatScreen = (props) => {
             <Button title="Submit" onPress={ReportSubmit} />
           </View>
         </Modal>
+        <View style={style.BombView}>
+          {BombIcons}
+          <Text style={style.BombText}>
+            빠른 매칭을 위해 채팅은 10분으로 제한합니다.
+          </Text>
+        </View>
         <FlatList
           data={state.messages}
           inverted={true}
@@ -681,6 +696,7 @@ const ChatScreen = (props) => {
 const style = {
   container: {
     flex: 1,
+    backgroundColor: '#37375B',
   },
   headerRightContainer: {
     flexDirection: 'row',
@@ -723,6 +739,15 @@ const style = {
   },
   sendButton: {
     marginLeft: 10,
+  },
+
+  BombView: {
+    width: '100%',
+    height: 122,
+  },
+  BombText: {
+    fontSize: 12,
+    color: '#DFE5F180',
   },
 };
 
