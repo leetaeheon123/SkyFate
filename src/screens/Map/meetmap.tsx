@@ -35,6 +35,11 @@ import {ILocation} from './map';
 import {UpdateMyLocationWatch} from './map';
 import {ReplacedotInEmail} from '^/Replace';
 import {parseLineString, tMapNavigate} from '../../utils';
+import {L1ChatSvg} from 'component/Chat/ChatSvg';
+import {L1styles} from '~/L1';
+import LinearGradient from 'react-native-linear-gradient';
+import {LinearProfileImage, LinearProfileImagView} from 'component/General';
+import {SecuritySvg} from 'component/General/GeneralSvg';
 
 const MeetMapScreen = ({route}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
@@ -56,7 +61,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
   const [OtherLocation, setOtherLocation] = useState<ILocation | undefined>(
     undefined,
   );
-  const [MyLocation, setMyLocation] = useState<ILocation | undefined>(
+  const [MyLocationState, setMyLocation] = useState<ILocation | undefined>(
     undefined,
   );
 
@@ -90,7 +95,6 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
     UpdateMyLocationWatch(locationdispatch, UpdateMyLocation);
 
-    
     SendBird.addChannelHandler('chat', channelHandler);
     // SendBird.addUserEventHandler('users', userEventHandler);
 
@@ -147,6 +151,10 @@ const MeetMapScreen = ({route}: any, props: any) => {
       // unsubscribe.remove();
     };
   }, []);
+  useEffect(() => {
+    console.log('useEffect MyLo, OtherLo');
+    drawRoute();
+  }, [MyLocationState, OtherLocation]);
 
   const refresh = () => {
     // channel.markAsRead();
@@ -210,6 +218,13 @@ const MeetMapScreen = ({route}: any, props: any) => {
     });
   };
 
+  const UpdateSpicLocation2 = () => {
+    reference.ref(MyDBUrlNode).update({
+      latitude: 37.6041558,
+      longitude: 126.9056834,
+    });
+  };
+
   // const userEventHandler = new SendBird.UserEventHandler();
 
   // userEventHandler.onTotalUnreadMessageCountUpdated = (
@@ -224,7 +239,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
   // };
 
   const channelHandler = new SendBird.ChannelHandler();
-  channelHandler.onMessageReceived = (targetChannel:any, message:any) => {
+  channelHandler.onMessageReceived = (targetChannel: any, message: any) => {
     if (targetChannel.url === channel.url) {
       dispatch({type: 'receive-message', payload: {message, channel}});
     }
@@ -234,121 +249,176 @@ const MeetMapScreen = ({route}: any, props: any) => {
     return (
       <View>
         <TouchableOpacity
-          style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}
+          style={[MapScreenStyles.MyLocationBtn, styles.RowCenter]}
           onPress={() => {
-            setChatModal(!ChatModal);
+            setChatModalVis(!ChatModalVis);
           }}>
-          <MaterialIcons name="message" size={27} color="#6713D2" />
+          {L1ChatSvg}
+          {/* <MaterialIcons name="message" size={27} color="#6713D2" /> */}
         </TouchableOpacity>
       </View>
     );
   };
 
-  const [ChatModal, setChatModal] = useState(true);
+  const [ChatModalVis, setChatModalVis] = useState(false);
 
   const drawRoute = async () => {
+    if (OtherLocation == undefined || Mylocation == undefined) {
+      console.log('OtherLocation:', OtherLocation);
+      console.log('MyLocation:', MyLocationState);
+      return;
+    }
     const coordinates = {
-      startX: MyLocation?.longitude.toString(),
-      startY: MyLocation?.latitude.toString(),
+      startX: MyLocationState?.longitude.toString(),
+      startY: MyLocationState?.latitude.toString(),
       endX: OtherLocation?.longitude.toString(),
       endY: OtherLocation?.latitude.toString(),
     };
+    console.log(coordinates);
     const data = await tMapNavigate(coordinates);
     data.features = parseLineString(data.features);
+    console.log('features:', data.features);
     setGeoJson(data);
   };
 
+  const Btn_Security = (
+    <TouchableOpacity>{SecuritySvg(19, 23)}</TouchableOpacity>
+  );
+
+  const ChatModal = (
+    <Modal
+      style={L1styles.ChatModal}
+      isVisible={ChatModalVis}
+      onBackdropPress={() => setChatModalVis(false)}
+      // swipeDirection="down"
+      // swipeThreshold={300}
+      // onSwipeComplete={() => setChatModalVis(false)}
+      coverScreen={false}>
+      <View style={L1styles.Body}>
+        <LinearGradient
+          colors={['#7373F6', '#8B70F7', '#956EF6', '#A869F7']}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+          style={L1styles.Header}>
+          {LinearProfileImagView(
+            // '18.2%',
+            // '82%',
+            78,
+            78,
+            otherUserData.ProfileImageUrl,
+            UserData.NickName,
+          )}
+          {/* 1/27 TODO: 신고부분 생성 
+          <View
+            style={{
+              position: 'absolute',
+              right: 10,
+              backgroundColor: 'red',
+            }}>
+            {Btn_Security}
+          </View> */}
+        </LinearGradient>
+        <View style={L1styles.Main}>
+          <Text
+            style={{
+              fontWeight: '400',
+              fontSize: 12,
+              color: '#DFE5F1',
+            }}>
+            빠른 매칭을 위해 채팅은 10분으로 제한합니다.
+          </Text>
+          <FlatList
+            data={state.messages}
+            inverted={true}
+            renderItem={({item}) => (
+              <Message
+                key={item.reqId}
+                channel={channel}
+                message={item}
+                SendBird={SendBird}
+                onPress={(message) => viewDetail(message)}
+                onLongPress={(message) => showContextMenu(message)}
+              />
+            )}
+            keyExtractor={(item) => `${item.messageId}` || item.reqId}
+            contentContainerStyle={{flexGrow: 1, paddingVertical: 10}}
+            ListHeaderComponent={
+              state.error && (
+                <View style={ChatStyle.errorContainer}>
+                  <Text style={ChatStyle.error}>{state.error}</Text>
+                </View>
+              )
+            }
+            ListEmptyComponent={
+              <View style={ChatStyle.emptyContainer}>
+                <Text style={ChatStyle.empty}>{state.empty}</Text>
+              </View>
+            }
+            onEndReached={() => next()}
+            onEndReachedThreshold={0.5}
+          />
+
+          <View style={ChatStyle.inputContainer}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={ChatStyle.uploadButton}
+              onPress={() => selectFile(SendBird, dispatch, channel)}>
+              <Icon name="insert-photo" color="#7b53ef" size={28} />
+            </TouchableOpacity>
+            <TextInput
+              value={state.input}
+              style={ChatStyle.input}
+              multiline={true}
+              numberOfLines={2}
+              // placeholder="메세지를 입력하세요"
+              onChangeText={(content) => {
+                // if (content.length > 0) {
+                //   channel.startTyping();
+                // } else {
+                //   channel.endTyping();
+                // }
+                dispatch({type: 'typing', payload: {input: content}});
+              }}
+            />
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={ChatStyle.sendButton}
+              onPress={() => {
+                console.log(state.input);
+                sendUserMessage(state.input, channel, dispatch, SendBird);
+              }}>
+              <Icon
+                name="send"
+                color={state.input.length > 0 ? '#7b53ef' : '#ddd'}
+                size={28}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <View style={{width: '100%', height: '100%'}}>
-      <Modal
-        style={{backgroundColor: 'red', width: '100%'}}
-        isVisible={ChatModal}
-        onBackdropPress={() => setChatModal(false)}
-        swipeDirection="right"
-        onSwipeComplete={() => setChatModal(false)}>
-        <FlatList
-          data={state.messages}
-          inverted={true}
-          renderItem={({item}) => (
-            <Message
-              key={item.reqId}
-              channel={channel}
-              message={item}
-              SendBird={SendBird}
-              onPress={(message) => viewDetail(message)}
-              onLongPress={(message) => showContextMenu(message)}
-            />
-          )}
-          keyExtractor={(item) => `${item.messageId}` || item.reqId}
-          contentContainerStyle={{flexGrow: 1, paddingVertical: 10}}
-          ListHeaderComponent={
-            state.error && (
-              <View style={ChatStyle.errorContainer}>
-                <Text style={ChatStyle.error}>{state.error}</Text>
-              </View>
-            )
-          }
-          ListEmptyComponent={
-            <View style={ChatStyle.emptyContainer}>
-              <Text style={ChatStyle.empty}>{state.empty}</Text>
-            </View>
-          }
-          onEndReached={() => next()}
-          onEndReachedThreshold={0.5}
-        />
-        <View style={ChatStyle.inputContainer}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={ChatStyle.uploadButton}
-            onPress={() => selectFile(SendBird, dispatch, channel)}>
-            <Icon name="insert-photo" color="#7b53ef" size={28} />
-          </TouchableOpacity>
-          <TextInput
-            value={state.input}
-            style={ChatStyle.input}
-            multiline={true}
-            numberOfLines={2}
-            onChangeText={(content) => {
-              // if (content.length > 0) {
-              //   channel.startTyping();
-              // } else {
-              //   channel.endTyping();
-              // }
-              dispatch({type: 'typing', payload: {input: content}});
-            }}
-          />
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={ChatStyle.sendButton}
-            onPress={() => {
-              console.log(state.input);
-              sendUserMessage(state.input, channel, dispatch, SendBird);
-            }}>
-            <Icon
-              name="send"
-              color={state.input.length > 0 ? '#7b53ef' : '#ddd'}
-              size={28}
-            />
-          </TouchableOpacity>
-        </View>
-      </Modal>
-      {MyLocation && (
+      {ChatModal}
+      {MyLocationState && (
         <MapView
-          style={{width: '100%', height: '90%'}}
+          style={{width: '100%', height: '100%'}}
           initialRegion={{
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
-            latitude: MyLocation.latitude,
-            longitude: MyLocation.longitude,
+            latitude: MyLocationState.latitude,
+            longitude: MyLocationState.longitude,
           }}
           showsUserLocation={false}
           loadingEnabled={true}
-          userInterfaceStyle="light"
-          // userInterfaceStyle="dark"
+          // userInterfaceStyle="light"
+          userInterfaceStyle="dark"
           minZoomLevel={5}
           maxZoomLevel={17}>
-          {MyLocation && (
-            <Marker coordinate={MyLocation} tracksViewChanges={false}>
+          {MyLocationState && (
+            <Marker coordinate={MyLocationState} tracksViewChanges={false}>
               <View>
                 <Image
                   source={{uri: UserData.ProfileImageUrl}}
@@ -369,29 +439,36 @@ const MeetMapScreen = ({route}: any, props: any) => {
               </View>
             </Marker>
           )}
-
-          {OtherLocation && MyLocation && (
-            <Polyline coordinates={[MyLocation, OtherLocation]}></Polyline>
-          )}
+          {/* 
+          {OtherLocation && MyLocationState && (
+            <Polyline coordinates={[MyLocationState, OtherLocation]}></Polyline>
+          )} */}
 
           {geoJson && (
             <Geojson
               geojson={geoJson}
-              strokeColor="red"
-              fillColor="green"
-              strokeWidth={2}
+              strokeColor="#E219FC"
+              // strokeColor="#FF03CD"
+              // fillColor="green"
+              strokeWidth={5}
             />
           )}
         </MapView>
       )}
 
-      <Button
-        title="Test"
+      {/* <Button
+        title="산으로이동"
         onPress={() => {
           UpdateSpicLocation();
-          drawRoute();
+          // drawRoute();
         }}
       />
+      <Button
+        title="집으로이동"
+        onPress={() => {
+          UpdateSpicLocation2();
+        }}
+      /> */}
       {ChatButton()}
     </View>
   );

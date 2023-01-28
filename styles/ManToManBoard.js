@@ -104,6 +104,10 @@ styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  Row_OnlyFlex: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
   Row_OnlyRowCenter: {
     display: 'flex',
     flexDirection: 'row',
@@ -119,6 +123,10 @@ styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  Row_OnlyFlex: {
+    display: 'flex',
+    flexDirection: 'column',
   },
   Column_OnlyRowCenter: {
     display: 'flex',

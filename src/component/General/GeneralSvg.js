@@ -18,6 +18,9 @@ import VerticalLine from 'Assets/VerticalLine.svg';
 import Check from 'Assets/Check.svg';
 import ClickedCheck from 'Assets/ClickedCheck.svg';
 
+import Pay from 'Assets/Pay.svg';
+
+import Security from 'Assets/Security.svg';
 const Gwidth = Dimensions.get('window').width;
 export const BackSvg = (width) => {
   let height = width * 1.8;
@@ -106,3 +109,11 @@ export const ClickedCheckSvg = (width) => {
       width={width}></WithLocalSvg>
   );
 };
+
+export const PaySvg = (width) => (
+  <WithLocalSvg asset={Pay} width={width} height={width}></WithLocalSvg>
+);
+
+export const SecuritySvg = (width, height) => (
+  <WithLocalSvg asset={Security} width={width} height={height}></WithLocalSvg>
+);

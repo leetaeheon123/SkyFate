@@ -13,8 +13,9 @@ import Channel from 'component/channel';
 import {AppContext} from '^/Appcontext';
 import {channelsReducer} from 'reducer/channels';
 import {GetEpochTime} from '^/GetTime';
-import {Btn_ClickableBack} from 'component/General';
+import {BombIconView, Btn_ClickableBack} from 'component/General';
 import {
+  BombIconSvg,
   ExplainLimit_BombSvg,
   Text_ExplainLimit_Main,
   Text_ExplainLimit_Sub,
@@ -198,25 +199,38 @@ const ChatListScreen = ({navigation, route}: any) => {
     );
   };
 
+  const Header = (
+    <View
+      style={[
+        styles.Row_OnlyColumnCenter,
+        {justifyContent: 'space-between', height: '10%'},
+      ]}>
+      <Btn_ClickableBack width={14} onPress={() => navigation.goBack()} />
+      {Text_Message(66)}
+      <Btn_ClickableBack width={14} onPress={() => navigation.goBack()} />
+    </View>
+  );
+
   return (
     <SafeAreaView style={ChatListStyles.Body}>
       <View style={ChatListStyles.Main}>
-        <View
-          style={[
-            styles.Row_OnlyColumnCenter,
-            {justifyContent: 'space-between'},
-          ]}>
-          <Btn_ClickableBack width={14} onPress={() => navigation.goBack()} />
-          {Text_Message(66)}
-          <Btn_ClickableBack width={14} onPress={() => navigation.goBack()} />
-        </View>
+        {Header}
         <View style={ChatListStyles.Explain}>
           {ExplainLimit_BombSvg(90)}
-
-          {Text_ExplainLimit_Main()}
-
-          {Text_ExplainLimit_Sub()}
+          <Text style={{fontSize: 15, fontWeight: '400', color: 'white'}}>
+            빠른매칭을 위해 채팅은 10분으로 제한합니다
+          </Text>
+          <View>
+            <Text style={{fontSize: 12, fontWeight: '400', color: 'white'}}>
+              채팅을 시작하는 순간 폭탄의 시간이 줄어듭니다
+            </Text>
+            <Text style={{fontSize: 12, fontWeight: '400', color: 'white'}}>
+              총 10분이며, 1분씩 줄어드는 시스템입니다.
+            </Text>
+          </View>
         </View>
+
+        {/* {BombIconView(90, 90)} */}
 
         <FlatList
           data={state.channels}
