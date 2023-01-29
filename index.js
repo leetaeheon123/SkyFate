@@ -13,6 +13,7 @@ import {LogBox} from 'react-native';
 
 LogBox.ignoreLogs(['Non-serializable']);
 LogBox.ignoreLogs(['The native module']);
+LogBox.ignoreLogs(['Encountered']);
 
 function SendPushNotificationInforeground() {
   PushNotificationIOS.addNotificationRequest({

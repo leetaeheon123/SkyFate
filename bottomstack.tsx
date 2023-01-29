@@ -9,6 +9,7 @@ import ChatListScreen from 'Screens/Map/ChatList';
 
 import MyProfileScreen from 'Screens/MyProfile/MyProfile';
 
+import {Rending} from 'Screens/Rending';
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
@@ -51,6 +52,7 @@ const BottomTabScreen = (props: any) => {
 
   return (
     <BottomTab.Navigator
+      initialRouteName="MapScreen"
       barStyle={{
         backgroundColor: 'white',
         justifyContent: 'flex-start',
@@ -63,6 +65,7 @@ const BottomTabScreen = (props: any) => {
       //   tabbarVisiable: false,
       // })}
     >
+      {/* <BottomTab.Screen name="Rending" component={Rending} /> */}
       <BottomTab.Screen
         name="MapScreen"
         component={MapScreen}

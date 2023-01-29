@@ -94,12 +94,15 @@ import {
   ClickedCompleteSvg,
   CompleteSvg,
   MinusSvg,
+  PaySvg,
   PeopleAddSvg,
   PeopleSvg,
   PlusSvg,
   VerticalLineSvg,
 } from 'component/General/GeneralSvg';
 import {M5ChatSvg} from 'component/Chat/ChatSvg';
+import channel from 'component/channel';
+import {Type2VerticalLine} from 'component/LinearGradient/LinearGradientCircle';
 export interface ILocation {
   latitude: number;
   longitude: number;
@@ -114,6 +117,7 @@ interface ProfileForGtoM {
   NickName: string;
   latitude: Number;
   longitude: Number;
+  Mbti: string;
 }
 
 export const reference = firebase
@@ -269,6 +273,7 @@ const ShowManLocationForGM = async (
   UserEmail: string,
   ProfileImageUrl: string,
   NickName: string,
+  Mbti: string,
 ) => {
   let ReplaceUserEmail = ReplacedotInEmail(UserEmail);
   let id = setInterval(() => {
@@ -281,6 +286,7 @@ const ShowManLocationForGM = async (
         ProfileImageUrl: ProfileImageUrl,
         TimeStamp: EpochTime,
         NickName: NickName,
+        Mbti: Mbti,
       });
     };
 
@@ -319,6 +325,7 @@ const Girl_StartShowLocation = async (
   CanPayit: Number,
   ProfileImageUrl: any,
   NickName: string,
+  Mbti: string,
 ) => {
   let CanPayStr: string;
   if (CanPayit == 1) {
@@ -353,6 +360,7 @@ const Girl_StartShowLocation = async (
         TimeStamp: EpochTime,
         UserEmail: UserEmail,
         NickName: NickName,
+        Mbti: Mbti,
       })
       .then(() => DeleteMyLocationAfter3Min(ReplaceUserEmail, 2));
   };
@@ -571,6 +579,7 @@ const MapScreen = (props: any) => {
           UserData.UserEmail,
           UserData.ProfileImageUrl,
           UserData.NickName,
+          UserData.Mbti,
         );
         return Result;
       }
@@ -707,6 +716,7 @@ const MapScreen = (props: any) => {
         MoenyRadioBox,
         UserData.ProfileImageUrl,
         UserData.NickName,
+        UserData.Mbti,
       );
       setGpsOn(true);
       ChangeModalVisiable();
@@ -766,36 +776,28 @@ const MapScreen = (props: any) => {
         latitude: ProfileForGtoM.latitude,
         longitude: ProfileForGtoM.longitude,
       };
-      // let MemberLatlng = {
-      //   ProfileForGtoM.UserEmail=Latlng
-      //   UserData.UserEmail=location
-      // }
-
-      // let MemberLatlng = {
-      //   Member[0]:Latlng,
-      //   Member[1]:location,
-      // }
-
-      // console.log(MemberLatlng)
 
       params.addUserIds(Member);
       params.coverUrl = ProfileForGtoM.ProfileImageUrl;
       params.name = NickNames[0];
       params.operatorUserIds = Member;
       (params.isDistinct = true), (params.isPublic = false);
-      // params.data = {
-      //   a: 10,
-      //   b: 20,
-      // };
+      const OtherMetadDataKey = 'CanSendL1Invite_' + Member[0];
+      const MyMetadDataKey = 'CanSendL1Invite_' + Member[1];
 
       SendBird.GroupChannel.createChannel(
         params,
         function (groupChannel: any, error: Error) {
           if (error) {
-            console.log(error);
+            console.log(error.message);
             // Handle error.
           } else if (!error) {
             SwitchShowUserModal();
+            CreateCanSendMetaData(
+              groupChannel,
+              OtherMetadDataKey,
+              MyMetadDataKey,
+            );
             chat(groupChannel);
             // 10분 경과시 채팅방을 삭제하기 위한 코드 추가
 
@@ -811,6 +813,23 @@ const MapScreen = (props: any) => {
         },
       );
     }
+  };
+
+  const CreateCanSendMetaData = (
+    channel: any,
+    OtherMetadDataKey: string,
+    MyMetaDataKey: string,
+  ) => {
+    let Metadata = {
+      [OtherMetadDataKey]: '0',
+      [MyMetaDataKey]: '0',
+    };
+
+    channel.createMetaData(Metadata, function (response: any, error: Error) {
+      if (error) {
+        // Handle error.
+      }
+    });
   };
 
   const chat = (channel: any) => {
@@ -873,7 +892,7 @@ const MapScreen = (props: any) => {
           setPeopleNum(PeopleNum - 1);
         }
       }}>
-      {MinusSvg(15)}
+      {MinusSvg(30)}
     </TouchableOpacity>
   );
 
@@ -884,7 +903,7 @@ const MapScreen = (props: any) => {
           setPeopleNum(PeopleNum + 1);
         }
       }}>
-      {PlusSvg(15)}
+      {PlusSvg(30)}
     </TouchableOpacity>
   );
 
@@ -921,8 +940,7 @@ const MapScreen = (props: any) => {
         height: '81%',
         borderRadius: 31,
         marginTop: 10,
-      }}
-    />
+      }}></Image>
   );
 
   const Desc = (
@@ -959,8 +977,25 @@ const MapScreen = (props: any) => {
   const ChatView = (
     <View style={MapScreenStyles.ChatView}>
       <TouchableOpacity onPress={() => CreateChating()}>
-        {M5ChatSvg}
+        {M5ChatSvg(width * 0.17)}
       </TouchableOpacity>
+    </View>
+  );
+
+  const ImageBar = (
+    <View style={MapScreenStyles.ImageBar}>
+      <View style={MapScreenStyles.ImageBarBox}>
+        {PaySvg(22)}
+        <Text style={styles.WhiteColor}>비용</Text>
+        <Text style={MapScreenStyles.ImageBarText}>더치페이</Text>
+      </View>
+      <View style={MapScreenStyles.ImageBarBox}>
+        {PaySvg(22)}
+        <Text style={styles.WhiteColor}>인원수</Text>
+        <Text style={MapScreenStyles.ImageBarText}>
+          {ProfileForGtoM?.PeopleNum}명
+        </Text>
+      </View>
     </View>
   );
 
@@ -973,14 +1008,41 @@ const MapScreen = (props: any) => {
         coverScreen={false}
         onBackdropPress={() => setShowUserModal(false)}
         onSwipeComplete={() => setShowUserModal(false)}
-        swipeDirection="down"
-        >
+        swipeDirection="down">
         <View
           style={[
             styles.W95ML5,
             {height: '65%', backgroundColor: '#313A5B', borderRadius: 26},
           ]}>
           {MainImage}
+          <View
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '20%',
+              bottom: '24%',
+            }}>
+            <View
+              style={{
+                marginLeft: 24,
+                width: '50%',
+              }}>
+              <Text style={{color: 'white', fontWeight: '700', fontSize: 17}}>
+                {ProfileForGtoM.NickName} {ProfileForGtoM.Age}
+              </Text>
+              <Text style={{color: 'white', marginTop: 5, fontWeight: '400'}}>
+                {ProfileForGtoM.Mbti}
+              </Text>
+              <Text
+                style={{color: 'white', marginTop: 5, fontWeight: '400'}}
+                numberOfLines={2}>
+                {ProfileForGtoM.Memo}
+              </Text>
+            </View>
+
+            {ImageBar}
+          </View>
+
           {ChatView}
           {/* {ProfileForGtoM.Memo != '' ? Desc : null} */}
         </View>
@@ -1173,10 +1235,10 @@ const MapScreen = (props: any) => {
         },
       ]}>
       <View style={MapScreenStyles.M3MainAside}>
-        {VerticalLineSvg(width * 0.1)}
+        {Type2VerticalLine('100%')}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
-        <Text>인원</Text>
+        <Text style={{marginBottom: 10}}>인원</Text>
         <View style={[MapScreenStyles.PeopleNumOption]}>
           {PeopleSvg(width * 0.08, {marginLeft: 10})}
           <View
@@ -1198,13 +1260,19 @@ const MapScreen = (props: any) => {
   );
 
   const M3Main_FriendSelect = (
-    <View style={[styles.Row_OnlyColumnCenter, styles.W100H25]}>
+    <View
+      style={[
+        styles.Row_OnlyColumnCenter,
+        styles.W100H20,
+        {backgroundColor: 'skyblue'},
+      ]}>
       <View style={MapScreenStyles.M3MainAside}>
-        {VerticalLineSvg()}
+        {Type2VerticalLine('100%')}
+
         {CheckSvg(22)}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
-        <Text>인원 추가</Text>
+        <Text style={{marginBottom: 10}}>인원 추가</Text>
         <View style={[MapScreenStyles.FriendAdd]}>
           {PeopleAddSvg(width * 0.08, {marginLeft: 10, marginRight: 10})}
           <TextInput
@@ -1212,7 +1280,7 @@ const MapScreen = (props: any) => {
             onChangeText={(text) => setMemo(text)}
             style={MapScreenStyles.MemoTextInput}></TextInput>
         </View>
-        <Text>랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요</Text>
+        {/* <Text>랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요</Text> */}
       </View>
     </View>
   );
@@ -1234,19 +1302,24 @@ const MapScreen = (props: any) => {
   };
 
   const M3Main_PaySelect = (
-    <View style={[styles.Row_OnlyColumnCenter, styles.W100H25]}>
+    <View
+      style={[
+        styles.Row_OnlyColumnCenter,
+        styles.W100H20,
+        {backgroundColor: 'orange'},
+      ]}>
       <View style={MapScreenStyles.M3MainAside}>
-        {VerticalLineSvg()}
-        {CheckSvg(22)}
+        {/* {Type2VerticalLine('100%')} */}
+
+        {/* {CheckSvg(22)} */}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
-        <Text>비용</Text>
         <View style={[MapScreenStyles.PayOption]}>
           <TouchableOpacity onPress={() => OnePress()}>
-            {Pay_PutoffSvg(92)}
+            {Pay_PutoffSvg(50)}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => TwoPress()}>
-            {MoenyRadioBox == 2 ? ClickedPay_HalfSvg(92) : Pay_HalfSvg(92)}
+            {MoenyRadioBox == 2 ? ClickedPay_HalfSvg(50) : Pay_HalfSvg(50)}
           </TouchableOpacity>
         </View>
       </View>
@@ -1319,7 +1392,11 @@ const MapScreen = (props: any) => {
             styles.Row_OnlyColumnCenter,
           ]}>
           <Text
-            style={[styles.WhiteColor, styles.FW500FS14, {marginLeft: '5%'}]}>
+            style={[
+              styles.WhiteColor,
+              styles.FW500FS14,
+              {marginLeft: '5%', marginBottom: 10},
+            ]}>
             인원
           </Text>
           <View
@@ -1468,16 +1545,19 @@ const MapScreen = (props: any) => {
             flexDirection: 'column',
             alignItems: 'flex-start',
             justifyContent: 'flex-start',
+            marginTop: 0,
+            marginBottom: 0,
+            backgroundColor: 'gray',
           },
         ]}>
         <SafeAreaView>{M3TopSvg(width)}</SafeAreaView>
-        <View
+        {/* <View
           style={{
             marginLeft: '8%',
             marginTop: '8%',
           }}>
           {M3Main_TopBarSvg(width * 0.84)}
-        </View>
+        </View> */}
 
         <View
           style={{
@@ -1490,15 +1570,14 @@ const MapScreen = (props: any) => {
             borderBottomStartRadius: 48,
           }}>
           {M3Main_PeopleNumSelect}
+          {M3Main_PeopleNumSelect}
           {M3Main_FriendSelect}
           {M3Main_PaySelect}
           <View
             style={[
               styles.Row_OnlyColumnCenter,
-              {
-                width: '100%',
-                height: '29%',
-              },
+              styles.W100H20,
+              {backgroundColor: 'pink'},
             ]}>
             <TouchableOpacity
               style={[styles.RowCenter, MapScreenStyles.CancelBoxView]}
@@ -1528,7 +1607,6 @@ const MapScreen = (props: any) => {
             )}
           </View>
         </View>
-        {/* {M3Main_legacy} */}
       </Modal>
     );
   };
@@ -1873,6 +1951,7 @@ const MapScreen = (props: any) => {
                         NickName: data.NickName,
                         latitude: data.latitude,
                         longitude: data.longitude,
+                        Mbti: data.Mbti,
                       });
                     }}>
                     <View
@@ -1918,6 +1997,7 @@ const MapScreen = (props: any) => {
                         NickName: MansData.NickName,
                         latitude: MansData.latitude,
                         longitude: MansData.longitude,
+                        Mbti: MansData.Mbti,
                       });
                     }}>
                     <View>
@@ -1962,10 +2042,10 @@ const MapScreen = (props: any) => {
             styles.NoFlexDirectionCenter,
           ]}
           onPress={() => {
-            // RemoveIdentityToken()
-            navigation.navigate('MyProfileScreen', {
-              UserData,
-            });
+            // navigation.navigate('MyProfileScreen', {
+            //   UserData,
+            // });
+            setProfileModalVisiable(true);
           }}>
           <Image
             source={{uri: ProfileImageUrl}}

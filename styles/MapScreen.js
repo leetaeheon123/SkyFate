@@ -56,7 +56,7 @@ export const MapScreenStyles = StyleSheet.create({
     styles.RowCenter,
     {
       width: '100%',
-      height: '19%',
+      height: '30%',
     },
   ],
 
@@ -103,7 +103,7 @@ export const MapScreenStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 46,
+    height: '50%',
     // backgroundColor: '#3E3E3E',
     backgroundColor: '#DFE5F1',
     borderRadius: 8,
@@ -113,7 +113,7 @@ export const MapScreenStyles = StyleSheet.create({
     width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
-    height: 46,
+    height: '50%',
     backgroundColor: '#DFE5F1',
     borderRadius: 8,
   },
@@ -129,7 +129,8 @@ export const MapScreenStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 65,
+    height: '80%',
+    backgroundColor: 'yellow',
   },
 
   CheckBoxView: {
@@ -137,7 +138,6 @@ export const MapScreenStyles = StyleSheet.create({
     width: '42.5%',
     borderRadius: 9,
     marginLeft: '5%',
-    backgroundColor: 'red',
   },
 
   CancelBoxView: {
@@ -273,4 +273,27 @@ export const MapScreenStyles = StyleSheet.create({
       height: '100%',
     },
   ],
+
+  ImageBar: [
+    styles.Row_OnlyColumnCenter,
+    {
+      width: '100%',
+      justifyContent: 'space-around',
+      marginTop: 15,
+    },
+  ],
+  ImageBarBox: [
+    styles.Row_OnlyColumnCenter,
+    {
+      width: 140,
+      height: 45,
+      backgroundColor: '#37375B',
+      borderRadius: 22,
+      justifyContent: 'space-around',
+    },
+  ],
+  ImageBarText: {
+    fontWeight: '600',
+    color: 'white',
+  },
 });

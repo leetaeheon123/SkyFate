@@ -15,6 +15,10 @@ styles = StyleSheet.create({
     width: '100%',
     height: '25%',
   },
+  W100H20: {
+    width: '100%',
+    height: '20%',
+  },
   FW500FS14: {
     fontWeight: '500',
     fontSize: 14,
@@ -104,6 +108,10 @@ styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  Row_OnlyFlex: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
   Row_OnlyRowCenter: {
     display: 'flex',
     flexDirection: 'row',
@@ -119,6 +127,10 @@ styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  Row_OnlyFlex: {
+    display: 'flex',
+    flexDirection: 'column',
   },
   Column_OnlyRowCenter: {
     display: 'flex',

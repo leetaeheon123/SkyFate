@@ -45,6 +45,30 @@ const ChatScreen = (props) => {
   const {channel} = route.params;
   const {UserData} = route.params;
 
+  const Key_MetaData = 'CanSendL1Invite_' + UserData.UserEmail;
+
+  // const GetMetadata = () => {
+  //   var keys = [Key_MetaData];
+
+  //   channel.getMetaData(keys, function (response, error) {
+  //     if (error) {
+  //       console.log(response);
+  //     }
+  //   });
+  // };
+
+  const [CanSendL1Invite, setCanSendL1Invite] = useState();
+
+  channel.getMetaData([Key_MetaData], function (response, error) {
+    if (!error) {
+      let value = response[Key_MetaData];
+      console.log('res:', value);
+      setCanSendL1Invite(value);
+    }
+  });
+
+  console.log('channel:', channel);
+
   // members 배열에서 UserEmail 값이 UserData.UserEmail과 동일한 요소를 제거함
 
   const otherUserData = channel.members.filter(
@@ -91,23 +115,25 @@ const ChatScreen = (props) => {
           onPress={leave}>
           <Icon name="directions-walk" color="black" size={28} />
         </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={style.headerRightButton}
-          onPress={() => {
-            sendL1InviteAndResUserMessage(
-              'L1_Invite',
-              '~~님께서 요청하셨습니다.',
-            );
-          }}>
-          <Image
-            style={{
-              width: 30,
-              height: 30,
-            }}
-            source={require('../Assets/Send.png')}
-          />
-        </TouchableOpacity>
+        {CanSendL1Invite == 0 ? (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={style.headerRightButton}
+            onPress={() => {
+              sendL1InviteAndResUserMessage(
+                'L1_Invite',
+                '~~님께서 요청하셨습니다.',
+              );
+            }}>
+            <Image
+              style={{
+                width: 30,
+                height: 30,
+              }}
+              source={require('../Assets/Send.png')}
+            />
+          </TouchableOpacity>
+        ) : null}
 
         <TouchableOpacity
           activeOpacity={0.85}
@@ -335,6 +361,7 @@ const ChatScreen = (props) => {
       if (!err) {
         // 이부분이 없으면 매세지를 보냈을 때 내 화면이 리로딩되지 않음
         dispatch({type: 'send-message', payload: {message}});
+        SaveSendL1InviteInMetaData();
       } else {
         console.log('In SendUserMessaging Error:', err);
         setTimeout(() => {
@@ -349,6 +376,26 @@ const ChatScreen = (props) => {
         }, 500);
       }
     });
+  };
+
+  const SaveSendL1InviteInMetaData = () => {
+    var Metadata = {
+      [Key_MetaData]: '1', // Update an existing item with a new value.
+    };
+
+    setCanSendL1Invite(1);
+
+    var upsertIfNotExist = true; // If false, the item with `key3` isn't added to the metadata.
+
+    channel.updateMetaData(
+      Metadata,
+      upsertIfNotExist,
+      function (response, error) {
+        if (error) {
+          // Handle error.
+        }
+      },
+    );
   };
 
   const selectFile = async () => {
@@ -700,6 +747,7 @@ const style = {
   },
   headerRightContainer: {
     flexDirection: 'row',
+    // backgroundColor: 'red',
   },
   headerRightButton: {
     marginRight: 10,
@@ -741,10 +789,13 @@ const style = {
     marginLeft: 10,
   },
 
-  BombView: {
-    width: '100%',
-    height: 122,
-  },
+  BombView: [
+    styles.ColumnCenter,
+    {
+      width: '100%',
+      height: 122,
+    },
+  ],
   BombText: {
     fontSize: 12,
     color: '#DFE5F180',

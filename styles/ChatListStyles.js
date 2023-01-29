@@ -12,13 +12,16 @@ export const ChatListStyles = StyleSheet.create({
   },
   Main: {
     width: '90%',
+    height: '100%',
     marginLeft: '5%',
+    // backgroundColor: 'red',
   },
   Explain: [
     styles.Column_OnlyRowCenter,
     {
       width: '100%',
       height: '34%',
+      // backgroundColor: 'orange',
       justifyContent: 'space-evenly',
     },
   ],
