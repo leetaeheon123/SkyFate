@@ -230,7 +230,7 @@ const ChatListScreen = ({navigation, route}: any) => {
           </View>
         </View>
 
-        {/* {BombIconView(90, 90)} */}
+        {BombIconView(90, 90)}
 
         <FlatList
           data={state.channels}

@@ -15,6 +15,10 @@ styles = StyleSheet.create({
     width: '100%',
     height: '25%',
   },
+  W100H20: {
+    width: '100%',
+    height: '20%',
+  },
   FW500FS14: {
     fontWeight: '500',
     fontSize: 14,

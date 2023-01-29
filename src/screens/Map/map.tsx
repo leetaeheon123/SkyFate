@@ -102,6 +102,7 @@ import {
 } from 'component/General/GeneralSvg';
 import {M5ChatSvg} from 'component/Chat/ChatSvg';
 import channel from 'component/channel';
+import {Type2VerticalLine} from 'component/LinearGradient/LinearGradientCircle';
 export interface ILocation {
   latitude: number;
   longitude: number;
@@ -1234,7 +1235,7 @@ const MapScreen = (props: any) => {
         },
       ]}>
       <View style={MapScreenStyles.M3MainAside}>
-        {VerticalLineSvg(width * 0.1)}
+        {Type2VerticalLine('100%')}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
         <Text style={{marginBottom: 10}}>인원</Text>
@@ -1259,9 +1260,15 @@ const MapScreen = (props: any) => {
   );
 
   const M3Main_FriendSelect = (
-    <View style={[styles.Row_OnlyColumnCenter, styles.W100H25]}>
+    <View
+      style={[
+        styles.Row_OnlyColumnCenter,
+        styles.W100H20,
+        {backgroundColor: 'skyblue'},
+      ]}>
       <View style={MapScreenStyles.M3MainAside}>
-        {VerticalLineSvg()}
+        {Type2VerticalLine('100%')}
+
         {CheckSvg(22)}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
@@ -1295,19 +1302,24 @@ const MapScreen = (props: any) => {
   };
 
   const M3Main_PaySelect = (
-    <View style={[styles.Row_OnlyColumnCenter, styles.W100H25]}>
+    <View
+      style={[
+        styles.Row_OnlyColumnCenter,
+        styles.W100H20,
+        {backgroundColor: 'orange'},
+      ]}>
       <View style={MapScreenStyles.M3MainAside}>
-        {VerticalLineSvg()}
-        {CheckSvg(22)}
+        {/* {Type2VerticalLine('100%')} */}
+
+        {/* {CheckSvg(22)} */}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
-        <Text style={{marginBottom: 10}}>비용</Text>
         <View style={[MapScreenStyles.PayOption]}>
           <TouchableOpacity onPress={() => OnePress()}>
-            {Pay_PutoffSvg(92)}
+            {Pay_PutoffSvg(50)}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => TwoPress()}>
-            {MoenyRadioBox == 2 ? ClickedPay_HalfSvg(92) : Pay_HalfSvg(92)}
+            {MoenyRadioBox == 2 ? ClickedPay_HalfSvg(50) : Pay_HalfSvg(50)}
           </TouchableOpacity>
         </View>
       </View>
@@ -1533,16 +1545,19 @@ const MapScreen = (props: any) => {
             flexDirection: 'column',
             alignItems: 'flex-start',
             justifyContent: 'flex-start',
+            marginTop: 0,
+            marginBottom: 0,
+            backgroundColor: 'gray',
           },
         ]}>
         <SafeAreaView>{M3TopSvg(width)}</SafeAreaView>
-        <View
+        {/* <View
           style={{
             marginLeft: '8%',
             marginTop: '8%',
           }}>
           {M3Main_TopBarSvg(width * 0.84)}
-        </View>
+        </View> */}
 
         <View
           style={{
@@ -1555,15 +1570,14 @@ const MapScreen = (props: any) => {
             borderBottomStartRadius: 48,
           }}>
           {M3Main_PeopleNumSelect}
+          {M3Main_PeopleNumSelect}
           {M3Main_FriendSelect}
           {M3Main_PaySelect}
           <View
             style={[
               styles.Row_OnlyColumnCenter,
-              {
-                width: '100%',
-                height: '29%',
-              },
+              styles.W100H20,
+              {backgroundColor: 'pink'},
             ]}>
             <TouchableOpacity
               style={[styles.RowCenter, MapScreenStyles.CancelBoxView]}
@@ -1593,7 +1607,6 @@ const MapScreen = (props: any) => {
             )}
           </View>
         </View>
-        {/* {M3Main_legacy} */}
       </Modal>
     );
   };

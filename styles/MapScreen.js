@@ -103,7 +103,7 @@ export const MapScreenStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 46,
+    height: '50%',
     // backgroundColor: '#3E3E3E',
     backgroundColor: '#DFE5F1',
     borderRadius: 8,
@@ -113,7 +113,7 @@ export const MapScreenStyles = StyleSheet.create({
     width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
-    height: 46,
+    height: '50%',
     backgroundColor: '#DFE5F1',
     borderRadius: 8,
   },
@@ -129,7 +129,8 @@ export const MapScreenStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 65,
+    height: '80%',
+    backgroundColor: 'yellow',
   },
 
   CheckBoxView: {

@@ -68,7 +68,7 @@ export const LinearProfileImagView = (width, height, uri, NickName) => (
 );
 
 export const BombIconView = (width, height) => (
-  <View style={{width: width, height: height}}>
+  <View style={{width: width, height: height, backgroundColor: 'blue'}}>
     <WithLocalSvg asset={BombIcon} width={width} height={height}></WithLocalSvg>
     <View
       style={[
