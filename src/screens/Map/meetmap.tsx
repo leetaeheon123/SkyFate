@@ -40,6 +40,7 @@ import {L1styles} from '~/L1';
 import LinearGradient from 'react-native-linear-gradient';
 import {LinearProfileImage, LinearProfileImagView} from 'component/General';
 import {SecuritySvg} from 'component/General/GeneralSvg';
+import firestore from '@react-native-firebase/firestore';
 
 const MeetMapScreen = ({route}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
@@ -90,6 +91,12 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
   useEffect(() => {
     StartLocation();
+    console.log('============>');
+    GetMyCoords(
+      updateMatchLocation,
+      '[GetMyCoords] Cannot get my location.',
+      '[GetMyCoords] Successfully got my location.',
+    );
     // locationdispatch({type: 'update', payload: {x:10} });
     // UpdateMyLocationWatch(setLocation, locationdispatch, UpdateMyLocation);
 
@@ -155,6 +162,31 @@ const MeetMapScreen = ({route}: any, props: any) => {
     console.log('useEffect MyLo, OtherLo');
     drawRoute();
   }, [MyLocationState, OtherLocation]);
+
+  const updateMatchLocation = (latitude: number, longitude: number) => {
+    const channelUrl = channel.url;
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const date = String(now.getDate()).padStart(2, '0');
+    const matchedList = firestore().collection(
+      `MatchedList/${now.getFullYear()}${month}/${date}`,
+    );
+
+    matchedList
+      .doc(channelUrl)
+      .update({
+        [ReplaceUserEmail]: {
+          latitude,
+          longitude,
+        },
+      })
+      .then(() => {
+        console.log('[updatedMatchLocation] Location update succeed.');
+      })
+      .catch((err) => {
+        console.error('[updatedMatchLocation] Location update failed:', err);
+      });
+  };
 
   const refresh = () => {
     // channel.markAsRead();
@@ -308,7 +340,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
             otherUserData.ProfileImageUrl,
             UserData.NickName,
           )}
-          {/* 1/27 TODO: 신고부분 생성 
+          {/* 1/27 TODO: 신고부분 생성
           <View
             style={{
               position: 'absolute',
@@ -439,7 +471,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
               </View>
             </Marker>
           )}
-          {/* 
+          {/*
           {OtherLocation && MyLocationState && (
             <Polyline coordinates={[MyLocationState, OtherLocation]}></Polyline>
           )} */}
