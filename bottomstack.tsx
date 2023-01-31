@@ -8,8 +8,10 @@ import MeetMapScreen from './src/screens/Map/meetmap';
 import ChatListScreen from 'Screens/Map/ChatList';
 
 import MyProfileScreen from 'Screens/MyProfile/MyProfile';
+import MyProfileChange from 'Screens/MyProfile/MyProfileChange';
 
 import {Rending} from 'Screens/Rending';
+import MyProfileChangeScreen from 'Screens/MyProfile/MyProfileChange';
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
@@ -96,6 +98,10 @@ const BottomTabScreen = (props: any) => {
         initialParams={{}}
       />
       <BottomTab.Screen name="MyProfileScreen" component={MyProfileScreen} />
+      <BottomTab.Screen
+        name="MyProfileChangeScreen"
+        component={MyProfileChangeScreen}
+      />
     </BottomTab.Navigator>
   );
 };

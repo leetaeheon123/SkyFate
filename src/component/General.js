@@ -67,9 +67,17 @@ export const LinearProfileImagView = (width, height, uri, NickName) => (
   </View>
 );
 
-export const BombIconView = (width, height) => (
-  <View style={{width: width, height: height, backgroundColor: 'blue'}}>
-    <WithLocalSvg asset={BombIcon} width={width} height={height}></WithLocalSvg>
+export const BombIconView = (width, num) => (
+  <View
+    style={{
+      width: width,
+      height: width,
+      // backgroundColor: 'blue',
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+    }}>
+    <WithLocalSvg asset={BombIcon} width={width} height={width}></WithLocalSvg>
     <View
       style={[
         styles.RowCenter,
@@ -88,7 +96,38 @@ export const BombIconView = (width, height) => (
           fontWeight: '600',
           fontSize: 16.5,
         }}>
-        5
+        {10 - num}
+      </Text>
+    </View>
+  </View>
+);
+
+export const BombIconViewNotabs = (width, num) => (
+  <View
+    style={{
+      width: width,
+      height: width,
+    }}>
+    <WithLocalSvg asset={BombIcon} width={width} height={width}></WithLocalSvg>
+    <View
+      style={[
+        styles.RowCenter,
+        {
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          width: width * 0.3,
+          height: width * 0.3,
+          borderRadius: (width * 0.3) / 2,
+          backgroundColor: 'red',
+        },
+      ]}>
+      <Text
+        style={{
+          fontWeight: '600',
+          fontSize: 16.5,
+        }}>
+        {10 - num}
       </Text>
     </View>
   </View>

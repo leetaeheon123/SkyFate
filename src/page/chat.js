@@ -39,6 +39,8 @@ import {MilisToMinutes} from '^/GetTime';
 
 import {BombIconSvg, ExplainLimit_BombSvg} from 'component/Chat/ChatSvg';
 import styles from '~/ManToManBoard';
+import {BombIconView, BombIconViewNotabs} from 'component/General';
+
 const ChatScreen = (props) => {
   const {route, navigation} = props;
 
@@ -305,6 +307,10 @@ const ChatScreen = (props) => {
       });
     }
   };
+  const now = GetEpochTime();
+  let milis = now - channel.createdAt;
+  let second = Math.floor(milis / 1000);
+  let minutes = MilisToMinutes(milis);
 
   const sendUserMessage = () => {
     if (state.input.length > 0) {
@@ -636,8 +642,8 @@ const ChatScreen = (props) => {
   //   );
   // };
 
-  const BombIcons = <View>{BombIconSvg}</View>;
-
+  // const BombIcons = <View>{BombIconSvg}</View>;
+  const {width} = Dimensions.get('window');
   return (
     <>
       <StatusBar backgroundColor="#742ddd" barStyle="light-content" />
@@ -667,12 +673,15 @@ const ChatScreen = (props) => {
             <Button title="Submit" onPress={ReportSubmit} />
           </View>
         </Modal>
+
         <View style={style.BombView}>
-          {BombIcons}
+          {BombIconViewNotabs(width * 0.2, minutes)}
+
           <Text style={style.BombText}>
             빠른 매칭을 위해 채팅은 10분으로 제한합니다.
           </Text>
         </View>
+
         <FlatList
           data={state.messages}
           inverted={true}
