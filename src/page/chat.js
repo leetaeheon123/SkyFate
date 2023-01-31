@@ -100,8 +100,6 @@ const ChatScreen = (props) => {
     error: '',
   });
 
-  const [matchedListPath, setMatchedListPath] = useState('');
-
   const onoffReportModal = () => {
     setPortModalVisiable(!ReportModalVisiable);
   };
