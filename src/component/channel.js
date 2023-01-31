@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Text, Image, TouchableOpacity, View} from 'react-native';
+import {Text, Image, TouchableOpacity, View, Dimensions} from 'react-native';
 import moment from 'moment';
 
 import {withAppContext} from '../contextReducer';
@@ -8,15 +8,30 @@ import {
   createUnreadMessageCount,
   ellipsis,
 } from '../utilsReducer';
+import {GetEpochTime} from '^/GetTime';
+import {BombIconView} from './General';
 
 const LAST_MESSAGE_ELLIPSIS = 45;
 
 const Channel = (props) => {
-  const {sendbird, channel, onPress} = props;
+  const {sendbird, channel, onPress, viewtime} = props;
+
+  const {width} = Dimensions.get('window');
   const [name, setName] = useState('');
   const [lastMessage, setLastMessage] = useState('');
   const [unreadMessageCount, setUnreadMessageCount] = useState('');
   const [updatedAt, setUpdatedAt] = useState('');
+  const [CreatedAt, setCreatedAt] = useState('');
+
+  useEffect(() => {
+    let now = GetEpochTime();
+    let milis = now - channel?.createdAt;
+    let second = Math.floor(milis / 1000);
+    let minutes = Math.floor(second / 60);
+
+    // setCreatedAt(moment(channel.createdAt).fromNow());
+    setCreatedAt(minutes);
+  }, []);
 
   const channelHandler = new sendbird.ChannelHandler();
   channelHandler.onChannelChanged = (updatedChannel) => {
@@ -91,7 +106,7 @@ const Channel = (props) => {
       style={style.container}
       onPress={() => {
         onPress(channel);
-
+        viewtime(channel);
         DecrementUnreadMessageCount(channel);
       }}>
       <Image
@@ -116,6 +131,7 @@ const Channel = (props) => {
           </View>
         ) : null}
       </View>
+      {BombIconView(width * 0.15, CreatedAt)}
     </TouchableOpacity>
   );
 };

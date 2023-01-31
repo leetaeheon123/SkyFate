@@ -230,8 +230,6 @@ const ChatListScreen = ({navigation, route}: any) => {
           </View>
         </View>
 
-        {BombIconView(90, 90)}
-
         <FlatList
           data={state.channels}
           renderItem={({item}) => (
@@ -240,6 +238,9 @@ const ChatListScreen = ({navigation, route}: any) => {
               channel={item}
               sendbird={SendBird}
               onPress={(channel) => chat(channel)}
+              viewtime={(channel) =>
+                console.log('channelcreateAt:', channel.createdAt)
+              }
             />
           )}
           keyExtractor={(item) => item.url}

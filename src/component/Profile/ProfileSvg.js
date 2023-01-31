@@ -52,6 +52,8 @@ import Btn_NotClickable from 'Assets/Profile/All/Btn_NotClickable.svg';
 import InvitationText_Main from 'Assets/Invitation/Invitation_Main.svg';
 import InvitationText_Sub from 'Assets/Invitation/Invitation_Sub.svg';
 
+import ChangeProfile from 'Assets/ChangeProfile.svg';
+
 const excuteObj = {
   Mbti: MbtiText,
   Age: AgeText,
@@ -160,3 +162,7 @@ export const MainText_InvitationSvg = () => {
 export const SubText_InvitationSvg = () => {
   return <WithLocalSvg asset={InvitationText_Sub}></WithLocalSvg>;
 };
+
+export const ChangeProfileSvg = (
+  <WithLocalSvg asset={ChangeProfile}></WithLocalSvg>
+);

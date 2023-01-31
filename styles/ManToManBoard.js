@@ -128,7 +128,7 @@ styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  Row_OnlyFlex: {
+  Column_OnlyFlex: {
     display: 'flex',
     flexDirection: 'column',
   },

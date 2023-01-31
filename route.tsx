@@ -39,8 +39,7 @@ const Routes = (props: any) => {
   // 성별 가져오는 코드 필요합니다 - 2022 10 09 오후1시.
 
   return (
-    <Stack.Navigator initialRouteName="IndicatorScreen"
-    >
+    <Stack.Navigator initialRouteName="IndicatorScreen">
       <Stack.Screen
         name="BottomTabScreen"
         component={BottomTabScreen}

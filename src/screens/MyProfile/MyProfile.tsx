@@ -21,20 +21,64 @@ import {
 } from 'react-native';
 import {MyProfileStyles} from '~/MyProfile';
 import LinearGradient from 'react-native-linear-gradient';
-const MyProfileScreen = ({route}: any) => {
+import {ChangeProfileSvg} from 'component/Profile/ProfileSvg';
+
+export const DescCricle = (
+  <LinearGradient
+    start={{x: 0, y: 0.5}}
+    end={{x: 1, y: 0.5}}
+    colors={['#7373F6', '#8B70F7', '#956EF6', '#A869F7']}
+    style={MyProfileStyles.DescCircle}></LinearGradient>
+);
+
+export const DescBottomline = (
+  <LinearGradient
+    start={{x: 0, y: 0}}
+    end={{x: 1, y: 0}}
+    colors={['#502EF5', '#6E36E6', '#7F41DC', '#A258C8', '#CA6CB0']}
+    style={MyProfileStyles.DescBottomLine}></LinearGradient>
+);
+
+export const DescBottomlineCustom = (style) => {
+  return (
+    <LinearGradient
+      start={{x: 0, y: 0}}
+      end={{x: 1, y: 0}}
+      colors={['#502EF5', '#6E36E6', '#7F41DC', '#A258C8', '#CA6CB0']}
+      style={style}></LinearGradient>
+  );
+};
+const MyProfileScreen = ({route, navigation}: any) => {
   const {UserData} = route.params;
 
   const SubImage = (
-    <LinearGradient
-      start={{x: 0.5, y: 0}}
-      end={{x: 0.5, y: 1}}
-      colors={['#5B5AF3', '#5B59F3', '#835CF0', '#B567DB']}
-      style={MyProfileStyles.linearGradient}>
-      <Image
-        resizeMode="cover"
-        style={MyProfileStyles.SubImage}
-        source={{uri: UserData.ProfileImageUrl}}></Image>
-    </LinearGradient>
+    <View>
+      <LinearGradient
+        start={{x: 0.5, y: 0}}
+        end={{x: 0.5, y: 1}}
+        colors={['#5B5AF3', '#5B59F3', '#835CF0', '#B567DB']}
+        style={MyProfileStyles.linearGradient}>
+        <Image
+          resizeMode="cover"
+          style={MyProfileStyles.SubImage}
+          source={{uri: UserData.ProfileImageUrl}}></Image>
+      </LinearGradient>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('MyProfileChangeScreen', {
+            UserData,
+          });
+        }}
+        style={{
+          width: 27,
+          height: 27,
+          position: 'absolute',
+          right: -3,
+          top: -0,
+        }}>
+        {ChangeProfileSvg}
+      </TouchableOpacity>
+    </View>
   );
 
   const ChangeProfile = (
@@ -42,24 +86,7 @@ const MyProfileScreen = ({route}: any) => {
       start={{x: 0.5, y: 0}}
       end={{x: 0.5, y: 1}}
       colors={['#5B5AF3', '#5B59F3', '#835CF0', '#B567DB']}
-      style={MyProfileStyles.linearGradient}>
-    </LinearGradient>
-  );
-
-  const DescCricle = (
-    <LinearGradient
-      start={{x: 0, y: 0.5}}
-      end={{x: 1, y: 0.5}}
-      colors={['#7373F6', '#8B70F7', '#956EF6', '#A869F7']}
-      style={MyProfileStyles.DescCircle}></LinearGradient>
-  );
-
-  const DescBottomline = (
-    <LinearGradient
-      start={{x: 0, y: 0}}
-      end={{x: 1, y: 0}}
-      colors={['#502EF5', '#6E36E6', '#7F41DC', '#A258C8', '#CA6CB0']}
-      style={MyProfileStyles.DescBottomLine}></LinearGradient>
+      style={MyProfileStyles.linearGradient}></LinearGradient>
   );
 
   const DescScetion = (Description: string) => {

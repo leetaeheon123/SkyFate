@@ -94,3 +94,72 @@ export const MyProfileStyles = StyleSheet.create({
     color: 'white',
   },
 });
+
+const num = 7;
+const per = 100 / num;
+export const MyProfileChangeStyles = StyleSheet.create({
+  Headers: {
+    width: '100%',
+    height: '44%',
+    backgroundColor: 'red',
+  },
+  Body: {
+    width: '100%',
+    height: '66%',
+    // backgroundColor: 'purple',
+  },
+
+  InforView: [
+    styles.W90ML5,
+    styles.Column_OnlyRowCenter,
+    {
+      height: '84%',
+      backgroundColor: '#37375B',
+      borderTopStartRadius: 55,
+      borderTopEndRadius: 55,
+      marginTop: '6%',
+    },
+  ],
+  SubText: {
+    fontSize: 12,
+    fontWeight: '300',
+    color: '#C3BFBF80',
+  },
+  InforBox: [
+    {
+      height: '56%',
+      width: '80%',
+      marginTop: '2%',
+    },
+  ],
+  InforBoxSection: [
+    // styles.Row_OnlyFlex,
+    styles.Row_OnlyColumnCenter,
+
+    {
+      width: '100%',
+      height: `${per * 0.7}%`,
+    },
+  ],
+  InforBoxColumnSection: [
+    styles.Column_OnlyFlex,
+    {
+      width: '100%',
+      height: `${per * 1.3}%`,
+      marginLeft: 17,
+    },
+  ],
+  InforBoxText: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: 'white',
+    // marginLeft: 7,
+  },
+  TextBox: [],
+  TI: {
+    width: '100%',
+    // height: '90%',
+    // height: 46,
+    color: 'white',
+  },
+});

@@ -2042,10 +2042,10 @@ const MapScreen = (props: any) => {
             styles.NoFlexDirectionCenter,
           ]}
           onPress={() => {
-            // navigation.navigate('MyProfileScreen', {
-            //   UserData,
-            // });
-            setProfileModalVisiable(true);
+            navigation.navigate('MyProfileScreen', {
+              UserData,
+            });
+            // setProfileModalVisiable(true);
           }}>
           <Image
             source={{uri: ProfileImageUrl}}
