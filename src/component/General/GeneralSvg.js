@@ -18,6 +18,11 @@ import VerticalLine from 'Assets/VerticalLine.svg';
 import Check from 'Assets/Check.svg';
 import ClickedCheck from 'Assets/ClickedCheck.svg';
 
+import CheckBox from 'Assets/CheckBox.svg';
+import CheckBox2 from 'Assets/CheckBox2.svg';
+import HR from 'Assets/HR.svg';
+import RightArrow from 'Assets/RightArrow.svg';
+
 import Pay from 'Assets/Pay.svg';
 
 import Security from 'Assets/Security.svg';
@@ -108,6 +113,21 @@ export const ClickedCheckSvg = (width) => {
       height={width}
       width={width}></WithLocalSvg>
   );
+};
+
+export const CheckBoxSvg = (width) => {
+  return <WithLocalSvg asset={CheckBox} height={width} width={width} />;
+};
+export const CheckBoxSvg2 = (width) => {
+  return <WithLocalSvg asset={CheckBox2} height={width} width={width} />;
+};
+
+export const HRSvg = () => {
+  return <WithLocalSvg asset={HR} />;
+};
+
+export const RightArrowSvg = () => {
+  return <WithLocalSvg asset={RightArrow} />;
 };
 
 export const PaySvg = (width) => (

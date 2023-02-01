@@ -43,6 +43,7 @@ export const LoginAndReigsterStyles = StyleSheet.create({
     // backgroundColor: 'skyblue',
     display: 'flex',
     justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   Center: {
     height: '50%',
