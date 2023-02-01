@@ -47,6 +47,7 @@ export const LoginAndReigsterStyles = StyleSheet.create({
       alignItems: 'flex-end',
     },
   ],
+
   Center: {
     height: '50%',
     width: '100%',

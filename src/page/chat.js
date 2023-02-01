@@ -462,6 +462,29 @@ const ChatScreen = (props) => {
       }
     }
   };
+
+  const createMatch = () => {
+    const channelUrl = channel.url;
+    console.log('[chat.js] channel_url:', channelUrl);
+
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const date = String(now.getDate()).padStart(2, '0');
+    const matchedList = firestore().collection(
+      `MatchedList/${now.getFullYear()}${month}/${date}`,
+    );
+
+    matchedList
+      .doc(channelUrl)
+      .set({createdAt: new Date()})
+      .then(() => {
+        console.log('[createMatch] Match created.');
+      })
+      .catch((err) => {
+        console.error('[createMatch] error', err);
+      });
+  };
+
   const viewDetail = (message) => {
     if (message.isFileMessage()) {
       // TODO: show file details
@@ -478,6 +501,7 @@ const ChatScreen = (props) => {
               'L1_Res',
               '둘 다 수락하여 방이 생성되었습니다! 이 메세지 클릭시 이동됩니다',
             );
+            createMatch();
           } else {
             Alert.alert('자기가 누르는건 에바지');
           }
