@@ -19,6 +19,7 @@ import {SubTextComponent} from 'component/Profile/ProfileSvg';
 import {MbtiBtn} from 'component/Profile/ProfileSvg';
 import styles from '~/ManToManBoard';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+import {MbtiStyles} from '~/ProfileInput';
 const MbtiSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
   const {UserEmail, Gender, NickName} = route.params;
@@ -67,13 +68,16 @@ const MbtiSelectScreen = ({navigation, route}: any) => {
           {TextComponent('Mbti')}
         </View>
         <View
-          style={{
-            height: '50%',
-            width: '100%',
-          }}>
+          style={[
+            styles.Column_OnlyRowCenter,
+            {
+              height: '50%',
+              width: '100%',
+            },
+          ]}>
           {SubTextComponent('Mbti')}
 
-          <View style={styles.Row_OnlyColumnCenter}>
+          <View style={[MbtiStyles.MbtiSelectView, {marginTop: '20%'}]}>
             {one == 'E'
               ? MbtiBtnComponent('ClickedE', setone, '')
               : MbtiBtnComponent('E', setone, 'E')}
@@ -88,7 +92,7 @@ const MbtiSelectScreen = ({navigation, route}: any) => {
               : MbtiBtnComponent('J', setfour, 'J')}
           </View>
 
-          <View style={styles.Row_OnlyColumnCenter}>
+          <View style={[MbtiStyles.MbtiSelectView, {marginTop: 20}]}>
             {one == 'I'
               ? MbtiBtnComponent('ClickedI', setone, '')
               : MbtiBtnComponent('I', setone, 'I')}

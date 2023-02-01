@@ -20,6 +20,7 @@ import {
   Dimensions,
   Modal,
   Button,
+  KeyboardAvoidingView,
 } from 'react-native';
 
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
@@ -649,101 +650,107 @@ const ChatScreen = (props) => {
       <StatusBar backgroundColor="#742ddd" barStyle="light-content" />
 
       <SafeAreaView style={style.container}>
-        <Modal visible={ReportModalVisiable} transparent={false}>
-          <View
-            style={{
-              width: '90%',
-              height: height * 0.5,
-              backgroundColor: 'red',
-              marginLeft: '5%',
-              marginTop: '30%',
-            }}>
-            <Image
+        <KeyboardAvoidingView
+          style={style.container}
+          // behavior={'padding'}
+          // keyboardVerticalOffset={150}
+        >
+          <Modal visible={ReportModalVisiable} transparent={false}>
+            <View
               style={{
-                width: 30,
-                height: 30,
-              }}
-              source={require('../Assets/security.png')}
-            />
-            <Button title="Close" onPress={onoffReportModal} />
-            {ReturnTo('허위 프로필', 1)}
-            {ReturnTo('욕설 및 비방', 2)}
-            {ReturnTo('불쾌한 대화', 3)}
-            {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
-            <Button title="Submit" onPress={ReportSubmit} />
-          </View>
-        </Modal>
-
-        <View style={style.BombView}>
-          {BombIconViewNotabs(width * 0.2, minutes)}
-
-          <Text style={style.BombText}>
-            빠른 매칭을 위해 채팅은 10분으로 제한합니다.
-          </Text>
-        </View>
-
-        <FlatList
-          data={state.messages}
-          inverted={true}
-          renderItem={({item}) => (
-            <Message
-              key={item.reqId}
-              channel={channel}
-              message={item}
-              SendBird={SendBird}
-              onPress={(message) => viewDetail(message)}
-              onLongPress={(message) => showContextMenu(message)}
-            />
-          )}
-          keyExtractor={(item) => `${item.messageId}` || item.reqId}
-          contentContainerStyle={{flexGrow: 1, paddingVertical: 10}}
-          ListHeaderComponent={
-            state.error && (
-              <View style={style.errorContainer}>
-                <Text style={style.error}>{state.error}</Text>
-              </View>
-            )
-          }
-          ListEmptyComponent={
-            <View style={style.emptyContainer}>
-              <Text style={style.empty}>{state.empty}</Text>
+                width: '90%',
+                height: height * 0.5,
+                backgroundColor: 'red',
+                marginLeft: '5%',
+                marginTop: '30%',
+              }}>
+              <Image
+                style={{
+                  width: 30,
+                  height: 30,
+                }}
+                source={require('../Assets/security.png')}
+              />
+              <Button title="Close" onPress={onoffReportModal} />
+              {ReturnTo('허위 프로필', 1)}
+              {ReturnTo('욕설 및 비방', 2)}
+              {ReturnTo('불쾌한 대화', 3)}
+              {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+              <Button title="Submit" onPress={ReportSubmit} />
             </View>
-          }
-          onEndReached={() => next()}
-          onEndReachedThreshold={0.5}
-        />
-        <View style={style.inputContainer}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={style.uploadButton}
-            onPress={selectFile}>
-            <Icon name="insert-photo" color="#7b53ef" size={28} />
-          </TouchableOpacity>
-          <TextInput
-            value={state.input}
-            style={style.input}
-            multiline={true}
-            numberOfLines={2}
-            onChangeText={(content) => {
-              // if (content.length > 0) {
-              //   channel.startTyping();
-              // } else {
-              //   channel.endTyping();
-              // }
-              dispatch({type: 'typing', payload: {input: content}});
-            }}
+          </Modal>
+
+          <View style={style.BombView}>
+            {BombIconViewNotabs(width * 0.2, minutes)}
+
+            <Text style={style.BombText}>
+              빠른 매칭을 위해 채팅은 10분으로 제한합니다.
+            </Text>
+          </View>
+
+          <FlatList
+            data={state.messages}
+            inverted={true}
+            renderItem={({item}) => (
+              <Message
+                key={item.reqId}
+                channel={channel}
+                message={item}
+                SendBird={SendBird}
+                onPress={(message) => viewDetail(message)}
+                onLongPress={(message) => showContextMenu(message)}
+              />
+            )}
+            keyExtractor={(item) => `${item.messageId}` || item.reqId}
+            contentContainerStyle={{flexGrow: 1, paddingVertical: 10}}
+            ListHeaderComponent={
+              state.error && (
+                <View style={style.errorContainer}>
+                  <Text style={style.error}>{state.error}</Text>
+                </View>
+              )
+            }
+            ListEmptyComponent={
+              <View style={style.emptyContainer}>
+                <Text style={style.empty}>{state.empty}</Text>
+              </View>
+            }
+            onEndReached={() => next()}
+            onEndReachedThreshold={0.5}
           />
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={style.sendButton}
-            onPress={sendUserMessage}>
-            <Icon
-              name="send"
-              color={state.input.length > 0 ? '#7b53ef' : '#ddd'}
-              size={28}
+          <View style={style.inputContainer}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={style.uploadButton}
+              onPress={selectFile}>
+              <Icon name="insert-photo" color="#7b53ef" size={28} />
+            </TouchableOpacity>
+            <TextInput
+              value={state.input}
+              style={style.input}
+              multiline={true}
+              numberOfLines={2}
+              onChangeText={(content) => {
+                // if (content.length > 0) {
+                //   channel.startTyping();
+                // } else {
+                //   channel.endTyping();
+                // }
+                dispatch({type: 'typing', payload: {input: content}});
+              }}
             />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={style.sendButton}
+              onPress={sendUserMessage}>
+              <Icon
+                name="send"
+                color={state.input.length > 0 ? '#7b53ef' : '#ddd'}
+                size={28}
+              />
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </>
   );

@@ -24,6 +24,7 @@ import {
   RefreshControl,
   Switch,
   Pressable,
+  KeyboardAvoidingView,
 } from 'react-native';
 
 import {MapScreenStyles} from '~/MapScreen';
@@ -91,8 +92,10 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   CheckSvg,
+  ClickedCheckSvg,
   ClickedCompleteSvg,
   CompleteSvg,
+  MemoSvg,
   MinusSvg,
   PaySvg,
   PeopleAddSvg,
@@ -103,6 +106,11 @@ import {
 import {M5ChatSvg} from 'component/Chat/ChatSvg';
 import channel from 'component/channel';
 import {Type2VerticalLine} from 'component/LinearGradient/LinearGradientCircle';
+import {WithLocalSvg} from 'react-native-svg';
+import M3Main_TopBar from 'Assets/Map/M3/M3Main_TopBar.svg';
+import LinearGradient from 'react-native-linear-gradient';
+import {Type2세로} from 'component/LinearGradient/LinearType';
+
 export interface ILocation {
   latitude: number;
   longitude: number;
@@ -680,6 +688,7 @@ const MapScreen = (props: any) => {
   const [ProfileForGtoM, setProfileForGtoM] = useState<Object>({});
 
   const [Memo, setMemo] = useState('');
+  const [FriendSelect, setFriendSelect] = useState('');
   const [PeopleNum, setPeopleNum] = useState(1);
   const [MoenyRadioBox, setMoneyRadioBox] = useState(0);
 
@@ -1236,11 +1245,12 @@ const MapScreen = (props: any) => {
       ]}>
       <View style={MapScreenStyles.M3MainAside}>
         {Type2VerticalLine('100%')}
+        {PeopleNum == 0 ? CheckSvg(22) : ClickedCheckSvg(22)}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
-        <Text style={{marginBottom: 10}}>인원</Text>
+        <Text style={MapScreenStyles.M3MainSectionText}>인원</Text>
         <View style={[MapScreenStyles.PeopleNumOption]}>
-          {PeopleSvg(width * 0.08, {marginLeft: 10})}
+          {PeopleSvg(width * 0.06, {marginLeft: 10})}
           <View
             style={[
               styles.Row_OnlyColumnCenter,
@@ -1260,25 +1270,53 @@ const MapScreen = (props: any) => {
   );
 
   const M3Main_FriendSelect = (
-    <View
-      style={[
-        styles.Row_OnlyColumnCenter,
-        styles.W100H20,
-        {backgroundColor: 'skyblue'},
-      ]}>
+    <View style={[styles.Row_OnlyColumnCenter, styles.W100H20]}>
       <View style={MapScreenStyles.M3MainAside}>
         {Type2VerticalLine('100%')}
 
-        {CheckSvg(22)}
+        {FriendSelect == '' ? CheckSvg(22) : ClickedCheckSvg(22)}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
-        <Text style={{marginBottom: 10}}>인원 추가</Text>
+        <Text style={MapScreenStyles.M3MainSectionText}>인원 추가</Text>
         <View style={[MapScreenStyles.FriendAdd]}>
-          {PeopleAddSvg(width * 0.08, {marginLeft: 10, marginRight: 10})}
+          {PeopleAddSvg(width * 0.06, {marginLeft: 10, marginRight: 5})}
+          <TextInput
+            value={FriendSelect}
+            onChangeText={(text) => setFriendSelect(text)}
+            style={MapScreenStyles.MemoTextInput}
+            placeholder="닉네임을 입력해주세요"></TextInput>
+        </View>
+
+        <Text
+          numberOfLines={1}
+          style={{
+            fontSize: 10,
+            fontWeight: '500',
+            color: '#DFE5F180',
+            marginLeft: 10,
+          }}>
+          랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요
+        </Text>
+      </View>
+    </View>
+  );
+
+  const M3Main_MemoInput = (
+    <View style={[styles.Row_OnlyColumnCenter, styles.W100H20]}>
+      <View style={MapScreenStyles.M3MainAside}>
+        {Type2VerticalLine('100%')}
+
+        {Memo == '' ? CheckSvg(22) : ClickedCheckSvg(22)}
+      </View>
+      <View style={MapScreenStyles.M3MainSection}>
+        <Text style={MapScreenStyles.M3MainSectionText}>인원 추가</Text>
+        <View style={[MapScreenStyles.FriendAdd]}>
+          {MemoSvg(width * 0.06, {marginLeft: 10, marginRight: 5})}
           <TextInput
             value={Memo}
             onChangeText={(text) => setMemo(text)}
-            style={MapScreenStyles.MemoTextInput}></TextInput>
+            style={MapScreenStyles.MemoTextInput}
+            placeholder="상대방에게 전하고 싶은 메세지를 입력하세요"></TextInput>
         </View>
         {/* <Text>랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요</Text> */}
       </View>
@@ -1301,25 +1339,106 @@ const MapScreen = (props: any) => {
     }
   };
 
-  const M3Main_PaySelect = (
-    <View
-      style={[
-        styles.Row_OnlyColumnCenter,
-        styles.W100H20,
-        {backgroundColor: 'orange'},
-      ]}>
-      <View style={MapScreenStyles.M3MainAside}>
-        {/* {Type2VerticalLine('100%')} */}
+  const M3Main_PayOption1 = (
+    <View style={MapScreenStyles.M3Main_PayOption}>
+      <Text
+        style={{
+          fontSize: 21.3,
+        }}>
+        🤔
+      </Text>
+      <Text
+        style={{
+          fontWeight: '400',
+          fontSize: 10.5,
+        }}>
+        보고 결정
+      </Text>
+    </View>
+  );
 
-        {/* {CheckSvg(22)} */}
+  const M3Main_PayOption2 = (
+    <View style={MapScreenStyles.M3Main_PayOption}>
+      <Text
+        style={{
+          fontSize: 21.3,
+        }}>
+        🤝
+      </Text>
+      <Text
+        style={{
+          fontWeight: '400',
+          fontSize: 10.5,
+        }}>
+        더치페이
+      </Text>
+    </View>
+  );
+
+  const M3Main_SelectedPayOption1 = (
+    <LinearGradient
+      colors={Type2세로}
+      start={{x: 0, y: 0}}
+      end={{x: 0, y: 1}}
+      style={MapScreenStyles.M3Main_PayOption}>
+      <Text
+        style={{
+          fontSize: 21.3,
+        }}>
+        🤔
+      </Text>
+      <Text
+        style={{
+          fontWeight: '400',
+          fontSize: 10.5,
+        }}>
+        보고 결정
+      </Text>
+    </LinearGradient>
+  );
+
+  const M3Main_SelectedPayOption2 = (
+    <LinearGradient
+      colors={Type2세로}
+      start={{x: 0, y: 0}}
+      end={{x: 0, y: 1}}
+      style={MapScreenStyles.M3Main_PayOption}>
+      <Text
+        style={{
+          fontSize: 21.3,
+        }}>
+        🤝
+      </Text>
+      <Text
+        style={{
+          fontWeight: '400',
+          fontSize: 10.5,
+        }}>
+        더치페이
+      </Text>
+    </LinearGradient>
+  );
+
+  const M3Main_PaySelect = (
+    <View style={[styles.Row_OnlyColumnCenter, styles.W100H20]}>
+      <View style={MapScreenStyles.M3MainAside}>
+        {Type2VerticalLine('100%')}
+
+        {MoenyRadioBox == 0 ? CheckSvg(22) : ClickedCheckSvg(22)}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
+        <Text style={MapScreenStyles.M3MainSectionText}>비용</Text>
+
         <View style={[MapScreenStyles.PayOption]}>
-          <TouchableOpacity onPress={() => OnePress()}>
-            {Pay_PutoffSvg(50)}
+          <TouchableOpacity
+            style={{height: '100%', width: '33%'}}
+            onPress={() => OnePress()}>
+            {MoenyRadioBox == 1 ? M3Main_SelectedPayOption1 : M3Main_PayOption1}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => TwoPress()}>
-            {MoenyRadioBox == 2 ? ClickedPay_HalfSvg(50) : Pay_HalfSvg(50)}
+          <TouchableOpacity
+            style={{height: '100%', width: '33%'}}
+            onPress={() => TwoPress()}>
+            {MoenyRadioBox == 2 ? M3Main_SelectedPayOption2 : M3Main_PayOption2}
           </TouchableOpacity>
         </View>
       </View>
@@ -1547,66 +1666,103 @@ const MapScreen = (props: any) => {
             justifyContent: 'flex-start',
             marginTop: 0,
             marginBottom: 0,
-            backgroundColor: 'gray',
           },
         ]}>
-        <SafeAreaView>{M3TopSvg(width)}</SafeAreaView>
-        {/* <View
-          style={{
-            marginLeft: '8%',
-            marginTop: '8%',
-          }}>
-          {M3Main_TopBarSvg(width * 0.84)}
-        </View> */}
-
-        <View
-          style={{
-            width: '84%',
-            height: '55%',
-            marginLeft: '8%',
-            marginTop: '-3%',
-            backgroundColor: '#37375B',
-            borderBottomEndRadius: 48,
-            borderBottomStartRadius: 48,
-          }}>
-          {M3Main_PeopleNumSelect}
-          {M3Main_PeopleNumSelect}
-          {M3Main_FriendSelect}
-          {M3Main_PaySelect}
+        <KeyboardAvoidingView
+          contentContainerStyle={{
+            // width: '100%',
+            // height: '100%',
+            flex: 1,
+          }}
+          behavior="padding"
+          enabled
+          // keyboardVerticalOffset={300}
+        >
+          <View>{M3TopSvg(width)}</View>
           <View
-            style={[
-              styles.Row_OnlyColumnCenter,
-              styles.W100H20,
-              {backgroundColor: 'pink'},
-            ]}>
-            <TouchableOpacity
-              style={[styles.RowCenter, MapScreenStyles.CancelBoxView]}
-              onPress={() => {
-                ChangeModalVisiable();
-              }}>
-              <Text>취소</Text>
-            </TouchableOpacity>
-
-            {Memo == '' && MoenyRadioBox != 0 ? (
-              <TouchableOpacity
-                style={MapScreenStyles.CheckBoxView}
-                onPress={() => {
-                  ShowMyLocation();
-                }}>
-                {ClickedCompleteSvg(width * 0.37)}
-              </TouchableOpacity>
-            ) : (
-              <View
-                style={[
-                  styles.RowCenter,
-                  MapScreenStyles.CheckBoxView,
-                  {backgroundColor: '#DFE5F1'},
-                ]}>
-                <Text>완료</Text>
-              </View>
-            )}
+            style={{
+              marginLeft: '8%',
+              marginTop: '5%',
+            }}>
+            {M3Main_TopBarSvg(width * 0.84)}
+            {/* <View style={[{backgroundColor: 'red'}, styles.RowCenter]}>
+            <WithLocalSvg
+              asset={M3Main_TopBar}
+              width={width * 0.84}
+              style={{display: 'flex'}}>
+              <Text style={{position: 'absolute', color: 'white', right: 0}}>
+                Hello
+              </Text>
+            </WithLocalSvg>
+          </View> */}
           </View>
-        </View>
+
+          <View
+            // behavior="position"
+            // contentContainerStyle={{
+            //   top: 50,
+            // }}
+            // behavior="padding"
+            // enabled
+            style={{
+              width: '84%',
+              height: '55%',
+              marginLeft: '8%',
+              marginTop: '-3%',
+              backgroundColor: '#37375B',
+              borderBottomEndRadius: 48,
+              borderBottomStartRadius: 48,
+            }}>
+            {M3Main_PeopleNumSelect}
+            {M3Main_FriendSelect}
+            {M3Main_MemoInput}
+            {M3Main_PaySelect}
+            <View
+              style={[
+                styles.Row_OnlyFlex,
+                styles.W100H20,
+                {marginTop: 10},
+                // {backgroundColor: 'pink'},
+              ]}>
+              <TouchableOpacity
+                style={[styles.RowCenter, MapScreenStyles.CancelBoxView]}
+                onPress={() => {
+                  ChangeModalVisiable();
+                }}>
+                <Text>취소</Text>
+              </TouchableOpacity>
+
+              {Memo == '' && MoenyRadioBox != 0 ? (
+                <TouchableOpacity
+                  style={MapScreenStyles.CheckBoxView}
+                  onPress={() => {
+                    ShowMyLocation();
+                  }}>
+                  <LinearGradient
+                    colors={Type2세로}
+                    start={{x: 0, y: 0}}
+                    end={{x: 0, y: 1}}
+                    style={[
+                      styles.RowCenter,
+                      {width: '100%', height: '100%', borderRadius: 9},
+                    ]}>
+                    <Text>완료</Text>
+                  </LinearGradient>
+                  {/* {ClickedCompleteSvg(width * 0.37)} */}
+                </TouchableOpacity>
+              ) : (
+                <View
+                  style={[
+                    styles.RowCenter,
+                    MapScreenStyles.CheckBoxView,
+                    {backgroundColor: '#DFE5F1'},
+                  ]}>
+                  <Text>완료</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     );
   };
@@ -2042,10 +2198,10 @@ const MapScreen = (props: any) => {
             styles.NoFlexDirectionCenter,
           ]}
           onPress={() => {
-            navigation.navigate('MyProfileScreen', {
-              UserData,
-            });
-            // setProfileModalVisiable(true);
+            // navigation.navigate('MyProfileScreen', {
+            //   UserData,
+            // });
+            setProfileModalVisiable(true);
           }}>
           <Image
             source={{uri: ProfileImageUrl}}

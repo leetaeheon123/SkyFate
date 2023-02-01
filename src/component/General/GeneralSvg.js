@@ -9,6 +9,7 @@ import Minus from 'Assets/Minus.svg';
 
 import People from 'Assets/People.svg';
 import PeopleAdd from 'Assets/PeopleAdd.svg';
+import Memo from 'Assets/Memo.svg';
 import Complete from 'Assets/Complete.svg';
 
 import ClickedComplete from 'Assets/ClickedComplete.svg';
@@ -89,6 +90,16 @@ export const PeopleAddSvg = (width, styleParam) => {
   );
 };
 
+export const MemoSvg = (width, styleParam) => {
+  return (
+    <WithLocalSvg
+      asset={Memo}
+      width={width}
+      height={width}
+      style={styleParam}></WithLocalSvg>
+  );
+};
+
 export const VerticalLineSvg = (width) => {
   return (
     <WithLocalSvg asset={VerticalLine} height={101} width={1}></WithLocalSvg>
@@ -97,7 +108,15 @@ export const VerticalLineSvg = (width) => {
 
 export const CheckSvg = (width) => {
   return (
-    <WithLocalSvg asset={Check} height={width} width={width}></WithLocalSvg>
+    <WithLocalSvg
+      asset={Check}
+      height={width}
+      width={width}
+      style={{
+        position: 'absolute',
+        top: '50%',
+        backgroundColor: '#37375B',
+      }}></WithLocalSvg>
   );
 };
 
@@ -106,7 +125,12 @@ export const ClickedCheckSvg = (width) => {
     <WithLocalSvg
       asset={ClickedCheck}
       height={width}
-      width={width}></WithLocalSvg>
+      width={width}
+      style={{
+        position: 'absolute',
+        top: '50%',
+        backgroundColor: '#37375B',
+      }}></WithLocalSvg>
   );
 };
 

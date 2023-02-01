@@ -81,9 +81,11 @@ export const MapScreenStyles = StyleSheet.create({
   ],
 
   MemoTextInput: {
-    width: '78%',
-    height: 46,
-    padding: 15,
+    // width: '78%',
+    // height: 46,
+    padding: 5,
+    flex: 1,
+    backgroundColor: 'red',
   },
 
   MoneyOption: {
@@ -129,8 +131,7 @@ export const MapScreenStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: '80%',
-    backgroundColor: 'yellow',
+    height: '70%',
   },
 
   CheckBoxView: {
@@ -271,6 +272,21 @@ export const MapScreenStyles = StyleSheet.create({
     {
       width: '82%',
       height: '100%',
+    },
+  ],
+  M3MainSectionText: {
+    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: '500',
+    color: 'white',
+  },
+  M3Main_PayOption: [
+    styles.ColumnCenter,
+    {
+      width: '100%',
+      height: '100%',
+      borderRadius: 14.25,
+      backgroundColor: '#DFE5F1',
     },
   ],
 

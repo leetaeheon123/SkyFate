@@ -53,6 +53,7 @@ import InvitationText_Main from 'Assets/Invitation/Invitation_Main.svg';
 import InvitationText_Sub from 'Assets/Invitation/Invitation_Sub.svg';
 
 import ChangeProfile from 'Assets/ChangeProfile.svg';
+import {Dimensions} from 'react-native';
 
 const excuteObj = {
   Mbti: MbtiText,
@@ -96,9 +97,14 @@ const MbtiBtnObj = {
   ClickedP: ClickedP,
 };
 
+const {width, height} = Dimensions.get('window');
+const W90 = width * 0.9;
+const W21 = width * 0.21;
+const H6 = height * 0.06;
+
 export const MbtiBtn = (Name) => {
   let asset = MbtiBtnObj[Name];
-  return <WithLocalSvg asset={asset} />;
+  return <WithLocalSvg asset={asset} width={W21} />;
 };
 
 export const TextComponent = (Name) => {
@@ -109,7 +115,7 @@ export const TextComponent = (Name) => {
 
 export const GenderBtnComponent = (Name) => {
   let asset = GenderBtnObj[Name];
-  return <WithLocalSvg asset={asset} />;
+  return <WithLocalSvg asset={asset} width={W90} />;
 };
 
 export const NickNameInput = () => {
@@ -124,9 +130,9 @@ export const AgeLine = () => {
   return <WithLocalSvg asset={AgelineSvg}></WithLocalSvg>;
 };
 
-export const SubTextComponent = (Name) => {
+export const SubTextComponent = (Name, style = {marginTop: H6}) => {
   let asset = SubTextObj[Name];
-  return <WithLocalSvg asset={asset}></WithLocalSvg>;
+  return <WithLocalSvg asset={asset} style={style}></WithLocalSvg>;
 };
 
 export const ProfileImageUploadComponent = () => {

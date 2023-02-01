@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import styles from './ManToManBoard';
 export const LoginAndReigsterStyles = StyleSheet.create({
   Body: {
     width: '100%',
@@ -37,13 +38,15 @@ export const LoginAndReigsterStyles = StyleSheet.create({
     height: '100%',
     marginLeft: '5%',
   },
-  Description: {
-    height: '15%',
-    width: '100%',
-    // backgroundColor: 'skyblue',
-    display: 'flex',
-    justifyContent: 'flex-end',
-  },
+  Description: [
+    styles.Row_OnlyRowCenter,
+    {
+      height: '15%',
+      width: '100%',
+      // backgroundColor: 'skyblue',
+      alignItems: 'flex-end',
+    },
+  ],
   Center: {
     height: '50%',
     width: '100%',
