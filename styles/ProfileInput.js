@@ -11,3 +11,25 @@ export const AgeStyles = StyleSheet.create({
     // backgroundColor: 'red',
   },
 });
+
+export const MbtiStyles = StyleSheet.create({
+  MbtiSelectView: [
+    styles.Row_OnlyColumnCenter,
+    {
+      width: '100%',
+      justifyContent: 'space-between',
+    },
+  ],
+});
+
+export const ProfileImageStyles = StyleSheet.create({
+  ImageSelectView: [
+    styles.Row_OnlyColumnCenter,
+    {
+      width: '100%',
+      justifyContent: 'space-around',
+      marginTop: 20,
+    },
+  ],
+  Image: {width: 106, height: 144, borderRadius: 30},
+});

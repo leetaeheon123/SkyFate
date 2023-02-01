@@ -20,6 +20,7 @@ import {Btn_ClickableNextSvg} from 'component/Profile/ProfileSvg';
 import {Btn_NotClickableNextSvg} from 'component/Profile/ProfileSvg';
 
 import {AppContext} from '^/Appcontext';
+import {ProfileImageStyles} from '~/ProfileInput';
 const ProfileImageSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
   const Context = useContext(AppContext);
@@ -103,31 +104,32 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
         <View style={LoginAndReigsterStyles.Description}>
           {TextComponent('ProfileImage')}
         </View>
-        <View style={LoginAndReigsterStyles.Center}>
-          {SubTextComponent('ProfileImage')}
-          <View style={styles.Row_OnlyColumnCenter}>
+        <View
+          style={[LoginAndReigsterStyles.Center, styles.Column_OnlyRowCenter]}>
+          {SubTextComponent('ProfileImage', {marginTop: 20})}
+          <View style={ProfileImageStyles.ImageSelectView}>
             {Url == '' ? (
               ProfileImageUploadComponentGen(1, setUrl)
             ) : (
               <Image
                 source={{uri: Url}}
-                style={{width: 30, height: 30}}></Image>
+                style={ProfileImageStyles.Image}></Image>
             )}
             {Url2 == '' ? (
               ProfileImageUploadComponentGen(2, setUrl2)
             ) : (
               <Image
                 source={{uri: Url2}}
-                style={{width: 30, height: 30}}></Image>
+                style={ProfileImageStyles.Image}></Image>
             )}
           </View>
-          <View style={styles.Row_OnlyColumnCenter}>
+          <View style={ProfileImageStyles.ImageSelectView}>
             {Url3 == '' ? (
               ProfileImageUploadComponentGen(3, setUrl3)
             ) : (
               <Image
                 source={{uri: Url3}}
-                style={{width: 30, height: 30}}></Image>
+                style={ProfileImageStyles.Image}></Image>
             )}
 
             {Url4 == '' ? (
@@ -135,7 +137,7 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
             ) : (
               <Image
                 source={{uri: Url4}}
-                style={{width: 30, height: 30}}></Image>
+                style={ProfileImageStyles.Image}></Image>
             )}
           </View>
         </View>

@@ -17,6 +17,7 @@ import firestore from '@react-native-firebase/firestore';
 import {TextComponent} from 'component/Profile/ProfileSvg';
 import {GenderBtnComponent} from 'component/Profile/ProfileSvg';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+import styles from '~/ManToManBoard';
 const GenderSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
   const {UserEmail, NickName} = route.params;
@@ -41,10 +42,14 @@ const GenderSelectScreen = ({navigation, route}: any) => {
           {TextComponent('Gender')}
         </View>
         <View
-          style={{
-            height: '50%',
-            width: '100%',
-          }}>
+          style={[
+            styles.Column_OnlyRowCenter,
+            {
+              height: '50%',
+              width: '100%',
+              justifyContent: 'space-evenly',
+            },
+          ]}>
           {Gender == 1 ? (
             <TouchableOpacity
               onPress={() => {

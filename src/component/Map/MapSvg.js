@@ -20,6 +20,7 @@ import Pay_Putoff from 'Assets/Map/M3/Pay_Putoff.svg';
 import ClickedPay_Half from 'Assets/Map/M3/ClickedPay_Half.svg';
 
 import Pay_Half from 'Assets/Map/M3/Pay_Half.svg';
+import {Text} from 'react-native';
 export const GeneralMatchSvg = (width) => {
   let height = width;
   return <WithLocalSvg asset={GeneralMatch} width={width} height={height} />;
@@ -81,7 +82,7 @@ export const M3TopSvg = (width) => {
 };
 
 export const M3Main_TopBarSvg = (width) => {
-  return <WithLocalSvg asset={M3Main_TopBar} width={width} />;
+  return <WithLocalSvg asset={M3Main_TopBar} width={width}></WithLocalSvg>;
 };
 
 export const Pay_PutoffSvg = (width) => {

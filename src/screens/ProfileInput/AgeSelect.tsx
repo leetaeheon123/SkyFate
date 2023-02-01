@@ -23,6 +23,7 @@ import {
 } from 'component/Profile/ProfileSvg';
 import {AgeStyles} from '~/ProfileInput';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+import styles from '~/ManToManBoard';
 
 const AgeSelectScreen = ({navigation, route}: any) => {
   const {UserEmail, Gender, NickName} = route.params;
@@ -128,10 +129,14 @@ const AgeSelectScreen = ({navigation, route}: any) => {
           {TextComponent('Age')}
         </View>
         <Pressable
-          style={{
-            height: '50%',
-            width: '100%',
-          }}
+          style={[
+            styles.Column_OnlyFlex,
+            {
+              height: '40%',
+              width: '100%',
+              justifyContent: 'flex-end',
+            },
+          ]}
           onPress={() => {
             Keyboard.dismiss();
           }}>
@@ -165,7 +170,9 @@ const AgeSelectScreen = ({navigation, route}: any) => {
             )}
           </View>
 
-          {SubTextComponent('Age')}
+          <View style={[styles.RowCenter, {width: '100%'}]}>
+            {SubTextComponent('Age', {marginTop: 20})}
+          </View>
         </Pressable>
 
         {ValidComponent()}
