@@ -1,29 +1,29 @@
 import React, {
-  useLayoutEffect,
-  useEffect,
-  useState,
-  useReducer,
   useContext,
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useState,
 } from 'react';
 import {
-  Text,
-  StatusBar,
+  Alert,
+  AppState,
+  Button,
+  Dimensions,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
   SafeAreaView,
+  StatusBar,
+  Text,
+  TextInput,
   TouchableOpacity,
   View,
-  FlatList,
-  AppState,
-  TextInput,
-  Alert,
-  Platform,
-  Image,
-  Dimensions,
-  Modal,
-  Button,
-  KeyboardAvoidingView,
 } from 'react-native';
 
-import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import DocumentPicker from 'react-native-document-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -35,12 +35,10 @@ import {createChannelName} from '../utilsReducer';
 import {AppContext} from '../UsefulFunctions/Appcontext';
 import {GetTime} from '../../1108backup/src/UsefulFunctions/GetTime';
 import firestore from '@react-native-firebase/firestore';
-import {GetEpochTime} from '^/GetTime';
-import {MilisToMinutes} from '^/GetTime';
-
-import {BombIconSvg, ExplainLimit_BombSvg} from 'component/Chat/ChatSvg';
+import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 import styles from '~/ManToManBoard';
-import {BombIconView, BombIconViewNotabs} from 'component/General';
+import {BombIconViewNotabs} from 'component/General';
+import {useInterval} from '../utils';
 
 const ChatScreen = (props) => {
   const {route, navigation} = props;
@@ -49,6 +47,8 @@ const ChatScreen = (props) => {
   const {UserData} = route.params;
 
   const Key_MetaData = 'CanSendL1Invite_' + UserData.UserEmail;
+
+  const [chatMinutes, setChatMinutes] = useState('');
 
   // const GetMetadata = () => {
   //   var keys = [Key_MetaData];
@@ -308,10 +308,29 @@ const ChatScreen = (props) => {
       });
     }
   };
-  const now = GetEpochTime();
-  let milis = now - channel.createdAt;
-  let second = Math.floor(milis / 1000);
-  let minutes = MilisToMinutes(milis);
+
+  useEffect(() => {
+    const minutes = getTimePassed();
+
+    // setCreatedAt(moment(channel.createdAt).fromNow());
+    setChatMinutes(minutes);
+  }, []);
+
+  const getTimePassed = () => {
+    const now = GetEpochTime();
+    const milis = now - channel?.createdAt;
+    const second = Math.floor(milis / 1000);
+    return Math.floor(second / 60);
+  };
+
+  const intervalRef = useInterval(() => {
+    const minutes = getTimePassed();
+    setChatMinutes(minutes);
+    console.log('[chat.js] ChatRoom time passed:', minutes);
+    if (minutes >= 10) {
+      clearInterval(intervalRef.current);
+    }
+  }, 10000);
 
   const sendUserMessage = () => {
     if (state.input.length > 0) {
@@ -705,7 +724,7 @@ const ChatScreen = (props) => {
           </Modal>
 
           <View style={style.BombView}>
-            {BombIconViewNotabs(width * 0.2, minutes)}
+            {BombIconViewNotabs(width * 0.2, chatMinutes)}
 
             <Text style={style.BombText}>
               빠른 매칭을 위해 채팅은 10분으로 제한합니다.

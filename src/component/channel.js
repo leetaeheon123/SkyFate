@@ -10,6 +10,7 @@ import {
 } from '../utilsReducer';
 import {GetEpochTime} from '^/GetTime';
 import {BombIconView} from './General';
+import {useInterval} from '../utils';
 
 const LAST_MESSAGE_ELLIPSIS = 45;
 
@@ -23,15 +24,30 @@ const Channel = (props) => {
   const [updatedAt, setUpdatedAt] = useState('');
   const [CreatedAt, setCreatedAt] = useState('');
 
+  const intervalRef = useInterval(() => {
+    const minutes = getTimePassed();
+    setCreatedAt(minutes);
+    console.log('[channel.js] ChatRoom time passed:', minutes);
+    if (minutes >= 10) {
+      clearInterval(intervalRef.current);
+    }
+  }, 10000);
+
   useEffect(() => {
-    let now = GetEpochTime();
-    let milis = now - channel?.createdAt;
-    let second = Math.floor(milis / 1000);
-    let minutes = Math.floor(second / 60);
+    const minutes = getTimePassed();
 
     // setCreatedAt(moment(channel.createdAt).fromNow());
     setCreatedAt(minutes);
   }, []);
+
+  const getTimePassed = () => {
+    const now = GetEpochTime();
+    const milis = now - channel?.createdAt;
+    const second = Math.floor(milis / 1000);
+    const minutes = Math.floor(second / 60);
+
+    return minutes;
+  };
 
   const channelHandler = new sendbird.ChannelHandler();
   channelHandler.onChannelChanged = (updatedChannel) => {
