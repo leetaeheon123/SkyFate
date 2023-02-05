@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -18,10 +18,16 @@ import {
   RefreshControl,
   Switch,
   Pressable,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+  TouchableNativeFeedback,
 } from 'react-native';
 import {MyProfileStyles} from '~/MyProfile';
 import LinearGradient from 'react-native-linear-gradient';
 import {ChangeProfileSvg} from 'component/Profile/ProfileSvg';
+import {Btn_ClickableBack, Btn_ClickableEnter_Setting} from 'component/General';
+import {ProfileTopLine} from 'component/Profile';
+import Swiper from 'react-native-swiper';
 
 export const DescCricle = (
   <LinearGradient
@@ -51,6 +57,19 @@ export const DescBottomlineCustom = (style) => {
 const MyProfileScreen = ({route, navigation}: any) => {
   const {UserData} = route.params;
 
+  const ImageArray = [
+    UserData.ProfileImageUrl,
+    UserData.ProfileImageUrl2,
+    UserData.ProfileImageUrl3,
+    UserData.ProfileImageUrl4,
+    UserData.ProfileImageUrl5,
+    UserData.ProfileImageUrl6,
+  ];
+
+  const [FiliterImageArray, setImageArray] = useState(
+    ImageArray.filter((data) => data != '' && data != undefined),
+  );
+
   const SubImage = (
     <View>
       <LinearGradient
@@ -61,7 +80,7 @@ const MyProfileScreen = ({route, navigation}: any) => {
         <Image
           resizeMode="cover"
           style={MyProfileStyles.SubImage}
-          source={{uri: UserData.ProfileImageUrl}}></Image>
+          source={{uri: ImageArray[0]}}></Image>
       </LinearGradient>
       <TouchableOpacity
         onPress={() => {
@@ -104,10 +123,59 @@ const MyProfileScreen = ({route, navigation}: any) => {
   return (
     <SafeAreaView style={MyProfileStyles.Body}>
       <View style={MyProfileStyles.ImageView}>
-        <Image
-          resizeMode="cover"
-          style={MyProfileStyles.FullImage}
-          source={{uri: UserData.ProfileImageUrl}}></Image>
+        {/* <ProfileTopLine /> */}
+        <Swiper
+          paginationStyle={{
+            width: '70%',
+            height: 2.5,
+            position: 'absolute',
+            top: 24,
+            left: '15%',
+            display: 'flex',
+            flexDirection: 'row',
+            zIndex: 10,
+          }}
+          dot={
+            <View
+              style={{
+                height: '100%',
+                width: `${100 / FiliterImageArray.length}%`,
+                backgroundColor: '#00000014',
+                borderRadius: 4,
+              }}></View>
+          }
+          activeDot={
+            <View
+              style={{
+                height: '100%',
+                width: `${100 / FiliterImageArray.length}%`,
+                backgroundColor: 'white',
+                borderRadius: 4,
+              }}></View>
+          }>
+          {FiliterImageArray.map((data, index) => {
+            return (
+              <Image
+                key={data + index}
+                resizeMode="cover"
+                style={MyProfileStyles.FullImage}
+                source={{uri: data}}
+              />
+            );
+          })}
+        </Swiper>
+
+        <Btn_ClickableBack
+          width={14}
+          onPress={() => navigation.goBack()}
+          style={{position: 'absolute', left: 12, top: 12}}
+        />
+
+        <Btn_ClickableEnter_Setting
+          width={30}
+          onPress={() => navigation.goBack()}
+          style={{position: 'absolute', right: 12, top: 12}}
+        />
       </View>
       <View style={MyProfileStyles.Main}>
         <View style={MyProfileStyles.Title}>

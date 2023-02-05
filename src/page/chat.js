@@ -21,6 +21,7 @@ import {
   Modal,
   Button,
   KeyboardAvoidingView,
+  NativeModules,
 } from 'react-native';
 
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
@@ -38,9 +39,9 @@ import firestore from '@react-native-firebase/firestore';
 import {GetEpochTime} from '^/GetTime';
 import {MilisToMinutes} from '^/GetTime';
 
-import {BombIconSvg, ExplainLimit_BombSvg} from 'component/Chat/ChatSvg';
 import styles from '~/ManToManBoard';
-import {BombIconView, BombIconViewNotabs} from 'component/General';
+import {BombIconViewNotabs} from 'component/General';
+import {useKeyboard} from '@react-native-community/hooks';
 
 const ChatScreen = (props) => {
   const {route, navigation} = props;
@@ -49,6 +50,7 @@ const ChatScreen = (props) => {
   const {UserData} = route.params;
 
   const Key_MetaData = 'CanSendL1Invite_' + UserData.UserEmail;
+  const keyboard = useKeyboard();
 
   // const GetMetadata = () => {
   //   var keys = [Key_MetaData];
@@ -81,10 +83,10 @@ const ChatScreen = (props) => {
   // console.log(otherUserData[0].userId);
   // console.log(otherUserData[0].plainProfileUrl);
 
-  const otherUserDataObj = {
-    UserEmail: otherUserData[0].userId,
-    ProfileImageUrl: otherUserData[0].plainProfileUrl,
-  };
+  // const otherUserDataObj = {
+  //   UserEmail: otherUserData[0].userId,
+  //   ProfileImageUrl: otherUserData[0].plainProfileUrl,
+  // };
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
@@ -509,11 +511,19 @@ const ChatScreen = (props) => {
           Alert.alert('60초 초과');
         }
       } else if (message.customType == 'L1_Res') {
-        navigation.navigate('MeetMapScreen', {
-          UserData: UserData,
-          otherUserData: otherUserDataObj,
-          channel: channel,
-        });
+        if (otherUserData.length == 0) {
+          Alert.alert('상대방이 방을 나가셨습니다.');
+        } else {
+          navigation.navigate('MeetMapScreen', {
+            UserData: UserData,
+            // otherUserData: otherUserDataObj,
+            otherUserData: {
+              UserEmail: otherUserData[0].userId,
+              ProfileImageUrl: otherUserData[0].plainProfileUrl,
+            },
+            channel: channel,
+          });
+        }
       } else {
         console.log('viewDetail message in chat,js:', message);
       }
@@ -669,111 +679,134 @@ const ChatScreen = (props) => {
 
   // const BombIcons = <View>{BombIconSvg}</View>;
   const {width} = Dimensions.get('window');
+
+  const [statusBarHeight, setStatusBarHeight] = useState(0);
+  const {StatusBarManager} = NativeModules;
+
+  useEffect(() => {
+    Platform.OS == 'ios'
+      ? StatusBarManager.getHeight((statusBarFrameData) => {
+          setStatusBarHeight(statusBarFrameData.height);
+        })
+      : null;
+  }, []);
+
   return (
     <>
       <StatusBar backgroundColor="#742ddd" barStyle="light-content" />
 
       <SafeAreaView style={style.container}>
-        <KeyboardAvoidingView
-          style={style.container}
-          // behavior={'padding'}
-          // keyboardVerticalOffset={150}
-        >
-          <Modal visible={ReportModalVisiable} transparent={false}>
-            <View
+        <Modal visible={ReportModalVisiable} transparent={false}>
+          <View
+            style={{
+              width: '90%',
+              height: height * 0.5,
+              backgroundColor: 'red',
+              marginLeft: '5%',
+              marginTop: '30%',
+            }}>
+            <Image
               style={{
-                width: '90%',
-                height: height * 0.5,
-                backgroundColor: 'red',
-                marginLeft: '5%',
-                marginTop: '30%',
-              }}>
-              <Image
-                style={{
-                  width: 30,
-                  height: 30,
-                }}
-                source={require('../Assets/security.png')}
-              />
-              <Button title="Close" onPress={onoffReportModal} />
-              {ReturnTo('허위 프로필', 1)}
-              {ReturnTo('욕설 및 비방', 2)}
-              {ReturnTo('불쾌한 대화', 3)}
-              {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
-              <Button title="Submit" onPress={ReportSubmit} />
-            </View>
-          </Modal>
-
-          <View style={style.BombView}>
-            {BombIconViewNotabs(width * 0.2, minutes)}
-
-            <Text style={style.BombText}>
-              빠른 매칭을 위해 채팅은 10분으로 제한합니다.
-            </Text>
-          </View>
-
-          <FlatList
-            data={state.messages}
-            inverted={true}
-            renderItem={({item}) => (
-              <Message
-                key={item.reqId}
-                channel={channel}
-                message={item}
-                SendBird={SendBird}
-                onPress={(message) => viewDetail(message)}
-                onLongPress={(message) => showContextMenu(message)}
-              />
-            )}
-            keyExtractor={(item) => `${item.messageId}` || item.reqId}
-            contentContainerStyle={{flexGrow: 1, paddingVertical: 10}}
-            ListHeaderComponent={
-              state.error && (
-                <View style={style.errorContainer}>
-                  <Text style={style.error}>{state.error}</Text>
-                </View>
-              )
-            }
-            ListEmptyComponent={
-              <View style={style.emptyContainer}>
-                <Text style={style.empty}>{state.empty}</Text>
-              </View>
-            }
-            onEndReached={() => next()}
-            onEndReachedThreshold={0.5}
-          />
-          <View style={style.inputContainer}>
-            <TouchableOpacity
-              activeOpacity={0.85}
-              style={style.uploadButton}
-              onPress={selectFile}>
-              <Icon name="insert-photo" color="#7b53ef" size={28} />
-            </TouchableOpacity>
-            <TextInput
-              value={state.input}
-              style={style.input}
-              multiline={true}
-              numberOfLines={2}
-              onChangeText={(content) => {
-                // if (content.length > 0) {
-                //   channel.startTyping();
-                // } else {
-                //   channel.endTyping();
-                // }
-                dispatch({type: 'typing', payload: {input: content}});
+                width: 30,
+                height: 30,
               }}
+              source={require('../Assets/security.png')}
             />
-            <TouchableOpacity
-              activeOpacity={0.85}
-              style={style.sendButton}
-              onPress={sendUserMessage}>
-              <Icon
-                name="send"
-                color={state.input.length > 0 ? '#7b53ef' : '#ddd'}
-                size={28}
-              />
-            </TouchableOpacity>
+            <Button title="Close" onPress={onoffReportModal} />
+            {ReturnTo('허위 프로필', 1)}
+            {ReturnTo('욕설 및 비방', 2)}
+            {ReturnTo('불쾌한 대화', 3)}
+            {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+            <Button title="Submit" onPress={ReportSubmit} />
           </View>
+        </Modal>
+
+        <View style={style.BombView}>
+          {BombIconViewNotabs(width * 0.2, minutes)}
+
+          <Text style={style.BombText}>
+            빠른 매칭을 위해 채팅은 10분으로 제한합니다.
+          </Text>
+        </View>
+
+        <FlatList
+          data={state.messages}
+          inverted={true}
+          renderItem={({item}) => (
+            <Message
+              key={item.reqId}
+              channel={channel}
+              message={item}
+              SendBird={SendBird}
+              onPress={(message) => viewDetail(message)}
+              onLongPress={(message) => showContextMenu(message)}
+            />
+          )}
+          keyExtractor={(item) => `${item.messageId}` || item.reqId}
+          contentContainerStyle={{flexGrow: 1, paddingVertical: 10}}
+          ListHeaderComponent={
+            state.error && (
+              <View style={style.errorContainer}>
+                <Text style={style.error}>{state.error}</Text>
+              </View>
+            )
+          }
+          ListEmptyComponent={
+            <View style={style.emptyContainer}>
+              <Text style={style.empty}>{state.empty}</Text>
+            </View>
+          }
+          onEndReached={() => next()}
+          onEndReachedThreshold={0.5}
+        />
+        <KeyboardAvoidingView
+          // contentContainerStyle={[
+          //   style.inputContainer,
+          //   {marginBottom: 47 + 44},
+          // ]}
+          // keyboardVerticalOffset={
+          //   Platform.OS === 'ios'
+          //     ? keyboard.keyboardHeight * 0.45
+          //     : // : -keyboard.keyboardHeight * 0.45
+          //       null
+          // }
+          style={style.inputContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={
+            Platform.OS === 'ios'
+              ? statusBarHeight + 50
+              : -(statusBarHeight + 50)
+          }>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={style.uploadButton}
+            onPress={selectFile}>
+            <Icon name="insert-photo" color="#7b53ef" size={28} />
+          </TouchableOpacity>
+          <TextInput
+            value={state.input}
+            style={style.input}
+            multiline={true}
+            numberOfLines={2}
+            onChangeText={(content) => {
+              // if (content.length > 0) {
+              //   channel.startTyping();
+              // } else {
+              //   channel.endTyping();
+              // }
+              dispatch({type: 'typing', payload: {input: content}});
+            }}
+          />
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={style.sendButton}
+            onPress={sendUserMessage}>
+            <Icon
+              name="send"
+              color={state.input.length > 0 ? '#7b53ef' : '#ddd'}
+              size={28}
+            />
+          </TouchableOpacity>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
@@ -782,7 +815,9 @@ const ChatScreen = (props) => {
 
 const style = {
   container: {
-    flex: 1,
+    // flex: 1,
+    width: '100%',
+    height: '100%',
     backgroundColor: '#37375B',
   },
   headerRightContainer: {
@@ -818,9 +853,11 @@ const style = {
     alignItems: 'center',
   },
   input: {
-    flex: 1,
+    // flex: 1,
+    width: '100%',
     fontSize: 20,
     color: '#555',
+    height: 40,
   },
   uploadButton: {
     marginRight: 10,

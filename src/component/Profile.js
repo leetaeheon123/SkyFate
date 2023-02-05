@@ -29,3 +29,42 @@ export const Btn_NotClickableNext = () => {
     </View>
   );
 };
+
+export const ProfileTopLine = () => (
+  <View
+    style={{
+      width: '70%',
+      height: 2.5,
+      position: 'absolute',
+      top: 24,
+      left: '15%',
+      display: 'flex',
+      flexDirection: 'row',
+      zIndex: 10,
+    }}>
+    <View
+      style={{
+        height: '100%',
+        width: '33%',
+        backgroundColor: 'white',
+        borderRadius: 4,
+      }}
+    />
+    <View
+      style={{
+        height: '100%',
+        width: '33%',
+        backgroundColor: 'white',
+        borderRadius: 4,
+      }}
+    />
+    <View
+      style={{
+        height: '100%',
+        width: '33%',
+        backgroundColor: 'white',
+        borderRadius: 4,
+      }}
+    />
+  </View>
+);

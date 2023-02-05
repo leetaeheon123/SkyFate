@@ -28,7 +28,7 @@ const Channel = (props) => {
     let milis = now - channel?.createdAt;
     let second = Math.floor(milis / 1000);
     let minutes = Math.floor(second / 60);
-
+    
     // setCreatedAt(moment(channel.createdAt).fromNow());
     setCreatedAt(minutes);
   }, []);

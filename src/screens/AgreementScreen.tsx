@@ -19,7 +19,6 @@ import {
   MainText_AgreementSvg,
 } from 'component/SignInUp/SignInUp';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
-import {position} from 'native-base/lib/typescript/theme/styled-system';
 
 export type AgreementScreenProps = NativeStackScreenProps<
   RootStackParamList,

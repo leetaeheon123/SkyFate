@@ -7,9 +7,9 @@ import {MyProfileStyles} from '~/MyProfile';
 import {BombIconSvg} from './Chat/ChatSvg';
 import BombIcon from 'Assets/BombIcon.svg';
 import {WithLocalSvg} from 'react-native-svg';
-
+import {Enter_SettingSvg} from './Map/MapSvg';
 export const Btn_ClickableBack = (props) => {
-  const {width, onPress} = props;
+  const {width, onPress, style} = props;
   return (
     <TouchableOpacity
       style={[
@@ -17,13 +17,33 @@ export const Btn_ClickableBack = (props) => {
         {
           width: 30,
           height: 30,
-          // backgroundColor: 'green'
         },
+        style,
       ]}
       onPress={() => {
         onPress();
       }}>
       {BackSvg(width)}
+    </TouchableOpacity>
+  );
+};
+
+export const Btn_ClickableEnter_Setting = (props) => {
+  const {width, onPress, style} = props;
+  return (
+    <TouchableOpacity
+      style={[
+        styles.RowCenter,
+        {
+          width: 35,
+          height: 35,
+        },
+        style,
+      ]}
+      onPress={() => {
+        onPress();
+      }}>
+      {Enter_SettingSvg(width)}
     </TouchableOpacity>
   );
 };
@@ -132,3 +152,4 @@ export const BombIconViewNotabs = (width, num) => (
     </View>
   </View>
 );
+

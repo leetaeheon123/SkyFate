@@ -3,6 +3,8 @@ import styles from './ManToManBoard';
 let {height} = Dimensions.get('window');
 height = Math.ceil(height);
 let NS2 = height * 0.65;
+let H10 = height * 0.1;
+let H5 = height * 0.05;
 
 export const MapScreenStyles = StyleSheet.create({
   ProfileModalParent: {
@@ -85,7 +87,7 @@ export const MapScreenStyles = StyleSheet.create({
     // height: 46,
     padding: 5,
     flex: 1,
-    backgroundColor: 'red',
+    // backgroundColor: 'red',
   },
 
   MoneyOption: {
@@ -115,8 +117,11 @@ export const MapScreenStyles = StyleSheet.create({
     width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
-    height: '50%',
+    // height: '50%',
+    height: H5,
+
     backgroundColor: '#DFE5F1',
+    // backgroundColor: 'red',
     borderRadius: 8,
   },
 
