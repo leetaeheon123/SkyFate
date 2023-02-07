@@ -21,6 +21,33 @@ import {Btn_NotClickableNextSvg} from 'component/Profile/ProfileSvg';
 
 import {AppContext} from '^/Appcontext';
 import {ProfileImageStyles} from '~/ProfileInput';
+
+const ProfileImageUploadComponentGen = (
+  index: number,
+  setState: Function,
+  UserEmail: string,
+  Gender: number,
+  navigation: any,
+  NickName: string,
+) => {
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        ChangeMyProfileImage(
+          UserEmail,
+          Gender,
+          navigation,
+          index,
+          setState,
+          NickName,
+          // SendBird,
+        );
+      }}>
+      {ProfileImageUploadComponent()}
+    </TouchableOpacity>
+  );
+};
+
 const ProfileImageSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
   const Context = useContext(AppContext);
@@ -76,28 +103,6 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
     }
   };
 
-  const ProfileImageUploadComponentGen = (
-    index: number,
-    setState: Function,
-  ) => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          ChangeMyProfileImage(
-            UserEmail,
-            Gender,
-            navigation,
-            index,
-            setState,
-            NickName,
-            // SendBird,
-          );
-        }}>
-        {ProfileImageUploadComponent()}
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <SafeAreaView style={LoginAndReigsterStyles.Body}>
       <View style={LoginAndReigsterStyles.Main}>
@@ -109,14 +114,30 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
           {SubTextComponent('ProfileImage', {marginTop: 20})}
           <View style={ProfileImageStyles.ImageSelectView}>
             {Url == '' ? (
-              ProfileImageUploadComponentGen(1, setUrl)
+              ProfileImageUploadComponentGen(
+                1,
+                setUrl,
+
+                UserEmail,
+                Gender,
+                navigation,
+                NickName,
+              )
             ) : (
               <Image
                 source={{uri: Url}}
                 style={ProfileImageStyles.Image}></Image>
             )}
             {Url2 == '' ? (
-              ProfileImageUploadComponentGen(2, setUrl2)
+              ProfileImageUploadComponentGen(
+                2,
+                setUrl2,
+
+                UserEmail,
+                Gender,
+                navigation,
+                NickName,
+              )
             ) : (
               <Image
                 source={{uri: Url2}}
@@ -125,7 +146,14 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
           </View>
           <View style={ProfileImageStyles.ImageSelectView}>
             {Url3 == '' ? (
-              ProfileImageUploadComponentGen(3, setUrl3)
+              ProfileImageUploadComponentGen(
+                3,
+                setUrl3,
+                UserEmail,
+                Gender,
+                navigation,
+                NickName,
+              )
             ) : (
               <Image
                 source={{uri: Url3}}
@@ -133,7 +161,14 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
             )}
 
             {Url4 == '' ? (
-              ProfileImageUploadComponentGen(4, setUrl4)
+              ProfileImageUploadComponentGen(
+                4,
+                setUrl4,
+                UserEmail,
+                Gender,
+                navigation,
+                NickName,
+              )
             ) : (
               <Image
                 source={{uri: Url4}}

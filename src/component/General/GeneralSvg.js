@@ -27,6 +27,8 @@ import RightArrow from 'Assets/RightArrow.svg';
 import Pay from 'Assets/Pay.svg';
 
 import Security from 'Assets/Security.svg';
+
+import 완료 from 'Assets/완료.svg';
 const Gwidth = Dimensions.get('window').width;
 export const BackSvg = (width) => {
   let height = width * 1.8;
@@ -161,3 +163,5 @@ export const PaySvg = (width) => (
 export const SecuritySvg = (width, height) => (
   <WithLocalSvg asset={Security} width={width} height={height}></WithLocalSvg>
 );
+
+export const 완료Svg = <WithLocalSvg asset={완료}></WithLocalSvg>;

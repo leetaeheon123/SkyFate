@@ -1,7 +1,8 @@
 import {StyleSheet, Dimensions} from 'react-native';
 import styles from './ManToManBoard';
 
-const {width} = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
+const W20 = width * 0.2;
 export const MyProfileStyles = StyleSheet.create({
   Body: {
     flex: 1,
@@ -101,12 +102,27 @@ export const MyProfileChangeStyles = StyleSheet.create({
   Headers: {
     width: '100%',
     height: '44%',
-    backgroundColor: 'red',
+    backgroundColor: 'white',
   },
+  HeadersGrid: [
+    styles.Row_OnlyColumnCenter,
+    {
+      width: '100%',
+      height: height * 0.22,
+      justifyContent: 'space-around',
+      backgroundColor: 'skyblue',
+    },
+  ],
   Body: {
     width: '100%',
     height: '66%',
     // backgroundColor: 'purple',
+  },
+
+  ProfileImage: {
+    width: W20,
+    height: W20 * 1.24,
+    borderRadius: 24.6,
   },
 
   InforView: [

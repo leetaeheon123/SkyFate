@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Image,
   Dimensions,
   KeyboardAvoidingView,
+  TouchableOpacity,
 } from 'react-native';
 import {MyProfileChangeStyles, MyProfileStyles} from '~/MyProfile';
 import {Type2} from 'component/LinearGradient/LinearType';
@@ -15,12 +16,77 @@ import {Type2ProfileImageCircle} from 'component/LinearGradient/LinearGradientCi
 import {DescBottomline, DescBottomlineCustom, DescCricle} from './MyProfile';
 import {TextInput} from 'react-native-gesture-handler';
 import styles from '~/ManToManBoard';
+import {
+  ProfileImageUploadComponent,
+  ProfileImageUploadComponentReact,
+} from 'component/Profile/ProfileSvg';
 
-const MyProfileChangeScreen = ({route}: any) => {
+import {ChangeMyProfileImage} from '^/ImageUpload';
+
+const ProfileImageUploadComponentGen = (
+  index: number,
+  setState: Function,
+  UserEmail: string,
+  Gender: number,
+  navigation: any,
+  NickName: string,
+  width: number,
+) => {
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        ChangeMyProfileImage(
+          UserEmail,
+          Gender,
+          navigation,
+          index,
+          setState,
+          NickName,
+          // SendBird,
+        );
+      }}>
+      {ProfileImageUploadComponentReact(width)}
+    </TouchableOpacity>
+  );
+};
+
+const MyProfileChangeScreen = ({route, navigation}: any) => {
   const {width} = Dimensions.get('window');
   const {UserData} = route.params;
 
   const Per20 = width * 0.2;
+
+  const [Url, setUrl] = useState(UserData.ProfileImageUrl);
+  const [Url2, setUrl2] = useState(UserData.ProfileImageUrl2);
+  const [Url3, setUrl3] = useState(UserData.ProfileImageUrl3);
+  const [Url4, setUrl4] = useState(UserData.ProfileImageUrl4);
+  const [Url5, setUrl5] = useState(UserData.ProfileImageUrl5);
+  const [Url6, setUrl6] = useState(UserData.ProfileImageUrl6);
+
+  const CheckImageNull = (
+    index: number,
+    setState: Function,
+    ImageUrl: string,
+  ) => {
+    if (ImageUrl == '') {
+      return ProfileImageUploadComponentGen(
+        index,
+        setState,
+        UserData.UserEmail,
+        UserData.Gender,
+        navigation,
+        UserData.NickName,
+        Per20,
+      );
+    } else {
+      return (
+        <Image
+          source={{uri: ImageUrl}}
+          style={MyProfileChangeStyles.ProfileImage}
+        />
+      );
+    }
+  };
 
   const InforBoxSection = (Desc: string) => {
     return (
@@ -39,7 +105,18 @@ const MyProfileChangeScreen = ({route}: any) => {
         style={{
           width: '100%',
         }}>
-        <View style={MyProfileChangeStyles.Headers}></View>
+        <View style={MyProfileChangeStyles.Headers}>
+          <View style={MyProfileChangeStyles.HeadersGrid}>
+            {CheckImageNull(1, setUrl, Url)}
+            {CheckImageNull(2, setUrl2, Url2)}
+            {CheckImageNull(3, setUrl3, Url3)}
+          </View>
+          <View style={MyProfileChangeStyles.HeadersGrid}>
+            {CheckImageNull(4, setUrl4, Url4)}
+            {CheckImageNull(5, setUrl5, Url5)}
+            {CheckImageNull(6, setUrl6, Url6)}
+          </View>
+        </View>
 
         <KeyboardAvoidingView style={MyProfileChangeStyles.Body}>
           <View style={MyProfileChangeStyles.InforView}>
@@ -48,11 +125,7 @@ const MyProfileChangeScreen = ({route}: any) => {
                 position: 'absolute',
                 top: '-13%',
               }}>
-              {Type2ProfileImageCircle(
-                width * 0.2,
-                width * 0.2,
-                UserData.ProfileImageUrl,
-              )}
+              {Type2ProfileImageCircle(Per20, Per20, UserData.ProfileImageUrl)}
             </View>
             <Text style={[MyProfileStyles.NickName, {marginTop: 21}]}>
               {UserData.NickName}
@@ -81,9 +154,7 @@ const MyProfileChangeScreen = ({route}: any) => {
               <View style={MyProfileChangeStyles.InforBoxColumnSection}>
                 <TextInput
                   style={MyProfileChangeStyles.TI}
-                  maxLength={2}
-                  
-                  ></TextInput>
+                  maxLength={2}></TextInput>
                 {DescBottomlineCustom({width: '88%', height: 1})}
               </View>
               {InforBoxSection('한줄소개')}
