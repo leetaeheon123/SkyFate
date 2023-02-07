@@ -1,5 +1,5 @@
 import LinearGradient from 'react-native-linear-gradient';
-import {Type2} from './LinearType';
+import {Type2, Type3} from './LinearType';
 import {Image} from 'react-native';
 import styles from '~/ManToManBoard';
 export const Type2Circle = (width, height) => {
@@ -18,7 +18,12 @@ export const Type2Circle = (width, height) => {
   );
 };
 
-export const Type2ProfileImageCircle = (width, height, ProfileImageUrl, style={}) => {
+export const Type2ProfileImageCircle = (
+  width,
+  height,
+  ProfileImageUrl,
+  style = {},
+) => {
   return (
     <LinearGradient
       colors={['#7373F6', '#8B70F7', '#956EF6', '#A869F7']}
@@ -56,3 +61,17 @@ export const Type2VerticalLine = (height) => {
       }}></LinearGradient>
   );
 };
+
+export const Type3Rectangle = (props) => {
+  const {style} = props;
+  console.log('style:', style);
+  return (
+    <LinearGradient
+      colors={Type3}
+      start={{x: 0, y: 0}}
+      end={{x: 1, y: 1}}
+      style={style}></LinearGradient>
+  );
+};
+
+

@@ -18,7 +18,6 @@ import {
   Platform,
   Image,
   Dimensions,
-  Modal,
   Button,
   KeyboardAvoidingView,
   NativeModules,
@@ -42,12 +41,16 @@ import {MilisToMinutes} from '^/GetTime';
 import styles from '~/ManToManBoard';
 import {BombIconViewNotabs} from 'component/General';
 import {useKeyboard} from '@react-native-community/hooks';
-
+import Modal from 'react-native-modal';
+import LinearGradient from 'react-native-linear-gradient';
+import {Type2가로} from 'component/LinearGradient/LinearType';
+import {CongratulateSvg} from 'component/Chat/ChatSvg';
 const ChatScreen = (props) => {
   const {route, navigation} = props;
 
   const {channel} = route.params;
   const {UserData} = route.params;
+  const {width} = Dimensions.get('window');
 
   const Key_MetaData = 'CanSendL1Invite_' + UserData.UserEmail;
   const keyboard = useKeyboard();
@@ -127,7 +130,7 @@ const ChatScreen = (props) => {
             onPress={() => {
               sendL1InviteAndResUserMessage(
                 'L1_Invite',
-                '~~님께서 요청하셨습니다.',
+                `${UserData.NickName}님께서 둘만의 지도로 이동하자고 요청하셨습니다.`,
               );
             }}>
             <Image
@@ -282,6 +285,87 @@ const ChatScreen = (props) => {
       },
     ]);
   };
+
+  const [InviteModalVis, setInviteModalVis] = useState(true);
+  const [CongratulateModalVis, setCongratulateModalVis] = useState(false);
+
+  const InviteModal = (
+    <Modal isVisible={InviteModalVis}>
+      <LinearGradient
+        colors={Type2가로}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 0}}
+        style={[
+          styles.Column_OnlyRowCenter,
+          {
+            width: '100%',
+            height: 119,
+            justifyContent: 'flex-end',
+            borderRadius: 20,
+          },
+        ]}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: '500',
+            color: 'white',
+          }}>
+          요청을 수락하시겠습니까?
+        </Text>
+        <Text
+          style={{
+            fontSize: 15,
+            fontWeight: '200',
+            color: '#FFFFFF80',
+            marginBottom: 15,
+          }}>
+          아니오를 누르시면 자동으로 취소됩니다.
+        </Text>
+        <View
+          style={[
+            styles.W100,
+            {height: 40, borderTopWidth: 0.5, borderTopColor: '#37375B15'},
+            styles.Row_OnlyFlex,
+          ]}>
+          <TouchableOpacity
+            style={[
+              styles.RowCenter,
+              styles.W50,
+              {borderRightWidth: 0.5, borderRightColor: '#37375B15'},
+            ]}
+            onPress={() => {
+              setInviteModalVis(false);
+              setTimeout(() => {
+                setCongratulateModalVis(true);
+              }, 500);
+              SendInviteResMessage();
+            }}>
+            <Text>네</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.RowCenter, styles.W50]}
+            onPress={() => {
+              setInviteModalVis(false);
+            }}>
+            <Text>아니요</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    </Modal>
+  );
+
+  const CongratulateModal = (
+    <Modal isVisible={CongratulateModalVis}>
+      <TouchableOpacity
+        onPress={() => {
+          setCongratulateModalVis(false);
+        }}>
+        {/* {CongratulateSvg(width * 0.9)}
+         */}
+        {CongratulateSvg(width * 0.9)}
+      </TouchableOpacity>
+    </Modal>
+  );
   const refresh = () => {
     // channel.markAsRead();
     setQuery(channel.createPreviousMessageListQuery());
@@ -487,6 +571,14 @@ const ChatScreen = (props) => {
       });
   };
 
+  const SendInviteResMessage = () => {
+    sendL1InviteAndResUserMessage(
+      'L1_Res',
+      '둘 다 수락하여 방이 생성되었습니다! 메세지 클릭하면 둘만의 지도로 이동됩니다',
+    );
+    createMatch();
+  };
+
   const viewDetail = (message) => {
     if (message.isFileMessage()) {
       // TODO: show file details
@@ -499,11 +591,7 @@ const ChatScreen = (props) => {
         if (second <= 60) {
           // Alert.alert('Gogo?');
           if (message.sender.userId != UserData.UserEmail) {
-            sendL1InviteAndResUserMessage(
-              'L1_Res',
-              '둘 다 수락하여 방이 생성되었습니다! 이 메세지 클릭시 이동됩니다',
-            );
-            createMatch();
+            setInviteModalVis(true);
           } else {
             Alert.alert('자기가 누르는건 에바지');
           }
@@ -678,7 +766,6 @@ const ChatScreen = (props) => {
   // };
 
   // const BombIcons = <View>{BombIconSvg}</View>;
-  const {width} = Dimensions.get('window');
 
   const [statusBarHeight, setStatusBarHeight] = useState(0);
   const {StatusBarManager} = NativeModules;
@@ -691,35 +778,41 @@ const ChatScreen = (props) => {
       : null;
   }, []);
 
+  const ReportModal = (
+    <Modal visible={ReportModalVisiable} transparent={false}>
+      <View
+        style={{
+          width: '90%',
+          height: height * 0.5,
+          backgroundColor: 'red',
+          marginLeft: '5%',
+          marginTop: '30%',
+        }}>
+        <Image
+          style={{
+            width: 30,
+            height: 30,
+          }}
+          source={require('../Assets/security.png')}
+        />
+        <Button title="Close" onPress={onoffReportModal} />
+        {ReturnTo('허위 프로필', 1)}
+        {ReturnTo('욕설 및 비방', 2)}
+        {ReturnTo('불쾌한 대화', 3)}
+        {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+        <Button title="Submit" onPress={ReportSubmit} />
+      </View>
+    </Modal>
+  );
+
   return (
     <>
       <StatusBar backgroundColor="#742ddd" barStyle="light-content" />
 
       <SafeAreaView style={style.container}>
-        <Modal visible={ReportModalVisiable} transparent={false}>
-          <View
-            style={{
-              width: '90%',
-              height: height * 0.5,
-              backgroundColor: 'red',
-              marginLeft: '5%',
-              marginTop: '30%',
-            }}>
-            <Image
-              style={{
-                width: 30,
-                height: 30,
-              }}
-              source={require('../Assets/security.png')}
-            />
-            <Button title="Close" onPress={onoffReportModal} />
-            {ReturnTo('허위 프로필', 1)}
-            {ReturnTo('욕설 및 비방', 2)}
-            {ReturnTo('불쾌한 대화', 3)}
-            {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
-            <Button title="Submit" onPress={ReportSubmit} />
-          </View>
-        </Modal>
+        {ReportModal}
+        {InviteModal}
+        {CongratulateModal}
 
         <View style={style.BombView}>
           {BombIconViewNotabs(width * 0.2, minutes)}
@@ -853,8 +946,8 @@ const style = {
     alignItems: 'center',
   },
   input: {
-    // flex: 1,
-    width: '100%',
+    flex: 1,
+    // width: '100%',
     fontSize: 20,
     color: '#555',
     height: 40,
