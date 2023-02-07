@@ -89,6 +89,7 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
           {MainHead_AgreementSvg()}
         </View>
         <View style={{marginTop: 80}}>
+          <View style={[styles.Line, {marginTop: 10}]} />
           <View style={styles.checkboxContainer}>
             <Pressable
               style={{marginLeft: 20, marginRight: 10}}
@@ -99,6 +100,8 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
             </Pressable>
             {MainText_AgreementSvg()}
           </View>
+          <View style={[styles.Line, {marginBottom: 20}]} />
+
           <View style={styles.checkboxContainer2}>
             <Pressable
               style={styles.checkboxBtn}
@@ -152,13 +155,17 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
 const styles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: 'row',
-    marginTop: 10,
-    marginBottom: 20,
     paddingVertical: 18,
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#DEDEDE',
+    // borderTopWidth: 1,
+    // borderBottomWidth: 1,
+    // borderColor: '#DEDEDE',
+  },
+  Line: {
+    backgroundColor: '#DEDEDE',
+    width: '110%',
+    right: '5%',
+    height: 1,
   },
   checkboxContainer2: {
     flexDirection: 'row',
