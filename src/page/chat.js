@@ -1,29 +1,33 @@
 import React, {
-  useLayoutEffect,
-  useEffect,
-  useState,
-  useReducer,
   useContext,
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useState,
 } from 'react';
 import {
-  Text,
-  StatusBar,
-  SafeAreaView,
-  TouchableOpacity,
-  View,
-  FlatList,
-  AppState,
-  TextInput,
   Alert,
   Platform,
   Image,
   Dimensions,
+  AppState,
   Button,
+  Dimensions,
+  FlatList,
+  Image,
   KeyboardAvoidingView,
   NativeModules,
+  Modal,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import DocumentPicker from 'react-native-document-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -35,16 +39,17 @@ import {createChannelName} from '../utilsReducer';
 import {AppContext} from '../UsefulFunctions/Appcontext';
 import {GetTime} from '../../1108backup/src/UsefulFunctions/GetTime';
 import firestore from '@react-native-firebase/firestore';
-import {GetEpochTime} from '^/GetTime';
-import {MilisToMinutes} from '^/GetTime';
 
+import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 import styles from '~/ManToManBoard';
 import {BombIconViewNotabs} from 'component/General';
+import {useInterval} from '../utils';
 import {useKeyboard} from '@react-native-community/hooks';
 import Modal from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
 import {Type2가로} from 'component/LinearGradient/LinearType';
 import {CongratulateSvg} from 'component/Chat/ChatSvg';
+
 const ChatScreen = (props) => {
   const {route, navigation} = props;
 
@@ -54,6 +59,8 @@ const ChatScreen = (props) => {
 
   const Key_MetaData = 'CanSendL1Invite_' + UserData.UserEmail;
   const keyboard = useKeyboard();
+
+  const [chatMinutes, setChatMinutes] = useState('');
 
   // const GetMetadata = () => {
   //   var keys = [Key_MetaData];
@@ -394,10 +401,29 @@ const ChatScreen = (props) => {
       });
     }
   };
-  const now = GetEpochTime();
-  let milis = now - channel.createdAt;
-  let second = Math.floor(milis / 1000);
-  let minutes = MilisToMinutes(milis);
+
+  useEffect(() => {
+    const minutes = getTimePassed();
+
+    // setCreatedAt(moment(channel.createdAt).fromNow());
+    setChatMinutes(minutes);
+  }, []);
+
+  const getTimePassed = () => {
+    const now = GetEpochTime();
+    const milis = now - channel?.createdAt;
+    const second = Math.floor(milis / 1000);
+    return Math.floor(second / 60);
+  };
+
+  const intervalRef = useInterval(() => {
+    const minutes = getTimePassed();
+    setChatMinutes(minutes);
+    console.log('[chat.js] ChatRoom time passed:', minutes);
+    if (minutes >= 10) {
+      clearInterval(intervalRef.current);
+    }
+  }, 10000);
 
   const sendUserMessage = () => {
     if (state.input.length > 0) {
@@ -814,13 +840,41 @@ const ChatScreen = (props) => {
         {InviteModal}
         {CongratulateModal}
 
-        <View style={style.BombView}>
-          {BombIconViewNotabs(width * 0.2, minutes)}
+        <Modal visible={ReportModalVisiable} transparent={false}>
+          <View
+            style={{
+              width: '90%',
+              height: height * 0.5,
+              backgroundColor: 'red',
+              marginLeft: '5%',
+              marginTop: '30%',
+            }}>
+            <Image
+              style={{
+                width: 30,
+                height: 30,
+              }}
+              source={require('../Assets/security.png')}
+            />
+            <Button title="Close" onPress={onoffReportModal} />
+            {ReturnTo('허위 프로필', 1)}
+            {ReturnTo('욕설 및 비방', 2)}
+            {ReturnTo('불쾌한 대화', 3)}
+            {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+            <Button title="Submit" onPress={ReportSubmit} />
 
-          <Text style={style.BombText}>
-            빠른 매칭을 위해 채팅은 10분으로 제한합니다.
-          </Text>
-        </View>
+
+            </View>
+      </Modal>
+          <View style={style.BombView}>
+            {BombIconViewNotabs(width * 0.2, chatMinutes)}
+
+            <Text style={style.BombText}>
+              빠른 매칭을 위해 채팅은 10분으로 제한합니다.
+            </Text>
+
+          </View>
+  
 
         <FlatList
           data={state.messages}

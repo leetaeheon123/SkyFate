@@ -1,5 +1,6 @@
 import notifee from '@notifee/react-native';
 import axios from 'axios';
+import {useEffect, useRef} from 'react';
 
 export const onRemoteMessage = async (remoteMessage) => {
   // Set the channel for Android
@@ -134,4 +135,22 @@ export const parseLineString = (features) => {
     }
   });
   return newFeatures;
+};
+
+export const useInterval = (callback, delay) => {
+  const intervalRef = useRef();
+  const callbackRef = useRef(callback);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    if (typeof delay === 'number') {
+      intervalRef.current = setInterval(() => callbackRef.current(), delay);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [delay]);
+
+  return intervalRef;
 };
