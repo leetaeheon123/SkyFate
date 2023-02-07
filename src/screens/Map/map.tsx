@@ -110,6 +110,8 @@ import {WithLocalSvg} from 'react-native-svg';
 import M3Main_TopBar from 'Assets/Map/M3/M3Main_TopBar.svg';
 import LinearGradient from 'react-native-linear-gradient';
 import {Type2세로} from 'component/LinearGradient/LinearType';
+import {MapTopLine} from 'component/Map';
+import Swiper from 'react-native-swiper';
 
 export interface ILocation {
   latitude: number;
@@ -118,6 +120,11 @@ export interface ILocation {
 
 interface ProfileForGtoM {
   ProfileImageUrl: string;
+  ProfileImageUrl2: string;
+  ProfileImageUrl3: string;
+  ProfileImageUrl4: string;
+  ProfileImageUrl5: string;
+  ProfileImageUrl6: string;
   UserEmail: string;
   Memo: string;
   PeopleNum: number;
@@ -280,6 +287,11 @@ export const GetMyCoords = async (
 const ShowManLocationForGM = async (
   UserEmail: string,
   ProfileImageUrl: string,
+  ProfileImageUrl2: string,
+  ProfileImageUrl3: string,
+  ProfileImageUrl4: string,
+  ProfileImageUrl5: string,
+  ProfileImageUrl6: string,
   NickName: string,
   Mbti: string,
 ) => {
@@ -289,9 +301,15 @@ const ShowManLocationForGM = async (
 
     const UpdateManLocation = (latitude: any, longitude: any) => {
       reference.ref(`/ManLocation/${ReplaceUserEmail}`).update({
+        UserEmail: UserEmail,
         latitude: latitude,
         longitude: longitude,
         ProfileImageUrl: ProfileImageUrl,
+        ProfileImageUrl2: ProfileImageUrl2,
+        ProfileImageUrl3: ProfileImageUrl3,
+        ProfileImageUrl4: ProfileImageUrl4,
+        ProfileImageUrl5: ProfileImageUrl5,
+        ProfileImageUrl6: ProfileImageUrl6,
         TimeStamp: EpochTime,
         NickName: NickName,
         Mbti: Mbti,
@@ -331,7 +349,12 @@ const Girl_StartShowLocation = async (
   Memo: string = '',
   PeopleNum: Number,
   CanPayit: Number,
-  ProfileImageUrl: any,
+  ProfileImageUrl: string,
+  ProfileImageUrl2: string,
+  ProfileImageUrl3: string,
+  ProfileImageUrl4: string,
+  ProfileImageUrl5: string,
+  ProfileImageUrl6: string,
   NickName: string,
   Mbti: string,
 ) => {
@@ -365,6 +388,12 @@ const Girl_StartShowLocation = async (
         CanPayit: CanPayStr,
         PeopleNum: PeopleNum,
         ProfileImageUrl: ProfileImageUrl,
+        ProfileImageUrl2: ProfileImageUrl2,
+        ProfileImageUrl3: ProfileImageUrl3,
+        ProfileImageUrl4: ProfileImageUrl4,
+        ProfileImageUrl5: ProfileImageUrl5,
+        ProfileImageUrl6: ProfileImageUrl6,
+
         TimeStamp: EpochTime,
         UserEmail: UserEmail,
         NickName: NickName,
@@ -450,6 +479,7 @@ const MapScreen = (props: any) => {
   );
   const {width, height} = Dimensions.get('window');
 
+  const H11 = height * 0.11;
   const mapRef = useRef(null);
 
   const [location, setLocation] = useState<ILocation | undefined>(undefined);
@@ -586,6 +616,11 @@ const MapScreen = (props: any) => {
         let Result = ShowManLocationForGM(
           UserData.UserEmail,
           UserData.ProfileImageUrl,
+          UserData.ProfileImageUrl2,
+          UserData.ProfileImageUrl3,
+          UserData.ProfileImageUrl4,
+          UserData.ProfileImageUrl5,
+          UserData.ProfileImageUrl6,
           UserData.NickName,
           UserData.Mbti,
         );
@@ -724,6 +759,11 @@ const MapScreen = (props: any) => {
         PeopleNum,
         MoenyRadioBox,
         UserData.ProfileImageUrl,
+        UserData.ProfileImageUrl2,
+        UserData.ProfileImageUrl3,
+        UserData.ProfileImageUrl4,
+        UserData.ProfileImageUrl5,
+        UserData.ProfileImageUrl6,
         UserData.NickName,
         UserData.Mbti,
       );
@@ -740,6 +780,7 @@ const MapScreen = (props: any) => {
 
   const Stateize = async (Obj: ProfileForGtoM) => {
     setProfileForGtoM(Obj);
+    console.log('stateize');
   };
 
   const GirlMarkerOnPress = async (Obj: ProfileForGtoM) => {
@@ -939,18 +980,77 @@ const MapScreen = (props: any) => {
     </Text>
   );
 
-  const MainImage = (
-    <Image
-      resizeMode="cover"
-      source={{uri: ProfileForGtoM?.ProfileImageUrl}}
-      style={{
-        width: '95%',
-        marginLeft: '2.5%',
-        height: '81%',
-        borderRadius: 31,
-        marginTop: 10,
-      }}></Image>
-  );
+  const MainImage = () => {
+    const ImageArray = [
+      ProfileForGtoM.ProfileImageUrl,
+      ProfileForGtoM.ProfileImageUrl2,
+      ProfileForGtoM.ProfileImageUrl3,
+      ProfileForGtoM.ProfileImageUrl4,
+      ProfileForGtoM.ProfileImageUrl5,
+      ProfileForGtoM.ProfileImageUrl6,
+    ];
+    const FiliterImageArray = ImageArray.filter((data: any) => {
+      return data != undefined && data != '';
+    });
+    return (
+      <View
+        style={{
+          width: '95%',
+          marginLeft: '2.5%',
+          height: '81%',
+          borderRadius: 31,
+          marginTop: 10,
+        }}>
+        <Swiper
+          paginationStyle={{
+            width: '70%',
+            height: 2.5,
+            position: 'absolute',
+            top: 24,
+            left: '15%',
+            display: 'flex',
+            flexDirection: 'row',
+            zIndex: 10,
+          }}
+          dot={
+            <View
+              style={{
+                height: '100%',
+                width: `${100 / FiliterImageArray.length}%`,
+                backgroundColor: '#00000014',
+                borderRadius: 4,
+              }}></View>
+          }
+          activeDot={
+            <View
+              style={{
+                height: '100%',
+                width: `${100 / FiliterImageArray.length}%`,
+                backgroundColor: 'white',
+                borderRadius: 4,
+              }}></View>
+          }>
+          {FiliterImageArray.map((data, index) => {
+            console.log(data);
+            return (
+              <Image
+                key={index}
+                resizeMode="cover"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 31,
+                }}
+                source={{
+                  uri: data,
+                }}
+              />
+            );
+          })}
+        </Swiper>
+      </View>
+    );
+  };
 
   const Desc = (
     <View style={{marginBottom: 10}}>
@@ -1016,14 +1116,17 @@ const MapScreen = (props: any) => {
         isVisible={ShowUserModal}
         coverScreen={false}
         onBackdropPress={() => setShowUserModal(false)}
-        onSwipeComplete={() => setShowUserModal(false)}
-        swipeDirection="down">
+        // onSwipeComplete={() => setShowUserModal(false)}
+        // swipeDirection="down"
+      >
         <View
           style={[
             styles.W95ML5,
             {height: '65%', backgroundColor: '#313A5B', borderRadius: 26},
           ]}>
-          {MainImage}
+          {ProfileForGtoM.ProfileImageUrl != undefined ? MainImage() : null}
+          {/* <MapTopLine /> */}
+
           <View
             style={{
               position: 'absolute',
@@ -1059,6 +1162,26 @@ const MapScreen = (props: any) => {
     );
   };
 
+  // const TopLine = (
+  //   <View
+  //     style={{
+  //       width: '100%',
+  //       height: 2,
+  //       display: 'flex',
+  //       flexDirection: 'row',
+  //       justifyContent: 'center',
+  //     }}>
+  //     <View
+  //       style={{
+  //         height: 2,
+  //         width: 80,
+  //         backgroundColor: 'gray',
+  //         borderRadius: 25,
+  //       }}
+  //     />
+  //   </View>
+  // );
+
   const ShowMyProfileModal = () => {
     return (
       <Modal
@@ -1075,23 +1198,7 @@ const MapScreen = (props: any) => {
       >
         <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
           <View style={styles.W90ML5}>
-            <View
-              style={{
-                width: '100%',
-                height: 2,
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}>
-              <View
-                style={{
-                  height: 2,
-                  width: 80,
-                  backgroundColor: 'gray',
-                  borderRadius: 25,
-                }}
-              />
-            </View>
+            {/* {TopLine} */}
 
             <View
               style={{
@@ -1240,7 +1347,7 @@ const MapScreen = (props: any) => {
         styles.Row_OnlyColumnCenter,
         {
           width: '100%',
-          height: '21%',
+          height: H11,
         },
       ]}>
       <View style={MapScreenStyles.M3MainAside}>
@@ -1270,7 +1377,7 @@ const MapScreen = (props: any) => {
   );
 
   const M3Main_FriendSelect = (
-    <View style={[styles.Row_OnlyColumnCenter, styles.W100H20]}>
+    <View style={[styles.Row_OnlyColumnCenter, {height: H11, width: '100%'}]}>
       <View style={MapScreenStyles.M3MainAside}>
         {Type2VerticalLine('100%')}
 
@@ -1302,14 +1409,16 @@ const MapScreen = (props: any) => {
   );
 
   const M3Main_MemoInput = (
-    <View style={[styles.Row_OnlyColumnCenter, styles.W100H20]}>
+    <View style={[styles.Row_OnlyColumnCenter, {height: H11, width: '100%'}]}>
       <View style={MapScreenStyles.M3MainAside}>
         {Type2VerticalLine('100%')}
 
         {Memo == '' ? CheckSvg(22) : ClickedCheckSvg(22)}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
-        <Text style={MapScreenStyles.M3MainSectionText}>인원 추가</Text>
+        <Text style={MapScreenStyles.M3MainSectionText}>
+          상태 메세지 입력하기
+        </Text>
         <View style={[MapScreenStyles.FriendAdd]}>
           {MemoSvg(width * 0.06, {marginLeft: 10, marginRight: 5})}
           <TextInput
@@ -1420,7 +1529,14 @@ const MapScreen = (props: any) => {
   );
 
   const M3Main_PaySelect = (
-    <View style={[styles.Row_OnlyColumnCenter, styles.W100H20]}>
+    <View
+      style={[
+        styles.Row_OnlyColumnCenter,
+        {
+          height: H11,
+          width: '100%',
+        },
+      ]}>
       <View style={MapScreenStyles.M3MainAside}>
         {Type2VerticalLine('100%')}
 
@@ -1659,7 +1775,6 @@ const MapScreen = (props: any) => {
         style={[
           styles.W100H100,
           {
-            // top: '-5%',
             right: '5%',
             flexDirection: 'column',
             alignItems: 'flex-start',
@@ -1670,11 +1785,9 @@ const MapScreen = (props: any) => {
         ]}>
         <KeyboardAvoidingView
           contentContainerStyle={{
-            // width: '100%',
-            // height: '100%',
             flex: 1,
           }}
-          behavior="padding"
+          behavior="position"
           enabled
           // keyboardVerticalOffset={300}
         >
@@ -1698,15 +1811,10 @@ const MapScreen = (props: any) => {
           </View>
 
           <View
-            // behavior="position"
-            // contentContainerStyle={{
-            //   top: 50,
-            // }}
-            // behavior="padding"
-            // enabled
             style={{
               width: '84%',
-              height: '55%',
+              // height: '55%',
+              height: height * 0.55,
               marginLeft: '8%',
               marginTop: '-3%',
               backgroundColor: '#37375B',
@@ -1714,14 +1822,18 @@ const MapScreen = (props: any) => {
               borderBottomStartRadius: 48,
             }}>
             {M3Main_PeopleNumSelect}
-            {M3Main_FriendSelect}
+            {PeopleNum >= 2 ? M3Main_FriendSelect : null}
             {M3Main_MemoInput}
             {M3Main_PaySelect}
             <View
               style={[
                 styles.Row_OnlyFlex,
-                styles.W100H20,
-                {marginTop: 10},
+
+                {
+                  marginTop: 10,
+                  width: '100%',
+                  height: H11,
+                },
                 // {backgroundColor: 'pink'},
               ]}>
               <TouchableOpacity
@@ -1732,7 +1844,7 @@ const MapScreen = (props: any) => {
                 <Text>취소</Text>
               </TouchableOpacity>
 
-              {Memo == '' && MoenyRadioBox != 0 ? (
+              {Memo != '' && MoenyRadioBox != 0 ? (
                 <TouchableOpacity
                   style={MapScreenStyles.CheckBoxView}
                   onPress={() => {
@@ -1933,9 +2045,11 @@ const MapScreen = (props: any) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('FriendMapScreen', {
-            UserData,
-          });
+          // navigation.navigate('FriendMapScreen', {
+          //   UserData,
+          // });
+
+          setProfileModalVisiable(true);
         }}>
         {Enter_FriendMapSvg(80)}
       </TouchableOpacity>
@@ -2100,6 +2214,11 @@ const MapScreen = (props: any) => {
                       // }
                       GirlMarkerOnPress({
                         ProfileImageUrl: data?.ProfileImageUrl,
+                        ProfileImageUrl2: data?.ProfileImageUrl2,
+                        ProfileImageUrl3: data?.ProfileImageUrl3,
+                        ProfileImageUrl4: data?.ProfileImageUrl4,
+                        ProfileImageUrl5: data?.ProfileImageUrl5,
+                        ProfileImageUrl6: data?.ProfileImageUrl6,
                         UserEmail: data?.UserEmail,
                         Memo: data.Memo,
                         PeopleNum: data.PeopleNum,
@@ -2146,6 +2265,11 @@ const MapScreen = (props: any) => {
                     onPress={() => {
                       GirlMarkerOnPress({
                         ProfileImageUrl: MansData?.ProfileImageUrl,
+                        ProfileImageUrl2: MansData?.ProfileImageUrl2,
+                        ProfileImageUrl3: MansData?.ProfileImageUrl3,
+                        ProfileImageUrl4: MansData?.ProfileImageUrl4,
+                        ProfileImageUrl5: MansData?.ProfileImageUrl5,
+                        ProfileImageUrl6: MansData?.ProfileImageUrl6,
                         UserEmail: MansData?.UserEmail,
                         Memo: '',
                         PeopleNum: 1,
@@ -2198,10 +2322,10 @@ const MapScreen = (props: any) => {
             styles.NoFlexDirectionCenter,
           ]}
           onPress={() => {
-            // navigation.navigate('MyProfileScreen', {
-            //   UserData,
-            // });
-            setProfileModalVisiable(true);
+            navigation.navigate('MyProfileScreen', {
+              UserData,
+            });
+            // setProfileModalVisiable(true);
           }}>
           <Image
             source={{uri: ProfileImageUrl}}

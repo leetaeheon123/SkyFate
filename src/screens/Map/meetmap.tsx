@@ -7,15 +7,13 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  NativeModules,
 } from 'react-native';
 
 import styles from '~/ManToManBoard';
-import MapView, {
-  Marker,
-  PROVIDER_GOOGLE,
-  Polyline,
-  Geojson,
-} from 'react-native-maps';
+import MapView, {Marker, Geojson} from 'react-native-maps';
 
 import {MapScreenStyles} from '~/MapScreen';
 import {GetMyCoords, reference} from './map';
@@ -29,7 +27,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Message from 'component/message';
 
 import {viewDetail, showContextMenu} from '^/Chat';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {locationReducer} from 'reducer/location';
 import {ILocation} from './map';
 import {UpdateMyLocationWatch} from './map';
@@ -38,9 +35,11 @@ import {parseLineString, tMapNavigate} from '../../utils';
 import {L1ChatSvg} from 'component/Chat/ChatSvg';
 import {L1styles} from '~/L1';
 import LinearGradient from 'react-native-linear-gradient';
-import {LinearProfileImage, LinearProfileImagView} from 'component/General';
+import {LinearProfileImagView} from 'component/General';
 import {SecuritySvg} from 'component/General/GeneralSvg';
 import firestore from '@react-native-firebase/firestore';
+
+import {useKeyboard} from '@react-native-community/hooks';
 
 const MeetMapScreen = ({route}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
@@ -317,6 +316,43 @@ const MeetMapScreen = ({route}: any, props: any) => {
     <TouchableOpacity>{SecuritySvg(19, 23)}</TouchableOpacity>
   );
 
+  // const keyboardDidShow = (e: any) => {
+  //   console.log(e.endCoordinates.height);
+  //   // keyboardHeight: e.endCoordinates.height,
+  //   // normalHeight: Dimensions.get('window').height,
+  //   // shortHeight: Dimensions.get('window').height - e.endCoordinates.height,
+  // };
+
+  // const keyboardDidShowListener = Keyboard.addListener(
+  //   'keyboardDidShow',
+  //   keyboardDidShow,
+  // );
+
+  const keyboard = useKeyboard();
+  console.log('keyboard isKeyboardShow: ', keyboard.keyboardShown);
+  console.log('keyboard keyboardHeight: ', keyboard.keyboardHeight);
+
+  const [statusBarHeight, setStatusBarHeight] = useState(0);
+  const {StatusBarManager} = NativeModules;
+
+  useEffect(() => {
+    Platform.OS == 'ios'
+      ? StatusBarManager.getHeight((statusBarFrameData: any) => {
+          setStatusBarHeight(statusBarFrameData.height);
+        })
+      : null;
+  }, []);
+
+  const getKeyboardHeight = () => {
+    if (keyboard.keyboardHeight == 0) {
+      return 300;
+    } else {
+      return keyboard.keyboardHeight;
+    }
+  };
+
+  console.log('statusBarHeight:', statusBarHeight);
+
   const ChatModal = (
     <Modal
       style={L1styles.ChatModal}
@@ -351,14 +387,17 @@ const MeetMapScreen = ({route}: any, props: any) => {
           </View> */}
         </LinearGradient>
         <View style={L1styles.Main}>
-          <Text
-            style={{
-              fontWeight: '400',
-              fontSize: 12,
-              color: '#DFE5F1',
-            }}>
-            빠른 매칭을 위해 채팅은 10분으로 제한합니다.
-          </Text>
+          <View style={[styles.RowCenter, {marginTop: 10}]}>
+            <Text
+              style={{
+                fontWeight: '400',
+                fontSize: 12,
+                color: '#DFE5F1',
+              }}>
+              빠른 매칭을 위해 채팅은 15분으로 제한합니다.
+            </Text>
+          </View>
+
           <FlatList
             data={state.messages}
             inverted={true}
@@ -390,7 +429,22 @@ const MeetMapScreen = ({route}: any, props: any) => {
             onEndReachedThreshold={0.5}
           />
 
-          <View style={ChatStyle.inputContainer}>
+          <KeyboardAvoidingView
+            style={ChatStyle.inputContainer}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={
+              Platform.OS === 'ios'
+                ? getKeyboardHeight()
+                : -keyboard.keyboardHeight
+            }
+            // style={style.inputContainer}
+            // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            // keyboardVerticalOffset={
+            //   Platform.OS === 'ios'
+            //     ? statusBarHeight + 50
+            //     : -(statusBarHeight + 50)
+            // }
+          >
             <TouchableOpacity
               activeOpacity={0.85}
               style={ChatStyle.uploadButton}
@@ -425,7 +479,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
                 size={28}
               />
             </TouchableOpacity>
-          </View>
+          </KeyboardAvoidingView>
         </View>
       </View>
     </Modal>
