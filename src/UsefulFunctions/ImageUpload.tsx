@@ -132,7 +132,37 @@ const UpdateProfileImage4UrlInFT = async (
     .collection(`UserList`)
     .doc(UserEmail)
     .update({
-      ProfileImage4Url: StorageUrl,
+      ProfileImageUrl4: StorageUrl,
+    })
+    .then(() => {
+      console.log('Scuessful UpdateProfileImageUrl');
+    });
+};
+
+const UpdateProfileImage5UrlInFT = async (
+  UserEmail: string,
+  StorageUrl: string,
+) => {
+  await firestore()
+    .collection(`UserList`)
+    .doc(UserEmail)
+    .update({
+      ProfileImageUrl5: StorageUrl,
+    })
+    .then(() => {
+      console.log('Scuessful UpdateProfileImageUrl');
+    });
+};
+
+const UpdateProfileImage6UrlInFT = async (
+  UserEmail: string,
+  StorageUrl: string,
+) => {
+  await firestore()
+    .collection(`UserList`)
+    .doc(UserEmail)
+    .update({
+      ProfileImageUrl6: StorageUrl,
     })
     .then(() => {
       console.log('Scuessful UpdateProfileImageUrl');
@@ -144,6 +174,8 @@ const Obj = {
   2: UpdateProfileImage2UrlInFT,
   3: UpdateProfileImage3UrlInFT,
   4: UpdateProfileImage4UrlInFT,
+  5: UpdateProfileImage5UrlInFT,
+  6: UpdateProfileImage6UrlInFT,
 };
 
 const UpdateProfileImageUrl = async (

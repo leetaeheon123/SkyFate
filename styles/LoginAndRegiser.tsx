@@ -12,7 +12,7 @@ export const LoginAndReigsterStyles = StyleSheet.create({
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0064FF',
+    // backgroundColor: '#0064FF',
     borderRadius: 25,
     position: 'absolute',
     bottom: '8%',

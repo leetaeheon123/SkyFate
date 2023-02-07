@@ -45,6 +45,7 @@ import SubTextMbti from 'Assets/Profile/Mbti/MbtiSubText.svg';
 import SubTextProfileImage from 'Assets/Profile/ProfileImage/ProfileImageSubText.svg';
 
 import ProfileImageUpload from 'Assets/Profile/ProfileImage/ProfileImageUpload.svg';
+import ProfileImageUpload87 from 'Assets/Profile/ProfileImage/ProfileImageUpload87.svg';
 
 import Btn_Clickable from 'Assets/Profile/All/Btn_Clickable.svg';
 import Btn_NotClickable from 'Assets/Profile/All/Btn_NotClickable.svg';
@@ -137,6 +138,15 @@ export const SubTextComponent = (Name, style = {marginTop: H6}) => {
 
 export const ProfileImageUploadComponent = () => {
   return <WithLocalSvg asset={ProfileImageUpload}></WithLocalSvg>;
+};
+
+export const ProfileImageUploadComponentReact = (width) => {
+  return (
+    <WithLocalSvg
+      asset={ProfileImageUpload87}
+      width={width}
+      height={width * 1.24}></WithLocalSvg>
+  );
 };
 
 export const Btn_ClickableNextSvg = (width) => {
