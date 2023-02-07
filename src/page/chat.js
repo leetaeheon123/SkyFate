@@ -12,13 +12,9 @@ import {
   Dimensions,
   AppState,
   Button,
-  Dimensions,
   FlatList,
-  Image,
   KeyboardAvoidingView,
   NativeModules,
-  Modal,
-  Platform,
   SafeAreaView,
   StatusBar,
   Text,
@@ -862,19 +858,15 @@ const ChatScreen = (props) => {
             {ReturnTo('불쾌한 대화', 3)}
             {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
             <Button title="Submit" onPress={ReportSubmit} />
-
-
-            </View>
-      </Modal>
-          <View style={style.BombView}>
-            {BombIconViewNotabs(width * 0.2, chatMinutes)}
-
-            <Text style={style.BombText}>
-              빠른 매칭을 위해 채팅은 10분으로 제한합니다.
-            </Text>
-
           </View>
-  
+        </Modal>
+        <View style={style.BombView}>
+          {BombIconViewNotabs(width * 0.2, chatMinutes)}
+
+          <Text style={style.BombText}>
+            빠른 매칭을 위해 채팅은 10분으로 제한합니다.
+          </Text>
+        </View>
 
         <FlatList
           data={state.messages}
