@@ -8,6 +8,8 @@ import BombIcon from 'Assets/BombIcon.svg';
 import M5Chat from 'Assets/Chat/M5Chat.svg';
 
 import L1Chat from 'Assets/Chat/L1Chat.svg';
+
+import Congratulate from 'Assets/Chat/Congratulate.svg';
 export const Text_Message = (width) => {
   //   let height = width * 1.8;
   let height = width / 3;
@@ -41,3 +43,9 @@ export const M5ChatSvg = (width) => (
 );
 
 export const L1ChatSvg = <WithLocalSvg asset={L1Chat} />;
+
+export const CongratulateSvg = (width) => {
+  return (
+    <WithLocalSvg asset={Congratulate} width={width} height={width * 0.81} />
+  );
+};

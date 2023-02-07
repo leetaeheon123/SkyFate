@@ -4,6 +4,9 @@ import * as Progress from 'react-native-progress';
 import moment from 'moment';
 
 import {withAppContext} from '../contextReducer';
+import {Type3Rectangle} from './LinearGradient/LinearGradientCircle';
+import LinearGradient from 'react-native-linear-gradient';
+import {Type3} from './LinearGradient/LinearType';
 
 const UserMessage = (props) => {
   const {
@@ -58,14 +61,56 @@ const UserMessage = (props) => {
     }
   };
 
-  const bgP = (isMyMessage, customType) => {
-    let bg = isMyMessage ? '#7b53ef' : '#ddd';
-    if (customType == 'L1_Invite' || customType == 'L1_Res') {
-      bg = 'red';
-    }
-    // bg = customType == 'L1_Invite' ? 'red' : bg;
-    return bg;
-  };
+  // const bgP = (isMyMessage, customType) => {
+  //   let bg = isMyMessage ? '#7b53ef' : '#ddd';
+  //   if (customType == 'L1_Invite' || customType == 'L1_Res') {
+  //     bg = 'red';
+  //   }
+  //   // bg = customType == 'L1_Invite' ? 'red' : bg;
+  //   return bg;
+  // };
+
+  const Chat = (
+    <View
+      style={{
+        ...style.content,
+        alignItems: isMyMessage ? 'flex-end' : 'flex-start',
+      }}>
+      {!message.hasSameSenderAbove && (
+        <Text style={style.nickname}>{message.sender.nickname}</Text>
+      )}
+      <View
+        style={{
+          ...style.messageBubble,
+          backgroundColor: isMyMessage ? '#7b53ef' : '#ddd',
+        }}>
+        <Text style={{...style.message, color: isMyMessage ? '#fff' : '#333'}}>
+          {message.message}
+        </Text>
+      </View>
+    </View>
+  );
+
+  const InviteChat = (
+    <View
+      style={{
+        ...style.content,
+        alignItems: isMyMessage ? 'flex-end' : 'flex-start',
+      }}>
+      {!message.hasSameSenderAbove && (
+        <Text style={style.nickname}>{message.sender.nickname}</Text>
+      )}
+      <LinearGradient
+        colors={Type3}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={style.messageBubble}>
+        <Text style={{...style.message, color: isMyMessage ? '#fff' : '#333'}}>
+          {message.message}
+        </Text>
+      </LinearGradient>
+    </View>
+  );
 
   return (
     <TouchableOpacity
@@ -87,26 +132,10 @@ const UserMessage = (props) => {
           />
         )}
       </View>
-      <View
-        style={{
-          ...style.content,
-          alignItems: isMyMessage ? 'flex-end' : 'flex-start',
-        }}>
-        {!message.hasSameSenderAbove && (
-          <Text style={style.nickname}>{message.sender.nickname}</Text>
-        )}
-        <View
-          style={{
-            ...style.messageBubble,
+      {message.customType == 'L1_Invite' || message.customType == 'L1_Res'
+        ? InviteChat
+        : Chat}
 
-            backgroundColor: bgP(isMyMessage, message.customType),
-          }}>
-          <Text
-            style={{...style.message, color: isMyMessage ? '#fff' : '#333'}}>
-            {message.message}
-          </Text>
-        </View>
-      </View>
       <View
         style={{
           ...style.status,
