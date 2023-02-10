@@ -21,10 +21,12 @@ export const SendBirdUpdateUserInfo = (
     async (user: any, err: any) => {
       console.log('In sendbird.updateCurrentUserInfo User:', user);
       if (!err) {
-        console.log('Succes updateCurrentUserInfo SendBird In SBconnect Function In Indicator Screen');
+        console.log(
+          'Succes updateCurrentUserInfo SendBird In SBconnect Function In Indicator Screen',
+        );
       } else {
         Alert.alert(
-          `SbConnect Function In RegisterScreen에서에러가 난 이유 : ${err.message}`,
+          `SbConnect Function In IndicatorScreen에서에러가 난 이유 : ${err.message}`,
         );
       }
     },
@@ -103,12 +105,21 @@ const IndicatorScreen = (props: any) => {
             return;
           }
 
+          const ValidAgreement = UserData?.hasOwnProperty(
+            'AgreementTermsofUse',
+          );
+          if (!ValidAgreement) {
+            GotoProfileInputScreen('AgreementScreen', UserEmail, Gender);
+            return;
+          }
+
           if (
             ValidNickName &&
             ValidMbti &&
             ValidGender &&
             ValidAge &&
-            ValidProfileImageUrl
+            ValidProfileImageUrl &&
+            ValidAgreement
           ) {
             setCurrentUser(UserData);
             SBConnect(
@@ -140,6 +151,11 @@ const IndicatorScreen = (props: any) => {
   useEffect(() => {
     // setCurrentUser(null);
     console.log('params In Indicator Screen: ', props.route.params);
+
+    if (props.route.params == undefined) {
+      return;
+    }
+
     AsyncStorage.getItem('UserEmail')
       .then(async (user) => {
         const UserData = await GetUserData(user);

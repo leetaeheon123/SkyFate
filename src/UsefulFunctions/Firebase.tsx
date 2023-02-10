@@ -17,7 +17,7 @@ export const UpdateFbFirestore = async (
   CollectionPath: string,
   DocPath: string,
   Data: string,
-  value: string,
+  value: any,
 ) => {
   firestore()
     .collection(`${CollectionPath}`)
@@ -26,6 +26,6 @@ export const UpdateFbFirestore = async (
       [Data]: value,
     })
     .then(() => {
-      console.log('Success DeleteInFbFirestore');
+      console.log('Success UpdateInFbFirestore');
     });
 };

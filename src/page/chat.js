@@ -44,7 +44,12 @@ import {useKeyboard} from '@react-native-community/hooks';
 import Modal from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
 import {Type2가로} from 'component/LinearGradient/LinearType';
-import {CongratulateSvg, L1InviteSvg} from 'component/Chat/ChatSvg';
+import {
+  ChatLeaveSvg,
+  ChatReportSvg,
+  CongratulateSvg,
+  L1InviteSvg,
+} from 'component/Chat/ChatSvg';
 
 const ChatScreen = (props) => {
   const {route, navigation} = props;
@@ -122,9 +127,10 @@ const ChatScreen = (props) => {
       <View style={style.headerRightContainer}>
         <TouchableOpacity
           activeOpacity={0.85}
-          style={[style.headerRightButton, {width: 25, height: 25}]}
-          onPress={leave}>
-          <Icon name="directions-walk" color="black" size={28} />
+          style={[style.headerRightButton]}
+          onPress={onoffReportModal}>
+          {ChatReportSvg}
+          {/* <Icon name="directions-walk" color="black" size={28} /> */}
         </TouchableOpacity>
         {CanSendL1Invite == 0 ? (
           <TouchableOpacity
@@ -143,14 +149,8 @@ const ChatScreen = (props) => {
         <TouchableOpacity
           activeOpacity={0.85}
           style={style.headerRightButton}
-          onPress={onoffReportModal}>
-          <Image
-            style={{
-              width: 30,
-              height: 30,
-            }}
-            source={require('../Assets/security.png')}
-          />
+          onPress={leave}>
+          {ChatLeaveSvg}
         </TouchableOpacity>
       </View>
     );
@@ -283,7 +283,7 @@ const ChatScreen = (props) => {
     ]);
   };
 
-  const [InviteModalVis, setInviteModalVis] = useState(true);
+  const [InviteModalVis, setInviteModalVis] = useState(false);
   const [CongratulateModalVis, setCongratulateModalVis] = useState(false);
 
   const InviteModal = (
@@ -958,7 +958,8 @@ const style = {
     // backgroundColor: 'red',
   },
   headerRightButton: {
-    marginRight: 10,
+    // marginRight: 10,
+    // backgroundColor: 'red',
   },
   errorContainer: {
     backgroundColor: '#333',

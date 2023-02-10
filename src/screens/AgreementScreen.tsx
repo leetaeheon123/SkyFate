@@ -19,6 +19,7 @@ import {
   MainText_AgreementSvg,
 } from 'component/SignInUp/SignInUp';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+import {UpdateFbFirestore} from '^/Firebase';
 
 export type AgreementScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -32,6 +33,9 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
     'https://zealous-jumpsuit-7f6.notion.site/e746adc75467454f9a5364be8b90c93d';
   const AGREEMENT_PRIVACY_URL =
     'https://zealous-jumpsuit-7f6.notion.site/b0d186174c2f4db7adbc97b3c7f2b0ae';
+
+  const {UserEmail} = route.params;
+
   const [all, setAll] = useState(false);
   const [service, setService] = useState(false);
   const [privacy, setPrivacy] = useState(false);
@@ -43,9 +47,24 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
     setPrivacy(value);
     setLocation(value);
   };
+  const handleBtn = async () => {
+    await UpdateFbFirestore(`UserList`, UserEmail, 'AgreementTermsofUse', true);
+    await UpdateFbFirestore(
+      `UserList`,
+      UserEmail,
+      'AgreementGiveLocaitionData ',
+      true,
+    );
+    await UpdateFbFirestore(
+      `UserList`,
+      UserEmail,
+      'AgreementCollectionofpersonalinformation',
+      true,
+    );
 
-  const handleBtn = () => {
-    navigation.navigate('RegisterScreen');
+    navigation.navigate('IndicatorScreen', {
+      From: 'LoginAndRegister',
+    });
   };
 
   const openWebView = (type: string) => {
