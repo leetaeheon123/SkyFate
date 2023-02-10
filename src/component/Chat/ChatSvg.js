@@ -8,6 +8,7 @@ import BombIcon from 'Assets/BombIcon.svg';
 import M5Chat from 'Assets/Chat/M5Chat.svg';
 
 import L1Chat from 'Assets/Chat/L1Chat.svg';
+import L1Invite from 'Assets/Chat/L1Invite.svg';
 
 import Congratulate from 'Assets/Chat/Congratulate.svg';
 export const Text_Message = (width) => {
@@ -43,9 +44,17 @@ export const M5ChatSvg = (width) => (
 );
 
 export const L1ChatSvg = <WithLocalSvg asset={L1Chat} />;
+export const L1InviteSvg = <WithLocalSvg asset={L1Invite} />;
 
 export const CongratulateSvg = (width) => {
+  console.log('ddwid', width);
+  console.log('ddhei', width * 0.81);
+
   return (
-    <WithLocalSvg asset={Congratulate} width={width} height={width * 0.81} />
+    <WithLocalSvg
+      asset={Congratulate}
+      width={width}
+      // height={width * 0.81}
+    />
   );
 };

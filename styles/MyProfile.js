@@ -99,18 +99,22 @@ export const MyProfileStyles = StyleSheet.create({
 const num = 7;
 const per = 100 / num;
 export const MyProfileChangeStyles = StyleSheet.create({
-  Headers: {
-    width: '100%',
-    height: '44%',
-    backgroundColor: 'white',
-  },
+  Headers: [
+    styles.Column_OnlyFlex,
+    {
+      width: '100%',
+      height: '44%',
+      backgroundColor: 'white',
+    },
+  ],
   HeadersGrid: [
     styles.Row_OnlyColumnCenter,
     {
       width: '100%',
-      height: height * 0.22,
-      justifyContent: 'space-around',
-      backgroundColor: 'skyblue',
+      // height: height * 0.22,
+      height: height * 0.18,
+      justifyContent: 'space-evenly',
+      // backgroundColor: 'skyblue',
     },
   ],
   Body: {

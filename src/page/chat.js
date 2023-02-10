@@ -44,7 +44,7 @@ import {useKeyboard} from '@react-native-community/hooks';
 import Modal from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
 import {Type2가로} from 'component/LinearGradient/LinearType';
-import {CongratulateSvg} from 'component/Chat/ChatSvg';
+import {CongratulateSvg, L1InviteSvg} from 'component/Chat/ChatSvg';
 
 const ChatScreen = (props) => {
   const {route, navigation} = props;
@@ -136,13 +136,7 @@ const ChatScreen = (props) => {
                 `${UserData.NickName}님께서 둘만의 지도로 이동하자고 요청하셨습니다.`,
               );
             }}>
-            <Image
-              style={{
-                width: 30,
-                height: 30,
-              }}
-              source={require('../Assets/Send.png')}
-            />
+            {L1InviteSvg}
           </TouchableOpacity>
         ) : null}
 

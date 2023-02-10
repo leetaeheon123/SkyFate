@@ -35,8 +35,8 @@ export const Btn_ClickableEnter_Setting = (props) => {
       style={[
         styles.RowCenter,
         {
-          width: 35,
-          height: 35,
+          width: 40,
+          height: 40,
         },
         style,
       ]}
@@ -152,4 +152,3 @@ export const BombIconViewNotabs = (width, num) => (
     </View>
   </View>
 );
-

@@ -164,4 +164,6 @@ export const SecuritySvg = (width, height) => (
   <WithLocalSvg asset={Security} width={width} height={height}></WithLocalSvg>
 );
 
-export const 완료Svg = <WithLocalSvg asset={완료}></WithLocalSvg>;
+export const 완료Svg = (
+  <WithLocalSvg asset={완료} style={{marginTop: 10}}></WithLocalSvg>
+);

@@ -9,7 +9,10 @@ import Enter_Match from 'Assets/Map/Enter_Match.svg';
 import ClickedEnter_Match from 'Assets/Map/ClickedEnter_Match.svg';
 
 import Enter_Chat from 'Assets/Enter_Chat.svg';
+
 import Setting from 'Assets/Setting.svg';
+import Setting2 from 'Assets/Setting2.svg';
+import Setting3 from 'Assets/Setting3.svg';
 
 import Enter_FriendMap from 'Assets/Map/Enter_FriendMap.svg';
 import M3TopBackground from 'Assets/Map/M3/M3TopBackground.svg';
@@ -63,7 +66,7 @@ export const Enter_ChatSvg = (width) => {
 
 export const Enter_SettingSvg = (width) => {
   let height = width;
-  return <WithLocalSvg asset={Setting} width={width} height={height} />;
+  return <WithLocalSvg asset={Setting3} width={width} height={height} />;
 };
 
 export const Enter_FriendMapSvg = (width) => {
