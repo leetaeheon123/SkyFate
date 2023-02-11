@@ -50,6 +50,7 @@ import {
   CongratulateSvg,
   L1InviteSvg,
 } from 'component/Chat/ChatSvg';
+import {UpdateFbFirestore} from '^/Firebase';
 
 const ChatScreen = (props) => {
   const {route, navigation} = props;
@@ -142,7 +143,7 @@ const ChatScreen = (props) => {
                 `${UserData.NickName}님께서 둘만의 지도로 이동하자고 요청하셨습니다.`,
               );
             }}>
-            {L1InviteSvg}
+            {L1InviteSvg(45)}
           </TouchableOpacity>
         ) : null}
 
@@ -627,6 +628,17 @@ const ChatScreen = (props) => {
             },
             channel: channel,
           });
+          UpdateFbFirestore('UserList', UserData.UserEmail, 'otherUserData', {
+            UserEmail: otherUserData[0].userId,
+            ProfileImageUrl: otherUserData[0].plainProfileUrl,
+          });
+          UpdateFbFirestore('UserList', UserData.UserEmail, 'channel', channel);
+          UpdateFbFirestore(
+            'UserList',
+            UserData.UserEmail,
+            'L1CreatedAt',
+            GetEpochTime(),
+          );
         }
       } else {
         console.log('viewDetail message in chat,js:', message);

@@ -68,7 +68,10 @@ import {isEmptyObj} from '../../UsefulFunctions/isEmptyObj';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 
-import {GetEpochTime} from '../../../src/UsefulFunctions/GetTime';
+import {
+  GetEpochTime,
+  MilisToMinutes,
+} from '../../../src/UsefulFunctions/GetTime';
 import {locationReducer} from 'reducer/location';
 import {ReplacedotInEmail} from '^/Replace';
 
@@ -471,6 +474,21 @@ const MapScreen = (props: any) => {
   const UserData = props.route.params.CurrentUser;
   const navigation = useNavigation();
 
+  // if (UserData.L1CreatedAt) {
+  //   console.log('L1CreatedAt');
+  //   let now = GetEpochTime();
+  //   let milis = now - UserData.L1CreatedAt;
+  //   let Minutes = MilisToMinutes(milis);
+
+  //   if (Minutes > 1) {
+  //     navigation.navigate('MeetMapScreen', {
+  //       UserData: UserData,
+  //       otherUserData: UserData.otherUserData,
+  //       channel: UserData.channel,
+  //     });
+  //   }
+  // }
+
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
@@ -588,6 +606,27 @@ const MapScreen = (props: any) => {
     setLocation({latitude, longitude});
   };
 
+  // async function CheckL1() {
+  //   if (UserData.L1CreatedAt) {
+  //     console.log('L1CreatedAt');
+  //     let now = GetEpochTime();
+  //     let milis = now - UserData.L1CreatedAt;
+  //     let Minutes = MilisToMinutes(milis);
+
+  //     if (Minutes < 15) {
+  //       console.log('15Limit Kick!!');
+
+  //       navigation.navigate('MeetMapScreen', {
+  //         UserData: UserData,
+  //         otherUserData: UserData.otherUserData,
+  //         channel: UserData.channel,
+  //       });
+  //     }
+  //   }
+  // }
+
+  // CheckL1();
+
   useEffect(() => {
     async function SaveInDevice() {
       // 로케이션 위치 가져오는 권한설정
@@ -634,6 +673,8 @@ const MapScreen = (props: any) => {
 
     fcmService.register(onRegister, onNotification, onOpenNotification);
     localNotificationService.configure(onOpenNotification);
+
+    // CheckL1();
 
     const onChildAdd = reference
       .ref('/Location')
@@ -683,8 +724,6 @@ const MapScreen = (props: any) => {
 
       unsubscribe.remove();
       // clearInterval(Result)
-      SendBird.removeConnectionHandler('channels');
-      SendBird.removeChannelHandler('channels');
       // unsubscribe.remove();
       // subscription.remove();
     };

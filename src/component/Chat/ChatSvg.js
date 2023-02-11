@@ -14,6 +14,7 @@ import ChatLeave from 'Assets/Chat/ChatLeave.svg';
 import ChatReport from 'Assets/Chat/ChatReport.svg';
 
 import Congratulate from 'Assets/Chat/Congratulate.svg';
+
 export const Text_Message = (width) => {
   //   let height = width * 1.8;
   let height = width / 3;
@@ -54,11 +55,11 @@ export const ChatReportSvg = (
   <WithLocalSvg asset={ChatReport} width={45} height={45} />
 );
 
-export const L1InviteSvg = (
+export const L1InviteSvg = (width) => (
   <WithLocalSvg
     asset={L1Invite}
-    width={45}
-    height={45}
+    width={width}
+    height={width}
     // style={{backgroundColor: 'blue'}}
   />
 );

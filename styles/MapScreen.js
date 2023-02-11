@@ -259,8 +259,8 @@ export const MapScreenStyles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 3,
     right: '3%',
-    bottom: 130,
-    backgroundColor: 'white',
+    bottom: 80,
+    // backgroundColor: 'white',
   },
 
   MatchModal: [styles.W100H100, {backgroundColor: 'black'}],
