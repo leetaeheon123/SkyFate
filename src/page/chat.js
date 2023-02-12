@@ -51,6 +51,7 @@ import {
   L1InviteSvg,
 } from 'component/Chat/ChatSvg';
 import {UpdateFbFirestore} from '^/Firebase';
+import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
 
 const ChatScreen = (props) => {
   const {route, navigation} = props;
@@ -637,7 +638,7 @@ const ChatScreen = (props) => {
             'UserList',
             UserData.UserEmail,
             'L1CreatedAt',
-            GetEpochTime(),
+            channel.createdAt,
           );
         }
       } else {
@@ -679,17 +680,48 @@ const ChatScreen = (props) => {
         onPress={() => {
           ReportSelect(id);
         }}
-        style={{
-          width: '100%',
-          height: 50,
-          marginVertical: 10,
-
-          backgroundColor: SelectedId == id ? 'skyblue' : null,
-        }}>
-        <Text>{message}</Text>
+        style={[
+          styles.Row_OnlyColumnCenter,
+          {
+            width: '100%',
+            height: '9%',
+            marginBottom: 10,
+            backgroundColor: SelectedId == id ? 'skyblue' : null,
+          },
+        ]}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            color: '#E8EBF2',
+            marginLeft: 37,
+          }}>
+          {message}
+        </Text>
       </TouchableOpacity>
     );
   };
+
+  const WhyReport = (
+    <View
+      style={[
+        styles.RowCenter,
+        {
+          width: '100%',
+          height: '10%',
+          marginBottom: 22,
+        },
+      ]}>
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: '600',
+          color: '#E8EBF2',
+        }}>
+        신고 이유는 무엇인가요?
+      </Text>
+    </View>
+  );
 
   const ReportSelect = (id) => {
     setSelectedId(id);
@@ -807,28 +839,53 @@ const ChatScreen = (props) => {
   }, []);
 
   const ReportModal = (
-    <Modal visible={ReportModalVisiable} transparent={false}>
+    <Modal
+      visible={ReportModalVisiable}
+      style={{
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'skyblue',
+        margintop: 0,
+        marginLeft: 0,
+        marginBottom: 0,
+      }}>
       <View
-        style={{
-          width: '90%',
-          height: height * 0.5,
-          backgroundColor: 'red',
-          marginLeft: '5%',
-          marginTop: '30%',
-        }}>
-        <Image
-          style={{
-            width: 30,
-            height: 30,
-          }}
-          source={require('../Assets/security.png')}
-        />
-        <Button title="Close" onPress={onoffReportModal} />
+        style={[
+          styles.Column_OnlyRowCenter,
+          {
+            width: '90%',
+            height: height * 0.55,
+            backgroundColor: '#37375B',
+            marginLeft: '5%',
+            borderRadius: 15,
+          },
+        ]}>
+        {WhiteReportSvg}
+        <TouchableOpacity
+          style={{position: 'absolute', top: 22, right: 13}}
+          onPress={onoffReportModal}>
+          {취소하기Svg}
+        </TouchableOpacity>
+        {WhyReport}
         {ReturnTo('허위 프로필', 1)}
         {ReturnTo('욕설 및 비방', 2)}
         {ReturnTo('불쾌한 대화', 3)}
         {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
-        <Button title="Submit" onPress={ReportSubmit} />
+        <TouchableOpacity
+          onPress={ReportSubmit}
+          style={[
+            styles.RowCenter,
+            {
+              width: '63%',
+              height: '8%',
+              borderRadius: 7,
+              backgroundColor: '#DFE5F1',
+              position: 'absolute',
+              bottom: 30,
+            },
+          ]}>
+          <Text style={[styles.FT16, styles.FW500]}>다음</Text>
+        </TouchableOpacity>
       </View>
     </Modal>
   );

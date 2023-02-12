@@ -65,8 +65,6 @@ export const L1InviteSvg = (width) => (
 );
 
 export const CongratulateSvg = (width) => {
-  console.log('ddwid', width);
-  console.log('ddhei', width * 0.81);
 
   return (
     <WithLocalSvg

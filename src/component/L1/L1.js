@@ -33,7 +33,8 @@ export const L1Bar15Svg = (
   <WithLocalSvg
     asset={L1Bar15}
     style={{
-      borderRadius: 18,
+      marginTop: 5,
+      // backgroundColor: 'red'
     }}></WithLocalSvg>
 );
 

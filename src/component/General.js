@@ -152,3 +152,6 @@ export const BombIconViewNotabs = (width, num) => (
     </View>
   </View>
 );
+
+// space-between 사용시 간격을 맞추기위해서 있는 컴포넌트
+export const EmptyBox = <View style={{width: 30, height: 30}}></View>;

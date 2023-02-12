@@ -412,7 +412,7 @@ const logout = (navigation: any, SendBird: any) => {
   SendBird.disconnect();
   navigation.navigate('ValidInvitationCodeScreen');
 };
-const RemoveIdentityToken = async () => {
+export const RemoveIdentityToken = async () => {
   AsyncStorage.removeItem('UserEmail');
 };
 // foreground에서 푸쉬알림 보기 테스트

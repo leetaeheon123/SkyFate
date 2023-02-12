@@ -33,6 +33,12 @@ styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 14,
   },
+  FWMe: {
+    fontWeight: '500',
+  },
+  FS16: {
+    fontSize: 16,
+  },
   Marker: {
     width: 30,
     height: 30,

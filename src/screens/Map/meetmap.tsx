@@ -43,6 +43,7 @@ import firestore from '@react-native-firebase/firestore';
 import {useKeyboard} from '@react-native-community/hooks';
 import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 import {L1Bar10Svg, L1Bar15Svg, Result} from 'component/L1/L1';
+import {Type2} from 'component/LinearGradient/LinearType';
 
 const MeetMapScreen = ({route}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
@@ -510,7 +511,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
         </LinearGradient>
         <View style={L1styles.Main}>
           <View style={[styles.ColumnCenter, {marginTop: 10}]}>
-            {L1Bar10Svg}
+            {/* {L1Bar10Svg} */}
             <Text
               style={{
                 fontWeight: '400',
@@ -672,10 +673,23 @@ const MeetMapScreen = ({route}: any, props: any) => {
           {
             width: '100%',
             position: 'absolute',
-            top: 20,
+            top: 70,
           },
         ]}>
-        {Result(15)}
+        <LinearGradient
+          style={[
+            styles.RowCenter,
+            {
+              width: 300,
+              borderRadius: 198,
+              height: 30,
+            },
+          ]}
+          colors={Type2}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 0}}>
+          {Result(15)}
+        </LinearGradient>
       </View>
       {ChatButton()}
     </View>
