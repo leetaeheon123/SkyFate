@@ -28,6 +28,7 @@ import {
   SubText_PasswordSvg,
 } from 'component/SignInUp/SignInUp';
 import {LongLineFixSvg} from 'component/General/GeneralSvg';
+import {HPer50} from '~/Per';
 export type Register2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'InvitationCodeSet'
@@ -186,7 +187,7 @@ const ReigsterScreen = ({navigation, route}: Register2ScreenProps) => {
         </View>
         <View
           style={{
-            height: '50%',
+            height: HPer50,
             width: '100%',
           }}>
           <Pressable

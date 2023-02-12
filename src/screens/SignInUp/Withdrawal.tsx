@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import {View, Text, SafeAreaView, TouchableOpacity, Alert} from 'react-native';
 import {WithdrawalInFbAuth} from '^/FirebaseAuth';
 import {DeleteInFbFirestore} from '^/Firebase';
@@ -8,10 +8,12 @@ import {Btn_ClickableBack, EmptyBox} from 'component/General';
 import {
   WithdrawalCatSvg,
   WithdrawalTextSvg,
+  탈퇴하기Svg,
 } from 'component/Withdrawal/Withdrawal';
 import {HPer15, HPer5, HPer8, WPer15} from '~/Per';
 import {FSStyles, FWStyles} from '~/FontWeights';
 
+import Modal from 'react-native-modal';
 const WithdrawalScreen = ({route, navigation}: any) => {
   const {UserEmail, logout} = route.params;
   const Context = useContext(AppContext);
@@ -68,6 +70,81 @@ const WithdrawalScreen = ({route, navigation}: any) => {
       {cancelable: false},
     );
 
+  const [WithdrawalModalVis, setWithdrawalModalVis] = useState(false);
+
+  const WithdrawalModal = (
+    <Modal isVisible={WithdrawalModalVis}>
+      <View
+        style={[
+          styles.Column_OnlyRowCenter,
+          {
+            width: '100%',
+            height: 260,
+            borderRadius: 20,
+            backgroundColor: '#37375B',
+          },
+        ]}>
+        <Text
+          style={[
+            {marginTop: 38},
+            FWStyles.Semibold,
+            FSStyles(20).General,
+            styles.WhiteColor,
+          ]}>
+          회원탈퇴를 정말 진행하시겠습니까?
+        </Text>
+        <Text
+          style={[
+            {marginTop: 7, color: '#B5BAC0'},
+            FWStyles.Light,
+            FSStyles(16).General,
+          ]}>
+          {`탈퇴를 진행하면 사용중인 계정의 모든
+정보가 삭제되고 복구가 불가능합니다.
+또한, 5일동안 재가입이 불가능합니다.`}
+        </Text>
+        <Text
+          style={[
+            {marginTop: 33, color: '#B5BAC0'},
+            FWStyles.Light,
+            FSStyles(14).General,
+          ]}>
+          계정 삭제가 완료되면 앱이 재시작됩니다.
+        </Text>
+
+        <View
+          style={[
+            styles.W100,
+            {
+              height: 57,
+              borderTopWidth: 0.5,
+              borderTopColor: '#FFFFFF0a',
+              position: 'absolute',
+              bottom: 0,
+            },
+            styles.Row_OnlyFlex,
+          ]}>
+          <TouchableOpacity
+            style={[
+              styles.RowCenter,
+              styles.W50,
+              {borderRightWidth: 0.5, borderRightColor: '#FFFFFF0a'},
+            ]}
+            onPress={() => {
+              setWithdrawalModalVis(false);
+            }}>
+            <Text style={[styles.WhiteColor]}>취소</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.RowCenter, styles.W50]}
+            onPress={() => {}}>
+            {탈퇴하기Svg}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <SafeAreaView
       style={[
@@ -77,6 +154,7 @@ const WithdrawalScreen = ({route, navigation}: any) => {
           backgroundColor: '#37375B',
         },
       ]}>
+      {WithdrawalModal}
       <View
         style={[
           styles.W100,
@@ -128,7 +206,8 @@ const WithdrawalScreen = ({route, navigation}: any) => {
           },
         ]}
         onPress={() => {
-          WithdrawalAlert();
+          // WithdrawalAlert();
+          setWithdrawalModalVis(true);
         }}>
         <Text style={[styles.WhiteColor]}>회원탈퇴하기</Text>
       </TouchableOpacity>

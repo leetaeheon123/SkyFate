@@ -627,7 +627,7 @@ const ChatScreen = (props) => {
               UserEmail: otherUserData[0].userId,
               ProfileImageUrl: otherUserData[0].plainProfileUrl,
             },
-            channel: channel,
+            channel: {url: channel.url},
           });
           UpdateFbFirestore('UserList', UserData.UserEmail, 'otherUserData', {
             UserEmail: otherUserData[0].userId,
