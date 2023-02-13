@@ -209,7 +209,7 @@ const WithdrawalScreen = ({route, navigation}: any) => {
           // WithdrawalAlert();
           setWithdrawalModalVis(true);
         }}>
-        <Text style={[styles.WhiteColor]}>회원탈퇴하기</Text>
+        <Text style={[styles.WhiteColor]}>회원탈퇴</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

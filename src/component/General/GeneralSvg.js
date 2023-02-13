@@ -29,6 +29,9 @@ import Pay from 'Assets/Pay.svg';
 import Security from 'Assets/Security.svg';
 
 import 완료 from 'Assets/완료.svg';
+import WaitScreen from 'Assets/WaitScreen.svg';
+import {WPer100, WPer15} from '~/Per';
+
 const Gwidth = Dimensions.get('window').width;
 export const BackSvg = (width) => {
   let height = width * 1.8;
@@ -166,4 +169,11 @@ export const SecuritySvg = (width, height) => (
 
 export const 완료Svg = (
   <WithLocalSvg asset={완료} style={{marginTop: 10}}></WithLocalSvg>
+);
+
+export const WaitScreenSvg = (
+  <WithLocalSvg
+    asset={WaitScreen}
+    width={WPer100}
+    height={WPer100 * 2}></WithLocalSvg>
 );

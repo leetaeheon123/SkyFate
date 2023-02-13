@@ -9,6 +9,7 @@ import {AppContext} from '../UsefulFunctions/Appcontext';
 import {handleNotificationAction} from '../utils';
 import {GetUserData} from '../UsefulFunctions/SaveUserDataInDevice';
 import {ViewAuth} from '^/FirebaseAuth';
+import {WaitScreen} from './Wait';
 // import { SBConnect } from '../UsefulFunctions/SaveUserDataInDevice';
 
 export const SendBirdUpdateUserInfo = (
@@ -82,7 +83,7 @@ const IndicatorScreen = (props: any) => {
   const CheckDaysofuse = () => {
     const date = new Date();
     let day = date.getDay();
-    day = 6;
+    // day = 6;
     if (day == 0 || day == 5 || day == 6) {
       setIsUseDay(true);
     } else {
@@ -231,14 +232,10 @@ const IndicatorScreen = (props: any) => {
                 {...props}
               />
             ) : (
-              <SafeAreaView>
-                <Text>이용시간이 아님</Text>
-              </SafeAreaView>
+              <WaitScreen />
             )
           ) : (
-            <SafeAreaView>
-              <Text>이용날짜가 아님</Text>
-            </SafeAreaView>
+            <WaitScreen />
           )
         ) : (
           <ValidInvitationCodeScreen />
