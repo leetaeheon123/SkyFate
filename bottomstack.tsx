@@ -12,10 +12,11 @@ import MyProfileChange from 'Screens/MyProfile/MyProfileChange';
 
 import {Rending} from 'Screens/Rending';
 import MyProfileChangeScreen from 'Screens/MyProfile/MyProfileChange';
+import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
-  const {route, currentUser} = props;
+  const {route, currentUser, navigation} = props;
 
   useEffect(() => {
     if (route.params && route.params.action) {
@@ -51,6 +52,27 @@ const BottomTabScreen = (props: any) => {
       }
     }
   }, [route.params]);
+
+  const ValidL1 = () => {
+    if (currentUser.L1CreatedAt) {
+      console.log('L1CreatedAt');
+      let now = GetEpochTime();
+      let milis = now - currentUser.L1CreatedAt;
+      let Minutes = MilisToMinutes(milis);
+
+      if (Minutes < 15) {
+        navigation.navigate('MeetMapScreen', {
+          UserData: currentUser,
+          otherUserData: currentUser.otherUserData,
+          channel: currentUser.channel,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    ValidL1();
+  }, []);
 
   return (
     <BottomTab.Navigator

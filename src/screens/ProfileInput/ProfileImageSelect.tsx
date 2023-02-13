@@ -63,9 +63,7 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
   const {width, height} = Dimensions.get('window');
 
   const goToNext = () => {
-    navigation.navigate('IndicatorScreen', {
-      From: 'LoginAndRegister',
-    });
+    navigation.navigate('AgreementScreen', {UserEmail});
   };
 
   const check = () => {

@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {ActivityIndicator, SafeAreaView, Alert} from 'react-native';
+import {ActivityIndicator, SafeAreaView, Alert, Text} from 'react-native';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import BottomTabScreen from '../../bottomstack';
@@ -8,6 +8,8 @@ import ValidInvitationCodeScreen from './ValidInvitationCode';
 import {AppContext} from '../UsefulFunctions/Appcontext';
 import {handleNotificationAction} from '../utils';
 import {GetUserData} from '../UsefulFunctions/SaveUserDataInDevice';
+import {ViewAuth} from '^/FirebaseAuth';
+import {WaitScreen} from './Wait';
 // import { SBConnect } from '../UsefulFunctions/SaveUserDataInDevice';
 
 export const SendBirdUpdateUserInfo = (
@@ -21,10 +23,12 @@ export const SendBirdUpdateUserInfo = (
     async (user: any, err: any) => {
       console.log('In sendbird.updateCurrentUserInfo User:', user);
       if (!err) {
-        console.log('Succes updateCurrentUserInfo SendBird In SBconnect Function In Indicator Screen');
+        console.log(
+          'Succes updateCurrentUserInfo SendBird In SBconnect Function In Indicator Screen',
+        );
       } else {
         Alert.alert(
-          `SbConnect Function In RegisterScreen에서에러가 난 이유 : ${err.message}`,
+          `SbConnect Function In IndicatorScreen에서에러가 난 이유 : ${err.message}`,
         );
       }
     },
@@ -57,6 +61,34 @@ const IndicatorScreen = (props: any) => {
         Alert.alert(`에러가 난 이유 : ${err.message}`);
       }
     });
+  };
+
+  const [IsUseTime, setIsUseTime] = useState(false);
+  const [IsUseDay, setIsUseDay] = useState(false);
+
+  const CheckHoursofuse = () => {
+    const date = new Date();
+    let day = date.getHours();
+    day = 23;
+
+    console.log(day);
+    // day가 오후 10시 ~ 새벽 7시
+    if ((day >= 22 && day <= 24) || (day >= 1 && day <= 7)) {
+      setIsUseTime(true);
+    } else {
+      setIsUseTime(false);
+    }
+  };
+
+  const CheckDaysofuse = () => {
+    const date = new Date();
+    let day = date.getDay();
+    // day = 6;
+    if (day == 0 || day == 5 || day == 6) {
+      setIsUseDay(true);
+    } else {
+      setIsUseDay(false);
+    }
   };
 
   useEffect(() => {
@@ -103,12 +135,21 @@ const IndicatorScreen = (props: any) => {
             return;
           }
 
+          const ValidAgreement = UserData?.hasOwnProperty(
+            'AgreementTermsofUse',
+          );
+          if (!ValidAgreement) {
+            GotoProfileInputScreen('AgreementScreen', UserEmail, Gender);
+            return;
+          }
+
           if (
             ValidNickName &&
             ValidMbti &&
             ValidGender &&
             ValidAge &&
-            ValidProfileImageUrl
+            ValidProfileImageUrl &&
+            ValidAgreement
           ) {
             setCurrentUser(UserData);
             SBConnect(
@@ -117,6 +158,8 @@ const IndicatorScreen = (props: any) => {
               UserData?.NickName,
               UserData?.ProfileImageUrl,
             );
+            CheckDaysofuse();
+            CheckHoursofuse();
           }
         }
         setInitialized(true);
@@ -140,6 +183,11 @@ const IndicatorScreen = (props: any) => {
   useEffect(() => {
     // setCurrentUser(null);
     console.log('params In Indicator Screen: ', props.route.params);
+
+    if (props.route.params == undefined) {
+      return;
+    }
+
     AsyncStorage.getItem('UserEmail')
       .then(async (user) => {
         const UserData = await GetUserData(user);
@@ -158,7 +206,8 @@ const IndicatorScreen = (props: any) => {
             UserData?.ProfileImageUrl,
           );
         }
-
+        CheckDaysofuse();
+        CheckHoursofuse();
         setInitialized(true);
 
         // return handleNotificationAction(
@@ -175,11 +224,19 @@ const IndicatorScreen = (props: any) => {
       {initialized ? (
         // Best Partice?
         currentUser ? (
-          <BottomTabScreen
-            currentUser={currentUser}
-            SendBird={SendBird}
-            {...props}
-          />
+          IsUseDay ? (
+            IsUseTime ? (
+              <BottomTabScreen
+                currentUser={currentUser}
+                SendBird={SendBird}
+                {...props}
+              />
+            ) : (
+              <WaitScreen />
+            )
+          ) : (
+            <WaitScreen />
+          )
         ) : (
           <ValidInvitationCodeScreen />
         )

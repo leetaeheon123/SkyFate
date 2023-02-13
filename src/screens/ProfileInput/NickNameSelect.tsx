@@ -20,6 +20,7 @@ import {NickNameInput} from 'component/Profile/ProfileSvg';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import {LongLineFixSvg} from 'component/General/GeneralSvg';
 import styles from '~/ManToManBoard';
+import {RemoveIdentityToken} from 'Screens/Map/map';
 const NickNameSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
   const {UserEmail} = route.params;
@@ -76,6 +77,11 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
             {NickNameTextInput()}
           </Pressable>
         </View>
+        <Button
+          title="RemoveToken"
+          onPress={() => {
+            RemoveIdentityToken();
+          }}></Button>
         {NickName.length >= 4 ? (
           <Btn_ClickableNext
             onPress={() => {

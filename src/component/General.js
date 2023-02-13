@@ -40,8 +40,8 @@ export const Btn_ClickableEnter_Setting = (props) => {
       style={[
         styles.RowCenter,
         {
-          width: 35,
-          height: 35,
+          width: 40,
+          height: 40,
         },
         style,
       ]}
@@ -158,6 +158,10 @@ export const BombIconViewNotabs = (width, num) => (
   </View>
 );
 
+
+// space-between 사용시 간격을 맞추기위해서 있는 컴포넌트
+export const EmptyBox = <View style={{width: 30, height: 30}}></View>;
+
 export const Btn_Complete = (props) => {
   const {width, onPress, style} = props;
   return (
@@ -217,3 +221,4 @@ export const Btn_ToggleOn = (props) => {
     </TouchableOpacity>
   );
 };
+

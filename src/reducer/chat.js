@@ -44,7 +44,7 @@ export const chatReducer = (state, action) => {
     case 'receive-message':
     case 'update-message': {
       if (action.type === 'receive-message') {
-        action.payload.channel.markAsRead();
+        action.payload.channel?.markAsRead();
       }
 
       const {message, clearInput} = action.payload || {};

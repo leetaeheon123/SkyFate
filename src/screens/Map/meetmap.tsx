@@ -18,7 +18,8 @@ import MapView, {Marker, Geojson} from 'react-native-maps';
 import {MapScreenStyles} from '~/MapScreen';
 import {GetMyCoords, reference} from './map';
 import {chatReducer} from '../../reducer/chat';
-import {AppContext} from '../../UsefulFunctions/Appcontext';
+import {AppContext} from '^/Appcontext';
+
 import Modal from 'react-native-modal';
 import {ChatStyle} from '~/Chat';
 
@@ -31,8 +32,8 @@ import {locationReducer} from 'reducer/location';
 import {ILocation} from './map';
 import {UpdateMyLocationWatch} from './map';
 import {ReplacedotInEmail} from '^/Replace';
-import {parseLineString, tMapNavigate} from '../../utils';
-import {L1ChatSvg} from 'component/Chat/ChatSvg';
+import {parseLineString, tMapNavigate, useInterval} from '../../utils';
+import {L1ChatSvg, L1InviteSvg} from 'component/Chat/ChatSvg';
 import {L1styles} from '~/L1';
 import LinearGradient from 'react-native-linear-gradient';
 import {LinearProfileImagView} from 'component/General';
@@ -40,23 +41,54 @@ import {SecuritySvg} from 'component/General/GeneralSvg';
 import firestore from '@react-native-firebase/firestore';
 
 import {useKeyboard} from '@react-native-community/hooks';
+import {GetEpochTime, MilisToMinutes} from '^/GetTime';
+import {L1Bar10Svg, L1Bar15Svg, Result} from 'component/L1/L1';
+import {Type2} from 'component/LinearGradient/LinearType';
 
 const MeetMapScreen = ({route}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
 
-  // console.log("UserData:", UserDatra)
-  // console.log("otherUserData:", otherUserData)
+  //console.log('UserData:', UserData);
+  console.log('Channel In L1:', channel);
+
+  // //console.log("otherUserData:", otherUserData)
 
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
   const uid = channel.url;
 
+  const [query, setQuery] = useState(null);
+
+  let Groupchannel: any;
+
+  //console.log('Uid for SendBird url:', uid);
   const [Mylocation, locationdispatch] = useReducer(locationReducer, {
     latlng: {},
   });
 
-  // console.log('Mylocation:', Mylocation);
+  const [CreateAt, setCreatedAt] = useState(
+    MilisToMinutes(GetEpochTime() - channel.createdAt),
+  );
+
+  const intervalRef = useInterval(() => {
+    const minutes = getTimePassed();
+    setCreatedAt(minutes);
+    console.log('[MeetMap.js] L1 time passed:', minutes);
+    if (minutes >= 15) {
+      clearInterval(intervalRef.current);
+    }
+  }, 10000);
+
+  useEffect(() => {
+    const minutes = getTimePassed();
+    setCreatedAt(minutes);
+  }, []);
+
+  const getTimePassed = () => {
+    const minutes = MilisToMinutes(GetEpochTime() - channel.createdAt);
+    return minutes;
+  };
 
   const [OtherLocation, setOtherLocation] = useState<ILocation | undefined>(
     undefined,
@@ -72,7 +104,6 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
   const OtherDBUrl = `/1v1meet/${uid}/${ReplaceOtherUserEmail}`;
 
-  const [query, setQuery] = useState(null);
   const [state, dispatch] = useReducer(chatReducer, {
     SendBird,
     channel,
@@ -88,9 +119,60 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
   // const [location, setLocation] = useState<ILocation | undefined>(undefined);
 
+  const userEventHandler = new SendBird.UserEventHandler();
+
+  userEventHandler.onTotalUnreadMessageCountUpdated = (
+    totalCount: any,
+    countByCustomTypes: any,
+  ) => {
+    //console.log(
+    //   'totalCount And countByCustomTypes:',
+    //   totalCount,
+    //   countByCustomTypes,
+    // );
+  };
+
+  const channelHandler = new SendBird.ChannelHandler();
+  channelHandler.onMessageReceived = (targetChannel: any, message: any) => {
+    if (targetChannel.url === Groupchannel.url) {
+      dispatch({type: 'receive-message', payload: {message, Groupchannel}});
+    }
+  };
+
+  channelHandler.onMessageUpdated = (targetChannel, message) => {
+    if (targetChannel.url === Groupchannel.url) {
+      dispatch({type: 'update-message', payload: {message}});
+    }
+  };
+  const connectionHandler = new SendBird.ConnectionHandler();
+  connectionHandler.onReconnectStarted = () => {
+    dispatch({
+      type: 'error',
+      payload: {
+        error: 'Connecting..',
+      },
+    });
+  };
+  connectionHandler.onReconnectSucceeded = () => {
+    dispatch({
+      type: 'error',
+      payload: {
+        error: '',
+      },
+    });
+    refresh();
+  };
+  connectionHandler.onReconnectFailed = () => {
+    dispatch({
+      type: 'error',
+      payload: {
+        error: 'Connection failed. Please check the network status.',
+      },
+    });
+  };
   useEffect(() => {
     StartLocation();
-    console.log('============>');
+    //console.log('============>');
     GetMyCoords(
       updateMatchLocation,
       '[GetMyCoords] Cannot get my location.',
@@ -100,49 +182,61 @@ const MeetMapScreen = ({route}: any, props: any) => {
     // UpdateMyLocationWatch(setLocation, locationdispatch, UpdateMyLocation);
 
     UpdateMyLocationWatch(locationdispatch, UpdateMyLocation);
-
+    SendBird.addConnectionHandler('chat', connectionHandler);
     SendBird.addChannelHandler('chat', channelHandler);
-    // SendBird.addUserEventHandler('users', userEventHandler);
+    SendBird.addUserEventHandler('users', userEventHandler);
 
-    if (!SendBird.currentUser) {
-      SendBird.connect(UserData.userId, (_, err) => {
-        if (!err) {
-          console.log('refresj In UseEffect In MeetMap');
+    setTimeout(() => {
+      if (!SendBird.currentUser) {
+        SendBird.connect(UserData.UserEmail, (_, err) => {
+          if (!err) {
+            //console.log('refresj In UseEffect In MeetMap');
+            refresh();
+          } else {
+            dispatch({
+              type: 'error',
+              payload: {
+                error: 'Connection failed. Please check the network status.',
+              },
+            });
+          }
+        });
+      } else {
+        refresh();
+      }
+    }, 2000);
+
+    SendBird.GroupChannel.getChannel(
+      uid,
+      function (groupChannel: any, error: Error) {
+        if (!error) {
+          Groupchannel = groupChannel;
           refresh();
-        } else {
-          dispatch({
-            type: 'error',
-            payload: {
-              error: 'Connection failed. Please check the network status.',
-            },
-          });
         }
-      });
-    } else {
-      refresh();
-    }
+      },
+    );
 
     const MyUpdate = reference.ref(MyDBUrl).on('child_changed', (snapshot) => {
-      console.log('MyUpdate child_changed snapshot:', snapshot.val());
+      // //console.log('MyUpdate child_changed snapshot:', snapshot.val());
       setMyLocation(snapshot.val());
     });
 
     const OtherUpdate = reference
       .ref(OtherDBUrl)
       .on('child_changed', (snapshot) => {
-        console.log('OtherUpdate child_changed snapshot:', snapshot.val());
+        // //console.log('OtherUpdate child_changed snapshot:', snapshot.val());
         setOtherLocation(snapshot.val());
       });
 
     const MyStart = reference.ref(MyDBUrl).on('child_added', (snapshot) => {
-      console.log('MyStart child_added snapshot:', snapshot.val());
+      //console.log('MyStart child_added snapshot:', snapshot.val());
       setMyLocation(snapshot.val());
     });
 
     const OtherStart = reference
       .ref(OtherDBUrl)
       .on('child_added', (snapshot) => {
-        console.log('OtherStart child_added snapshot:', snapshot.val());
+        //console.log('OtherStart child_added snapshot:', snapshot.val());
         setOtherLocation(snapshot.val());
       });
 
@@ -158,7 +252,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
     };
   }, []);
   useEffect(() => {
-    console.log('useEffect MyLo, OtherLo');
+    //console.log('useEffect MyLo, OtherLo');
     drawRoute();
   }, [MyLocationState, OtherLocation]);
 
@@ -180,7 +274,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
         },
       })
       .then(() => {
-        console.log('[updatedMatchLocation] Location update succeed.');
+        //console.log('[updatedMatchLocation] Location update succeed.');
       })
       .catch((err) => {
         console.error('[updatedMatchLocation] Location update failed:', err);
@@ -189,7 +283,16 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
   const refresh = () => {
     // channel.markAsRead();
-    setQuery(channel.createPreviousMessageListQuery());
+    // setQuery(Groupchannel.createPreviousMessageListQuery());
+    SendBird.GroupChannel.getChannel(
+      uid,
+      function (groupChannel: any, error: Error) {
+        if (!error) {
+          setQuery(groupChannel.createPreviousMessageListQuery());
+        }
+      },
+    );
+
     dispatch({type: 'refresh'});
   };
   const next = () => {
@@ -199,14 +302,14 @@ const MeetMapScreen = ({route}: any, props: any) => {
       query.reverse = true;
       query.load((fetchedMessages, err) => {
         if (!err) {
-          console.log('Success to get the messages.');
-          // console.log('fetchedMessages In Chat page:', fetchedMessages);
+          //console.log('Success to get the messages.');
+          // //console.log('fetchedMessages In Chat page:', fetchedMessages);
           dispatch({
             type: 'fetch-messages',
             payload: {messages: fetchedMessages},
           });
         } else {
-          console.log('Failed to get the messages.');
+          //console.log('Failed to get the messages.');
           dispatch({
             type: 'error',
             payload: {error: 'Failed to get the messages.'},
@@ -222,9 +325,49 @@ const MeetMapScreen = ({route}: any, props: any) => {
     }
   }, [query]);
 
+  const SDUM = (Inputmessage: string) => {
+    if (Inputmessage.length > 0) {
+      const params = new SendBird.UserMessageParams();
+      params.message = Inputmessage;
+
+      SendBird.GroupChannel.getChannel(
+        uid,
+        function (groupChannel: any, error: Error) {
+          if (!error) {
+            const pendingMessage = groupChannel.sendUserMessage(
+              params,
+              (message: string, err: Error) => {
+                if (!err) {
+                  dispatch({type: 'send-message', payload: {message}});
+                } else {
+                  console.log('In SendUserMessaging Error:', err);
+                  setTimeout(() => {
+                    dispatch({
+                      type: 'error',
+                      payload: {error: 'Failed to send a message.'},
+                    });
+                    dispatch({
+                      type: 'delete-message',
+                      payload: {reqId: pendingMessage.reqId},
+                    });
+                  }, 500);
+                }
+              },
+            );
+
+            dispatch({
+              type: 'send-message',
+              payload: {message: pendingMessage, clearInput: true},
+            });
+          }
+        },
+      );
+    }
+  };
+
   // useEffect(() => {
-  //   console.log('L1 Screen UseEffect [UserData]');
-  //   console.log(Mylocation.latlng);
+  //   //console.log('L1 Screen UseEffect [UserData]');
+  //   //console.log(Mylocation.latlng);
   // }, [props.route]);
 
   const StartLocation = () => {
@@ -256,26 +399,6 @@ const MeetMapScreen = ({route}: any, props: any) => {
     });
   };
 
-  // const userEventHandler = new SendBird.UserEventHandler();
-
-  // userEventHandler.onTotalUnreadMessageCountUpdated = (
-  //   totalCount: any,
-  //   countByCustomTypes: any,
-  // ) => {
-  //   console.log(
-  //     'totalCount And countByCustomTypes:',
-  //     totalCount,
-  //     countByCustomTypes,
-  //   );
-  // };
-
-  const channelHandler = new SendBird.ChannelHandler();
-  channelHandler.onMessageReceived = (targetChannel: any, message: any) => {
-    if (targetChannel.url === channel.url) {
-      dispatch({type: 'receive-message', payload: {message, channel}});
-    }
-  };
-
   const ChatButton = () => {
     return (
       <View>
@@ -284,7 +407,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
           onPress={() => {
             setChatModalVis(!ChatModalVis);
           }}>
-          {L1ChatSvg}
+          {L1InviteSvg(80)}
           {/* <MaterialIcons name="message" size={27} color="#6713D2" /> */}
         </TouchableOpacity>
       </View>
@@ -295,8 +418,8 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
   const drawRoute = async () => {
     if (OtherLocation == undefined || Mylocation == undefined) {
-      console.log('OtherLocation:', OtherLocation);
-      console.log('MyLocation:', MyLocationState);
+      //console.log('OtherLocation:', OtherLocation);
+      //console.log('MyLocation:', MyLocationState);
       return;
     }
     const coordinates = {
@@ -305,10 +428,10 @@ const MeetMapScreen = ({route}: any, props: any) => {
       endX: OtherLocation?.longitude.toString(),
       endY: OtherLocation?.latitude.toString(),
     };
-    console.log(coordinates);
+    //console.log(coordinates);
     const data = await tMapNavigate(coordinates);
     data.features = parseLineString(data.features);
-    console.log('features:', data.features);
+    //console.log('features:', data.features);
     setGeoJson(data);
   };
 
@@ -317,7 +440,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
   );
 
   // const keyboardDidShow = (e: any) => {
-  //   console.log(e.endCoordinates.height);
+  //   //console.log(e.endCoordinates.height);
   //   // keyboardHeight: e.endCoordinates.height,
   //   // normalHeight: Dimensions.get('window').height,
   //   // shortHeight: Dimensions.get('window').height - e.endCoordinates.height,
@@ -329,8 +452,8 @@ const MeetMapScreen = ({route}: any, props: any) => {
   // );
 
   const keyboard = useKeyboard();
-  console.log('keyboard isKeyboardShow: ', keyboard.keyboardShown);
-  console.log('keyboard keyboardHeight: ', keyboard.keyboardHeight);
+  //console.log('keyboard isKeyboardShow: ', keyboard.keyboardShown);
+  //console.log('keyboard keyboardHeight: ', keyboard.keyboardHeight);
 
   const [statusBarHeight, setStatusBarHeight] = useState(0);
   const {StatusBarManager} = NativeModules;
@@ -351,7 +474,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
     }
   };
 
-  console.log('statusBarHeight:', statusBarHeight);
+  //console.log('statusBarHeight:', statusBarHeight);
 
   const ChatModal = (
     <Modal
@@ -387,7 +510,8 @@ const MeetMapScreen = ({route}: any, props: any) => {
           </View> */}
         </LinearGradient>
         <View style={L1styles.Main}>
-          <View style={[styles.RowCenter, {marginTop: 10}]}>
+          <View style={[styles.ColumnCenter, {marginTop: 10}]}>
+            {/* {L1Bar10Svg} */}
             <Text
               style={{
                 fontWeight: '400',
@@ -470,8 +594,9 @@ const MeetMapScreen = ({route}: any, props: any) => {
               activeOpacity={0.85}
               style={ChatStyle.sendButton}
               onPress={() => {
-                console.log(state.input);
-                sendUserMessage(state.input, channel, dispatch, SendBird);
+                //console.log(state.input);
+                SDUM(state.input);
+                // sendUserMessage(state.input, Groupchannel, dispatch, SendBird);
               }}>
               <Icon
                 name="send"
@@ -542,19 +667,30 @@ const MeetMapScreen = ({route}: any, props: any) => {
         </MapView>
       )}
 
-      {/* <Button
-        title="산으로이동"
-        onPress={() => {
-          UpdateSpicLocation();
-          // drawRoute();
-        }}
-      />
-      <Button
-        title="집으로이동"
-        onPress={() => {
-          UpdateSpicLocation2();
-        }}
-      /> */}
+      <View
+        style={[
+          styles.RowCenter,
+          {
+            width: '100%',
+            position: 'absolute',
+            top: 70,
+          },
+        ]}>
+        <LinearGradient
+          style={[
+            styles.RowCenter,
+            {
+              width: 300,
+              borderRadius: 198,
+              height: 30,
+            },
+          ]}
+          colors={Type2}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 0}}>
+          {Result(15)}
+        </LinearGradient>
+      </View>
       {ChatButton()}
     </View>
   );
@@ -566,7 +702,7 @@ export default MeetMapScreen;
 //   Geolocation.getCurrentPosition(
 //     async position => {
 //       const {latitude, longitude} = position.coords;
-//       console.log(latitude, longitude);
+//       //console.log(latitude, longitude);
 
 //       const StartLatitude = latitude;
 //       const StartLongitude = longitude;
@@ -579,7 +715,7 @@ export default MeetMapScreen;
 //       );
 
 //       const DistanceValue = Distance.distanceInfo.distance;
-//       console.log(DistanceValue);
+//       //console.log(DistanceValue);
 
 //       if (DistanceValue <= 100) {
 //         GoToChat();
@@ -590,7 +726,7 @@ export default MeetMapScreen;
 //     },
 //     error => {
 //       // See error code charts below.
-//       console.log(error.code, error.message);
+//       //console.log(error.code, error.message);
 //     },
 //     {enableHighAccuracy: true, timeout: 300000, maximumAge: 10000},
 //   );
@@ -601,11 +737,11 @@ export default MeetMapScreen;
 //   127.026001&key=${GOOGLE_MAPS_APIKEY}`)
 //   .then(response => response.json())
 //   .then(result => {
-//     // console.log(result.results[0])
-//     console.log(result.results[0].formatted_address)
+//     // //console.log(result.results[0])
+//     //console.log(result.results[0].formatted_address)
 // })
 
-//   .catch(error => console.log('error', error));
+//   .catch(error => //console.log('error', error));
 // }
 
 // const GOOGLE_MAPS_APIKEY = "AIzaSyB4tGCRQ3tKg3jvJ2mnG4OUxltghPldMcs"

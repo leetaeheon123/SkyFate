@@ -27,7 +27,12 @@ import {LoginAndRegisterTextInputStyle} from '../../../styles/LoginAndRegiser';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import {LongLineFixSvg, LongLineSvg} from 'component/General/GeneralSvg';
 import {withDecay} from 'react-native-reanimated';
-import {MainText_LoginSvg, SubText_EmailSvg, SubText_PasswordSvg} from 'component/SignInUp/SignInUp';
+import {
+  MainText_LoginSvg,
+  SubText_EmailSvg,
+  SubText_PasswordSvg,
+} from 'component/SignInUp/SignInUp';
+import {HPer15, HPer50} from '~/Per';
 export type Register2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'InvitationCode'
@@ -127,7 +132,8 @@ const LoginScreen = (props: any) => {
         </View>
         <View
           style={{
-            height: '50%',
+            height: HPer50,
+            // height: '50%',
             width: '100%',
           }}>
           <Pressable

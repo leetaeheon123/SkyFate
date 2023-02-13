@@ -84,9 +84,9 @@ const MyProfileScreen = ({route, navigation}: any) => {
       </LinearGradient>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('MyProfileChangeScreen', {
-            UserData,
-          });
+          // navigation.navigate('MyProfileChangeScreen', {
+          //   UserData,
+          // });
         }}
         style={{
           width: 27,
@@ -108,7 +108,7 @@ const MyProfileScreen = ({route, navigation}: any) => {
       style={MyProfileStyles.linearGradient}></LinearGradient>
   );
 
-  const DescScetion = (Description: string) => {
+  const DescScetion = (Description: string = '') => {
     return (
       <View style={MyProfileStyles.DescBox}>
         {DescCricle}
@@ -142,7 +142,9 @@ const MyProfileScreen = ({route, navigation}: any) => {
                 width: `${100 / FiliterImageArray.length}%`,
                 backgroundColor: '#00000014',
                 borderRadius: 4,
-              }}></View>
+                marginLeft: 4.5,
+              }}
+            />
           }
           activeDot={
             <View
@@ -151,7 +153,9 @@ const MyProfileScreen = ({route, navigation}: any) => {
                 width: `${100 / FiliterImageArray.length}%`,
                 backgroundColor: 'white',
                 borderRadius: 4,
-              }}></View>
+                marginLeft: 4.5,
+              }}
+            />
           }>
           {FiliterImageArray.map((data, index) => {
             return (
@@ -166,7 +170,7 @@ const MyProfileScreen = ({route, navigation}: any) => {
         </Swiper>
 
         <Btn_ClickableBack
-          width={14}
+          width={17}
           onPress={() => navigation.goBack()}
           style={{position: 'absolute', left: 12, top: 12}}
         />
@@ -174,6 +178,7 @@ const MyProfileScreen = ({route, navigation}: any) => {
         <Btn_ClickableEnter_Setting
           width={30}
           onPress={() => navigation.navigate('SettingScreen')}
+
           style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
@@ -185,7 +190,7 @@ const MyProfileScreen = ({route, navigation}: any) => {
         <View style={MyProfileStyles.Desc}>
           {DescScetion(UserData.Mbti)}
           {DescScetion(UserData.Age)}
-          {DescScetion('딘내이상형')}
+          {DescScetion(UserData.IntroduceText)}
         </View>
       </View>
       {/* <View style={MyProfileStyles.footer}></View> */}

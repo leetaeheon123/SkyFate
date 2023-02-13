@@ -245,16 +245,16 @@ const ValidInvitationCodeScreen = () => {
             }}>
             {InvitationCode()}
 
-            <Button
+            {/* <Button
               title="닉네임 입력창 이동"
               onPress={() => {
                 navigation.navigate('NickNameSelectScreen', {
                   UserEmail: '8269apk@naver.com',
                 });
               }}
-            />
+            /> */}
 
-            <Button
+            {/* <Button
               title="나이 입력창 이동"
               onPress={() => {
                 navigation.navigate('AgeSelectScreen', {
@@ -262,11 +262,11 @@ const ValidInvitationCodeScreen = () => {
                   Gender: 2,
                 });
               }}
-            />
+            /> */}
           </Pressable>
         </View>
 
-        <Button
+        {/* <Button
           title="이미지 업로드로 이동"
           onPress={() => {
             navigation.navigate('ProfileImageSelectScreen', {
@@ -293,7 +293,7 @@ const ValidInvitationCodeScreen = () => {
               PkNumber: 0,
             });
           }}
-        />
+        /> */}
 
         <Btn_ClickableNext
           onPress={() => {
@@ -310,7 +310,14 @@ const ValidInvitationCodeScreen = () => {
             },
           ]}>
           <TouchableOpacity
-            style={[styles.RowCenter, {backgroundColor: 'red', height: 30}]}
+            style={[
+              styles.RowCenter,
+              {
+                // backgroundColor: 'red',
+
+                height: 30,
+              },
+            ]}
             onPress={() => {
               navigation.navigate('LoginScreen');
             }}>

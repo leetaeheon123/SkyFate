@@ -44,7 +44,14 @@ import {useKeyboard} from '@react-native-community/hooks';
 import Modal from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
 import {Type2가로} from 'component/LinearGradient/LinearType';
-import {CongratulateSvg} from 'component/Chat/ChatSvg';
+import {
+  ChatLeaveSvg,
+  ChatReportSvg,
+  CongratulateSvg,
+  L1InviteSvg,
+} from 'component/Chat/ChatSvg';
+import {UpdateFbFirestore} from '^/Firebase';
+import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
 
 const ChatScreen = (props) => {
   const {route, navigation} = props;
@@ -122,9 +129,10 @@ const ChatScreen = (props) => {
       <View style={style.headerRightContainer}>
         <TouchableOpacity
           activeOpacity={0.85}
-          style={[style.headerRightButton, {width: 25, height: 25}]}
-          onPress={leave}>
-          <Icon name="directions-walk" color="black" size={28} />
+          style={[style.headerRightButton]}
+          onPress={onoffReportModal}>
+          {ChatReportSvg}
+          {/* <Icon name="directions-walk" color="black" size={28} /> */}
         </TouchableOpacity>
         {CanSendL1Invite == 0 ? (
           <TouchableOpacity
@@ -136,27 +144,15 @@ const ChatScreen = (props) => {
                 `${UserData.NickName}님께서 둘만의 지도로 이동하자고 요청하셨습니다.`,
               );
             }}>
-            <Image
-              style={{
-                width: 30,
-                height: 30,
-              }}
-              source={require('../Assets/Send.png')}
-            />
+            {L1InviteSvg(45)}
           </TouchableOpacity>
         ) : null}
 
         <TouchableOpacity
           activeOpacity={0.85}
           style={style.headerRightButton}
-          onPress={onoffReportModal}>
-          <Image
-            style={{
-              width: 30,
-              height: 30,
-            }}
-            source={require('../Assets/security.png')}
-          />
+          onPress={leave}>
+          {ChatLeaveSvg}
         </TouchableOpacity>
       </View>
     );
@@ -289,7 +285,7 @@ const ChatScreen = (props) => {
     ]);
   };
 
-  const [InviteModalVis, setInviteModalVis] = useState(true);
+  const [InviteModalVis, setInviteModalVis] = useState(false);
   const [CongratulateModalVis, setCongratulateModalVis] = useState(false);
 
   const InviteModal = (
@@ -631,8 +627,19 @@ const ChatScreen = (props) => {
               UserEmail: otherUserData[0].userId,
               ProfileImageUrl: otherUserData[0].plainProfileUrl,
             },
-            channel: channel,
+            channel: {url: channel.url},
           });
+          UpdateFbFirestore('UserList', UserData.UserEmail, 'otherUserData', {
+            UserEmail: otherUserData[0].userId,
+            ProfileImageUrl: otherUserData[0].plainProfileUrl,
+          });
+          UpdateFbFirestore('UserList', UserData.UserEmail, 'channel', channel);
+          UpdateFbFirestore(
+            'UserList',
+            UserData.UserEmail,
+            'L1CreatedAt',
+            channel.createdAt,
+          );
         }
       } else {
         console.log('viewDetail message in chat,js:', message);
@@ -673,17 +680,48 @@ const ChatScreen = (props) => {
         onPress={() => {
           ReportSelect(id);
         }}
-        style={{
-          width: '100%',
-          height: 50,
-          marginVertical: 10,
-
-          backgroundColor: SelectedId == id ? 'skyblue' : null,
-        }}>
-        <Text>{message}</Text>
+        style={[
+          styles.Row_OnlyColumnCenter,
+          {
+            width: '100%',
+            height: '9%',
+            marginBottom: 10,
+            backgroundColor: SelectedId == id ? 'skyblue' : null,
+          },
+        ]}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            color: '#E8EBF2',
+            marginLeft: 37,
+          }}>
+          {message}
+        </Text>
       </TouchableOpacity>
     );
   };
+
+  const WhyReport = (
+    <View
+      style={[
+        styles.RowCenter,
+        {
+          width: '100%',
+          height: '10%',
+          marginBottom: 22,
+        },
+      ]}>
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: '600',
+          color: '#E8EBF2',
+        }}>
+        신고 이유는 무엇인가요?
+      </Text>
+    </View>
+  );
 
   const ReportSelect = (id) => {
     setSelectedId(id);
@@ -801,28 +839,53 @@ const ChatScreen = (props) => {
   }, []);
 
   const ReportModal = (
-    <Modal visible={ReportModalVisiable} transparent={false}>
+    <Modal
+      visible={ReportModalVisiable}
+      style={{
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'skyblue',
+        margintop: 0,
+        marginLeft: 0,
+        marginBottom: 0,
+      }}>
       <View
-        style={{
-          width: '90%',
-          height: height * 0.5,
-          backgroundColor: 'red',
-          marginLeft: '5%',
-          marginTop: '30%',
-        }}>
-        <Image
-          style={{
-            width: 30,
-            height: 30,
-          }}
-          source={require('../Assets/security.png')}
-        />
-        <Button title="Close" onPress={onoffReportModal} />
+        style={[
+          styles.Column_OnlyRowCenter,
+          {
+            width: '90%',
+            height: height * 0.55,
+            backgroundColor: '#37375B',
+            marginLeft: '5%',
+            borderRadius: 15,
+          },
+        ]}>
+        {WhiteReportSvg}
+        <TouchableOpacity
+          style={{position: 'absolute', top: 22, right: 13}}
+          onPress={onoffReportModal}>
+          {취소하기Svg}
+        </TouchableOpacity>
+        {WhyReport}
         {ReturnTo('허위 프로필', 1)}
         {ReturnTo('욕설 및 비방', 2)}
         {ReturnTo('불쾌한 대화', 3)}
         {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
-        <Button title="Submit" onPress={ReportSubmit} />
+        <TouchableOpacity
+          onPress={ReportSubmit}
+          style={[
+            styles.RowCenter,
+            {
+              width: '63%',
+              height: '8%',
+              borderRadius: 7,
+              backgroundColor: '#DFE5F1',
+              position: 'absolute',
+              bottom: 30,
+            },
+          ]}>
+          <Text style={[styles.FT16, styles.FW500]}>다음</Text>
+        </TouchableOpacity>
       </View>
     </Modal>
   );
@@ -964,7 +1027,8 @@ const style = {
     // backgroundColor: 'red',
   },
   headerRightButton: {
-    marginRight: 10,
+    // marginRight: 10,
+    // backgroundColor: 'red',
   },
   errorContainer: {
     backgroundColor: '#333',

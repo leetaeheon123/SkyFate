@@ -22,7 +22,9 @@ import {
 } from 'component/Profile/ProfileSvg';
 
 import {ChangeMyProfileImage} from '^/ImageUpload';
-
+import {완료Svg} from 'component/General/GeneralSvg';
+import {UpdateFbFirestore} from '^/Firebase';
+import {Btn_ClickableBack} from 'component/General';
 const ProfileImageUploadComponentGen = (
   index: number,
   setState: Function,
@@ -63,6 +65,8 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
   const [Url5, setUrl5] = useState(UserData.ProfileImageUrl5);
   const [Url6, setUrl6] = useState(UserData.ProfileImageUrl6);
 
+  const [IntroduceText, setIntroduceText] = useState(UserData.IntroduceText);
+
   const CheckImageNull = (
     index: number,
     setState: Function,
@@ -96,6 +100,33 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
       </View>
     );
   };
+
+  const ChangeUserData = () => {
+    UpdateFbFirestore(
+      'UserList',
+      '8269apk@naver.com',
+      'IntroduceText',
+      IntroduceText,
+    );
+  };
+
+  const Btn_완료 = (
+    <TouchableOpacity
+      style={[
+        styles.RowCenter,
+        {
+          width: 50,
+          height: 50,
+        },
+      ]}
+      onPress={() => {
+        // console.log('Hello');
+        ChangeUserData();
+        navigation.goBack();
+      }}>
+      {완료Svg}
+    </TouchableOpacity>
+  );
   return (
     <SafeAreaView style={{flex: 1}}>
       <LinearGradient
@@ -106,7 +137,27 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
           width: '100%',
         }}>
         <View style={MyProfileChangeStyles.Headers}>
-          <View style={MyProfileChangeStyles.HeadersGrid}>
+          <View
+            style={
+              (styles.W90ML5,
+              {
+                height: 50,
+                width: '90%',
+                marginLeft: '5%',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              })
+            }>
+            <Btn_ClickableBack
+              width={14}
+              onPress={() => navigation.navigate('MyProfileScreen', {UserData})}
+            />
+            {Btn_완료}
+          </View>
+
+          <View style={[MyProfileChangeStyles.HeadersGrid, {marginTop: 10}]}>
             {CheckImageNull(1, setUrl, Url)}
             {CheckImageNull(2, setUrl2, Url2)}
             {CheckImageNull(3, setUrl3, Url3)}
@@ -165,7 +216,11 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
                 </Text>
                 <TextInput
                   style={MyProfileChangeStyles.TI}
-                  maxLength={5}></TextInput>
+                  maxLength={5}
+                  value={IntroduceText}
+                  onChangeText={(value) => {
+                    setIntroduceText(value);
+                  }}></TextInput>
                 {DescBottomlineCustom({width: '88%', height: 1})}
               </View>
             </View>
