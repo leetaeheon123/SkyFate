@@ -23,6 +23,7 @@ import CheckBox from 'Assets/CheckBox.svg';
 import CheckBox2 from 'Assets/CheckBox2.svg';
 import HR from 'Assets/HR.svg';
 import RightArrow from 'Assets/RightArrow.svg';
+import RightArrowWhite from 'Assets/RightArrowWhite.svg';
 
 import Pay from 'Assets/Pay.svg';
 
@@ -167,9 +168,8 @@ export const SecuritySvg = (width, height) => (
   <WithLocalSvg asset={Security} width={width} height={height}></WithLocalSvg>
 );
 
-export const 완료Svg = (
-  <WithLocalSvg asset={완료} style={{marginTop: 10}}></WithLocalSvg>
-);
+
+export const 완료Svg = <WithLocalSvg asset={완료}></WithLocalSvg>;
 
 export const WaitScreenSvg = (
   <WithLocalSvg
@@ -177,3 +177,13 @@ export const WaitScreenSvg = (
     width={WPer100}
     height={WPer100 * 2}></WithLocalSvg>
 );
+
+
+export const RightArrowWhiteSvg = (width) => {
+  return (
+    <WithLocalSvg
+      asset={RightArrowWhite}
+      width={width}
+      height={width}></WithLocalSvg>
+  );
+};

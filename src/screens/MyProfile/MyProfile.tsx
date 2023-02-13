@@ -176,8 +176,9 @@ const MyProfileScreen = ({route, navigation}: any) => {
         />
 
         <Btn_ClickableEnter_Setting
-          width={40}
-          onPress={() => navigation.goBack()}
+          width={30}
+          onPress={() => navigation.navigate('SettingScreen')}
+
           style={{position: 'absolute', right: 12, top: 12}}
         />
       </View>
