@@ -33,6 +33,8 @@ import ProfileImageSelectScreen from 'Screens/ProfileInput/ProfileImageSelect';
 import AgreementScreen from 'Screens/AgreementScreen';
 import WebViewScreen from 'Screens/WebViewScreen';
 
+import SettingScreen from 'Screens/Setting/Setting';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const Routes = (props: any) => {
@@ -152,6 +154,11 @@ const Routes = (props: any) => {
       <Stack.Screen
         name="ProfileImageSelectScreen"
         component={ProfileImageSelectScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="SettingScreen"
+        component={SettingScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

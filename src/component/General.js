@@ -8,6 +8,11 @@ import {BombIconSvg} from './Chat/ChatSvg';
 import BombIcon from 'Assets/BombIcon.svg';
 import {WithLocalSvg} from 'react-native-svg';
 import {Enter_SettingSvg} from './Map/MapSvg';
+import {
+  HeaderCompleteSvg,
+  ToggleOffSvg,
+  ToggleOnSvg,
+} from 'component/Setting/SettingSvg';
 export const Btn_ClickableBack = (props) => {
   const {width, onPress, style} = props;
   return (
@@ -153,3 +158,62 @@ export const BombIconViewNotabs = (width, num) => (
   </View>
 );
 
+export const Btn_Complete = (props) => {
+  const {width, onPress, style} = props;
+  return (
+    <TouchableOpacity
+      style={[
+        styles.RowCenter,
+        {
+          width: width,
+          height: width,
+        },
+        style,
+      ]}
+      onPress={() => {
+        onPress();
+      }}>
+      {HeaderCompleteSvg(width)}
+    </TouchableOpacity>
+  );
+};
+
+export const Btn_ToggleOff = (props) => {
+  const {onPress, style} = props;
+  return (
+    <TouchableOpacity
+      style={[
+        styles.RowCenter,
+        {
+          width: 51,
+          height: 35,
+        },
+        style,
+      ]}
+      onPress={() => {
+        onPress();
+      }}>
+      {ToggleOffSvg()}
+    </TouchableOpacity>
+  );
+};
+
+export const Btn_ToggleOn = (props) => {
+  const {onPress, style} = props;
+  return (
+    <TouchableOpacity
+      style={[
+        styles.RowCenter,
+        {
+          width: 51,
+          height: 35,
+        },
+        style,
+      ]}
+      onPress={() => {
+        onPress();
+      }}>
+      {ToggleOnSvg()}
+    </TouchableOpacity>
+  );
+};
