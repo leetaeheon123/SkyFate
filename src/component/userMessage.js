@@ -7,13 +7,14 @@ import {withAppContext} from '../contextReducer';
 import {Type3Rectangle} from './LinearGradient/LinearGradientCircle';
 import LinearGradient from 'react-native-linear-gradient';
 import {Type3} from './LinearGradient/LinearType';
-
+import styles from '~/ManToManBoard';
 const UserMessage = (props) => {
   const {
     SendBird,
     channel,
     message,
     onPress = () => {},
+    onPressImage = () => {},
     onLongPress = () => {},
     navigation,
   } = props;
@@ -126,9 +127,12 @@ const UserMessage = (props) => {
       }}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('ProfileImageViewScreen', {
-            UserEmail: message.sender.userId,
-          });
+          // navigation.navigate('ProfileImageViewScreen', {
+          //   UserEmail: message.sender.userId,
+          // });
+          if (!isMyMessage) {
+            onPressImage();
+          }
         }}
         style={style.profileImageContainer}>
         {!message.hasSameSenderAbove && (

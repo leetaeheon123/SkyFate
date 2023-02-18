@@ -52,6 +52,8 @@ import {
 } from 'component/Chat/ChatSvg';
 import {UpdateFbFirestore} from '^/Firebase';
 import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
+import {GetUserData} from '^/SaveUserDataInDevice';
+import Swiper from 'react-native-swiper';
 
 export const WhyReport = (
   <View
@@ -103,6 +105,23 @@ const ChatScreen = (props) => {
   const otherUserData = channel.members.filter(
     (data) => data.userId != UserData.UserEmail,
   );
+
+  const [OtherUserAllData, setUserData] = useState();
+  const [FiliterImageArray, setImageArray] = useState();
+
+  const Statelize = async () => {
+    const UserData = await GetUserData(otherUserData[0].userId);
+    setUserData(UserData);
+    const ImageArray = [
+      UserData.ProfileImageUrl,
+      UserData.ProfileImageUrl2,
+      UserData.ProfileImageUrl3,
+      UserData.ProfileImageUrl4,
+      UserData.ProfileImageUrl5,
+      UserData.ProfileImageUrl6,
+    ];
+    setImageArray(ImageArray.filter((data) => data != '' && data != undefined));
+  };
 
   // console.log(otherUserData[0].userId);
   // console.log(otherUserData[0].plainProfileUrl);
@@ -168,7 +187,7 @@ const ChatScreen = (props) => {
     );
 
     navigation.setOptions({
-      title: createChannelName(channel),
+      title: otherUserData[0].nickname,
       headerRight: () => right,
       headerStyle: {
         backgroundColor: '#7373F6',
@@ -297,6 +316,7 @@ const ChatScreen = (props) => {
 
   const [InviteModalVis, setInviteModalVis] = useState(false);
   const [CongratulateModalVis, setCongratulateModalVis] = useState(false);
+  const [ProfileViewModalVis, setProfileViewModalVis] = useState(false);
 
   const InviteModal = (
     <Modal isVisible={InviteModalVis}>
@@ -375,6 +395,104 @@ const ChatScreen = (props) => {
       </TouchableOpacity>
     </Modal>
   );
+
+  const MainImage = () => {
+    return (
+      <View
+        style={{
+          width: '95%',
+          marginLeft: '2.5%',
+          height: '95%',
+          borderRadius: 31,
+          marginTop: 10,
+        }}>
+        <Swiper
+          paginationStyle={{
+            width: '70%',
+            height: 2.5,
+            position: 'absolute',
+            top: 24,
+            left: '15%',
+            display: 'flex',
+            flexDirection: 'row',
+            zIndex: 10,
+          }}
+          dot={
+            <View
+              style={{
+                height: '100%',
+                width: `${100 / FiliterImageArray.length}%`,
+                backgroundColor: '#00000014',
+                borderRadius: 4,
+              }}></View>
+          }
+          activeDot={
+            <View
+              style={{
+                height: '100%',
+                width: `${100 / FiliterImageArray.length}%`,
+                backgroundColor: 'white',
+                borderRadius: 4,
+              }}></View>
+          }>
+          {FiliterImageArray.map((data, index) => {
+            return (
+              <Image
+                key={index}
+                resizeMode="contain"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 31,
+                }}
+                source={{
+                  uri: data,
+                }}
+              />
+            );
+          })}
+        </Swiper>
+      </View>
+    );
+  };
+
+  const ProfileViewModal = (
+    <Modal
+      animationIn="slideInUp"
+      isVisible={ProfileViewModalVis}
+      coverScreen={false}
+      onBackdropPress={() => setProfileViewModalVis(false)}>
+      <View
+        style={[
+          styles.W95ML5,
+          {height: '65%', backgroundColor: '#313A5B', borderRadius: 26},
+        ]}>
+        {FiliterImageArray != undefined ? MainImage() : null}
+        {OtherUserAllData && (
+          <View
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '20%',
+              bottom: 0,
+            }}>
+            <View
+              style={{
+                marginLeft: 24,
+                width: '50%',
+              }}>
+              <Text style={{color: 'white', fontWeight: '700', fontSize: 17}}>
+                {OtherUserAllData.NickName} {OtherUserAllData.Age}
+              </Text>
+              <Text style={{color: 'white', marginTop: 5, fontWeight: '400'}}>
+                {OtherUserAllData.Mbti}
+              </Text>
+            </View>
+          </View>
+        )}
+      </View>
+    </Modal>
+  );
   const refresh = () => {
     // channel.markAsRead();
     setQuery(channel.createPreviousMessageListQuery());
@@ -407,8 +525,11 @@ const ChatScreen = (props) => {
   useEffect(() => {
     const minutes = getTimePassed();
 
-    // setCreatedAt(moment(channel.createdAt).fromNow());
-    setChatMinutes(minutes);
+    async function Init() {
+      await Statelize();
+      setChatMinutes(minutes);
+    }
+    Init();
   }, []);
 
   const getTimePassed = () => {
@@ -896,6 +1017,7 @@ const ChatScreen = (props) => {
         {ReportModal}
         {InviteModal}
         {CongratulateModal}
+        {ProfileViewModal}
 
         <Modal visible={ReportModalVisiable} transparent={false}>
           <View
@@ -939,6 +1061,7 @@ const ChatScreen = (props) => {
               message={item}
               SendBird={SendBird}
               onPress={(message) => viewDetail(message)}
+              onPressImage={() => setProfileViewModalVis(!ProfileViewModalVis)}
               onLongPress={(message) => showContextMenu(message)}
               navigation={navigation}
             />

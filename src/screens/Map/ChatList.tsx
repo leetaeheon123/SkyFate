@@ -241,6 +241,7 @@ const ChatListScreen = ({navigation, route}: any) => {
               viewtime={(channel) =>
                 console.log('channelcreateAt:', channel.createdAt)
               }
+              UserData={UserData}
             />
           )}
           keyExtractor={(item) => item.url}

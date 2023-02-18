@@ -15,7 +15,7 @@ import {useInterval} from '../utils';
 const LAST_MESSAGE_ELLIPSIS = 45;
 
 const Channel = (props) => {
-  const {sendbird, channel, onPress, viewtime} = props;
+  const {sendbird, channel, onPress, viewtime, UserData} = props;
 
   const {width} = Dimensions.get('window');
   const [name, setName] = useState('');
@@ -49,6 +49,12 @@ const Channel = (props) => {
     return minutes;
   };
 
+  const otherUserData = channel.members.filter(
+    (data) => data.userId != UserData.UserEmail,
+  );
+
+  console.log('otherUserData In Channel.js :', otherUserData);
+
   const channelHandler = new sendbird.ChannelHandler();
   channelHandler.onChannelChanged = (updatedChannel) => {
     if (updatedChannel.url === channel.url) {
@@ -74,7 +80,7 @@ const Channel = (props) => {
   };
 
   const updateChannelName = (channel) => {
-    setName(createChannelName(channel));
+    setName(otherUserData[0].nickname);
   };
   const updateLastMessage = (channel) => {
     if (channel.lastMessage) {
@@ -128,7 +134,7 @@ const Channel = (props) => {
       <Image
         source={
           channel.coverUrl
-            ? {uri: channel.coverUrl}
+            ? {uri: otherUserData[0].plainProfileUrl}
             : require('../Assets/logo-icon-purple.png')
         }
         style={style.profileImage}

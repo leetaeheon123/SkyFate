@@ -4,7 +4,7 @@ export const LoginAndReigsterStyles = StyleSheet.create({
   Body: {
     width: '100%',
     height: '100%',
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
   },
   CheckBox: {
     width: '100%',

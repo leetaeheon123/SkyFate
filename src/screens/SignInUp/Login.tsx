@@ -33,6 +33,7 @@ import {
   SubText_PasswordSvg,
 } from 'component/SignInUp/SignInUp';
 import {HPer15, HPer50} from '~/Per';
+import {Btn_ClickableBack} from 'component/General';
 export type Register2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'InvitationCode'
@@ -127,6 +128,13 @@ const LoginScreen = (props: any) => {
   return (
     <SafeAreaView style={LoginAndReigsterStyles.Body}>
       <View style={LoginAndReigsterStyles.Main}>
+        <Btn_ClickableBack
+          width={12}
+          style={{position: 'absolute', top: 12, left: '-2.5%'}}
+          onPress={() => {
+            navigation.goBack();
+          }}
+        />
         <View style={LoginAndReigsterStyles.Description}>
           {MainText_LoginSvg()}
         </View>
