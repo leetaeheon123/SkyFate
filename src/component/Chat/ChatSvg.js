@@ -12,6 +12,7 @@ import L1Invite from 'Assets/Chat/L1Invite.svg';
 
 import ChatLeave from 'Assets/Chat/ChatLeave.svg';
 import ChatReport from 'Assets/Chat/ChatReport.svg';
+import ChatReportNotShadow from 'Assets/Chat/ChatReportNotShadow.svg';
 
 import Congratulate from 'Assets/Chat/Congratulate.svg';
 
@@ -55,6 +56,10 @@ export const ChatReportSvg = (
   <WithLocalSvg asset={ChatReport} width={45} height={45} />
 );
 
+export const ChatReportNotShadowSvg = (
+  <WithLocalSvg asset={ChatReportNotShadow} width={32} height={32} />
+);
+
 export const L1InviteSvg = (width) => (
   <WithLocalSvg
     asset={L1Invite}
@@ -65,7 +70,6 @@ export const L1InviteSvg = (width) => (
 );
 
 export const CongratulateSvg = (width) => {
-
   return (
     <WithLocalSvg
       asset={Congratulate}

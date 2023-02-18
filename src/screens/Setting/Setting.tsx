@@ -1,24 +1,32 @@
-import React, {useState} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, {useContext, useState} from 'react';
+import {SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
 import {SettingStyles} from '~/SettingStyles';
 import {
   Btn_ClickableBack,
   Btn_Complete,
   Btn_ToggleOff,
 } from 'component/General';
-import {HeaderText_Setting, ToggleOffSvg} from 'component/Setting/SettingSvg';
-import {white} from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
+import {HeaderText_Setting} from 'component/Setting/SettingSvg';
 import {RightArrowWhiteSvg} from 'component/General/GeneralSvg';
+import styles from '~/ManToManBoard';
+import {logout} from 'Screens/Map/map';
+import {AppContext} from '^/Appcontext';
 
 function Setting({navigation, route}: any) {
   const [notification, setNotification] = useState(false);
+  const {UserData} = route.params;
+  const Context = useContext(AppContext);
+  const SendBird = Context.sendbird;
 
+  const line = (
+    <View
+      style={{
+        backgroundColor: '#DFE5F114',
+        height: 1,
+        width: '100%',
+        marginTop: 15,
+      }}></View>
+  );
   return (
     <SafeAreaView style={SettingStyles.Body}>
       <View
@@ -36,61 +44,115 @@ function Setting({navigation, route}: any) {
           <Btn_Complete
             width={30}
             onPress={() => {
-              console.log('Complete');
+              navigation.goBack();
             }}
           />
         </View>
       </View>
-      <View style={{borderBottomWidth: 1, borderColor: '#DFE5F1'}}>
-        <Text>푸시 알림</Text>
-        <View>
-          <Text style={[styles.textWhite]}>전체 알림 끄기</Text>
-          <Text>위치, 채팅알림 전체를 끕니다.</Text>
+
+      <View>
+        <Text style={SettingStyles.MainText}>푸시 알림</Text>
+        <View
+          style={[
+            {
+              // backgroundColor: 'red',
+              width: '100%',
+              justifyContent: 'space-between',
+              marginTop: 18,
+              height: 46,
+            },
+            styles.Row_OnlyColumnCenter,
+          ]}>
+          <View style={{marginLeft: 23}}>
+            <Text style={SettingStyles.H2Text}>전체 알림 끄기</Text>
+            <Text style={{marginTop: 2, color: '#B5BAC0'}}>
+              위치, 채팅알림 전체를 끕니다.
+            </Text>
+          </View>
+          <Btn_ToggleOff
+            style={{marginRight: 17}}
+            onPress={() => {
+              console.log('toggle');
+            }}
+          />
         </View>
-        <Btn_ToggleOff
+        {line}
+      </View>
+
+      <View>
+        <Text style={SettingStyles.MainText}>개인정보 처리방침</Text>
+        <View
+          style={{
+            width: '100%',
+            // height: 72,
+          }}>
+          <TouchableOpacity
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              height: 24,
+              marginTop: 18,
+            }}>
+            <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
+              개인정보 처리방침
+            </Text>
+            {RightArrowWhiteSvg}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              // height: 24,
+              marginTop: 24,
+              width: '100%',
+            }}>
+            <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
+              이용 약관
+            </Text>
+            {RightArrowWhiteSvg}
+          </TouchableOpacity>
+        </View>
+      </View>
+      {line}
+
+      <View>
+        <Text style={SettingStyles.MainText}>회원 관리</Text>
+        <TouchableOpacity
           onPress={() => {
-            console.log('toggle');
+            navigation.navigate('WithdrawalScreen', {
+              logout: logout,
+              UserEmail: UserData.UserEmail,
+            });
           }}
-        />
-      </View>
-      <View style={{borderBottomWidth: 1, borderColor: '#DFE5F1'}}>
-        <Text>개인정보 처리방침</Text>
-        <View
           style={{
+            display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
+            marginTop: 18,
+            width: '100%',
           }}>
-          <Text style={[styles.textWhite]}>개인정보 처리방침</Text>
-          <TouchableOpacity>{RightArrowWhiteSvg()}</TouchableOpacity>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
-          <Text style={[styles.textWhite]}>이용 약관</Text>
-          <TouchableOpacity>{RightArrowWhiteSvg()}</TouchableOpacity>
-        </View>
+          <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
+            회원 탈퇴
+          </Text>
+          {RightArrowWhiteSvg}
+        </TouchableOpacity>
       </View>
-      <View style={{borderBottomWidth: 1, borderColor: '#DFE5F1'}}>
-        <Text>회원 탈퇴</Text>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
-          <Text style={[styles.textWhite]}>회원 탈퇴</Text>
-          <TouchableOpacity>{RightArrowWhiteSvg()}</TouchableOpacity>
-        </View>
-      </View>
+
+      <TouchableOpacity
+        onPress={() => {
+          logout(navigation, SendBird);
+        }}
+        style={[
+          styles.W100H100,
+          {marginTop: 150, height: 24},
+          styles.RowCenter,
+        ]}>
+        <Text style={SettingStyles.H2Text}>로그아웃</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  textWhite: {
-    color: 'white',
-  },
-});
 
 export default Setting;

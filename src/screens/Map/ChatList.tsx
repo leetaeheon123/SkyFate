@@ -13,7 +13,7 @@ import Channel from 'component/channel';
 import {AppContext} from '^/Appcontext';
 import {channelsReducer} from 'reducer/channels';
 import {GetEpochTime} from '^/GetTime';
-import {BombIconView, Btn_ClickableBack} from 'component/General';
+import {BombIconView, Btn_ClickableBack, EmptyBox} from 'component/General';
 import {
   BombIconSvg,
   ExplainLimit_BombSvg,
@@ -207,7 +207,7 @@ const ChatListScreen = ({navigation, route}: any) => {
       ]}>
       <Btn_ClickableBack width={14} onPress={() => navigation.goBack()} />
       {Text_Message(66)}
-      <Btn_ClickableBack width={14} onPress={() => navigation.goBack()} />
+      {EmptyBox}
     </View>
   );
 

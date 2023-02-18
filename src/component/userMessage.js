@@ -15,6 +15,7 @@ const UserMessage = (props) => {
     message,
     onPress = () => {},
     onLongPress = () => {},
+    navigation,
   } = props;
   // console.log('props In UserMessage:', props);
   const isMyMessage = message.sender.userId === SendBird.currentUser.userId;
@@ -92,7 +93,12 @@ const UserMessage = (props) => {
   );
 
   const InviteChat = (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.75}
+      onPress={() => {
+        onPress(message);
+      }}
+      onLongPress={() => onLongPress(message)}
       style={{
         ...style.content,
         alignItems: isMyMessage ? 'flex-end' : 'flex-start',
@@ -109,29 +115,30 @@ const UserMessage = (props) => {
           {message.message}
         </Text>
       </LinearGradient>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.75}
-      onPress={() => {
-        // console.log(message.customType);
-        onPress(message);
-      }}
-      onLongPress={() => onLongPress(message)}
+    <View
       style={{
         ...style.container,
         flexDirection: isMyMessage ? 'row-reverse' : 'row',
       }}>
-      <View style={style.profileImageContainer}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('ProfileImageViewScreen', {
+            UserEmail: message.sender.userId,
+          });
+        }}
+        style={style.profileImageContainer}>
         {!message.hasSameSenderAbove && (
           <Image
             source={{uri: message.sender.profileUrl}}
             style={style.profileImage}
           />
         )}
-      </View>
+      </TouchableOpacity>
+
       {message.customType == 'L1_Invite' || message.customType == 'L1_Res'
         ? InviteChat
         : Chat}
@@ -156,7 +163,7 @@ const UserMessage = (props) => {
           {moment(message.createdAt).fromNow()}
         </Text>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 

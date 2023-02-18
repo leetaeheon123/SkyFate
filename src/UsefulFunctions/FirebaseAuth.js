@@ -16,12 +16,9 @@ export function signOut() {
   return auth().signOut();
 }
 
-export async function WithdrawalInFbAuth(Email, Password) {
+export async function WithdrawalInFbAuth() {
   if (auth().currentUser) {
-    console.log(auth().currentUser);
-
     try {
-      await signIn({email: Email, password: Password});
       await auth().currentUser.delete();
       console.log('User deleted successfully');
     } catch (error) {

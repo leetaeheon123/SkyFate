@@ -35,6 +35,8 @@ import WebViewScreen from 'Screens/WebViewScreen';
 
 import SettingScreen from 'Screens/Setting/Setting';
 
+import ProfileImageViewScreen from './src/page/ProfileImageView';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const Routes = (props: any) => {
@@ -114,6 +116,12 @@ const Routes = (props: any) => {
         }}
       />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+      <Stack.Screen
+        name="ProfileImageViewScreen"
+        component={ProfileImageViewScreen}
+        options={{headerShown: false}}
+      />
+
       <Stack.Screen
         name="ManToManBoardViewScreen"
         component={ManToManBoardViewScreen}

@@ -10,13 +10,14 @@ import {withAppContext} from '../contextReducer';
 const DEFAULT_IMAGE_WIDTH = 240;
 const DEFAULT_IMAGE_HEIGHT = 160;
 
-const FileMessage = props => {
+const FileMessage = (props) => {
   const {
     SendBird,
     channel,
     message,
     onPress = () => {},
     onLongPress = () => {},
+    navigation,
   } = props;
   const isMyMessage = message.sender.userId === SendBird.currentUser.userId;
   const [readReceipt, setReadReceipt] = useState(0);
@@ -40,7 +41,7 @@ const FileMessage = props => {
   }, []);
 
   const channelHandler = new SendBird.ChannelHandler();
-  channelHandler.onReadReceiptUpdated = targetChannel => {
+  channelHandler.onReadReceiptUpdated = (targetChannel) => {
     if (targetChannel.url === channel.url) {
       const newReadReceipt = channel.getUnreadMemberCount(message);
       if (newReadReceipt !== readReceipt) {
@@ -50,22 +51,25 @@ const FileMessage = props => {
   };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.75}
-      onPress={() => onPress(message)}
-      onLongPress={() => onLongPress(message)}
+    <View
       style={{
         ...style.container,
         flexDirection: isMyMessage ? 'row-reverse' : 'row',
       }}>
-      <View style={style.profileImageContainer}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('ProfileImageViewScreen', {
+            UserEmail: message.sender.userId,
+          });
+        }}
+        style={style.profileImageContainer}>
         {!message.hasSameSenderAbove && (
           <Image
             source={{uri: message.sender.profileUrl}}
             style={style.profileImage}
           />
         )}
-      </View>
+      </TouchableOpacity>
       <View
         style={{
           ...style.content,
@@ -122,7 +126,7 @@ const FileMessage = props => {
           {moment(message.createdAt).fromNow()}
         </Text>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 

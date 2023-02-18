@@ -8,7 +8,6 @@ import ValidInvitationCodeScreen from './ValidInvitationCode';
 import {AppContext} from '../UsefulFunctions/Appcontext';
 import {handleNotificationAction} from '../utils';
 import {GetUserData} from '../UsefulFunctions/SaveUserDataInDevice';
-import {ViewAuth} from '^/FirebaseAuth';
 import {WaitScreen} from './Wait';
 // import { SBConnect } from '../UsefulFunctions/SaveUserDataInDevice';
 
@@ -83,7 +82,7 @@ const IndicatorScreen = (props: any) => {
   const CheckDaysofuse = () => {
     const date = new Date();
     let day = date.getDay();
-    // day = 6;
+    day = 6;
     if (day == 0 || day == 5 || day == 6) {
       setIsUseDay(true);
     } else {

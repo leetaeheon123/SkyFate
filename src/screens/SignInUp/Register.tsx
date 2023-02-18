@@ -81,6 +81,12 @@ const SignUpFirestore = async (
     TensionGrade: 0,
     MannerGrade: 0,
     SocialGrade: 0,
+    ProfileImageUrl: '',
+    ProfileImageUrl2: '',
+    ProfileImageUrl3: '',
+    ProfileImageUrl4: '',
+    ProfileImageUrl5: '',
+    ProfileImageUrl6: '',
   });
 };
 

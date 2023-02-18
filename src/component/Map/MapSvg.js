@@ -24,6 +24,12 @@ import ClickedPay_Half from 'Assets/Map/M3/ClickedPay_Half.svg';
 
 import Pay_Half from 'Assets/Map/M3/Pay_Half.svg';
 import {Text} from 'react-native';
+
+import On from 'Assets/On.svg';
+import Off from 'Assets/Off.svg';
+import OnToggle from 'Assets/Map/OnToggle.svg';
+import OffToggle from 'Assets/Map/OffToggle.svg';
+
 export const GeneralMatchSvg = (width) => {
   let height = width;
   return <WithLocalSvg asset={GeneralMatch} width={width} height={height} />;
@@ -99,3 +105,9 @@ export const Pay_HalfSvg = (width) => {
 export const ClickedPay_HalfSvg = (width) => {
   return <WithLocalSvg asset={ClickedPay_Half} width={width} height={65} />;
 };
+
+export const OnSvg = <WithLocalSvg asset={On} />;
+export const OffSvg = <WithLocalSvg asset={Off} />;
+
+export const OnToggleSvg = <WithLocalSvg asset={OnToggle} />;
+export const OffToggleSvg = <WithLocalSvg asset={OffToggle} />;

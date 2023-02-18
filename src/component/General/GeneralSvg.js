@@ -9,6 +9,8 @@ import Minus from 'Assets/Minus.svg';
 
 import People from 'Assets/People.svg';
 import PeopleAdd from 'Assets/PeopleAdd.svg';
+import ColorPeople from 'Assets/ColorPeople.svg';
+
 import Memo from 'Assets/Memo.svg';
 import Complete from 'Assets/Complete.svg';
 
@@ -164,10 +166,13 @@ export const PaySvg = (width) => (
   <WithLocalSvg asset={Pay} width={width} height={width}></WithLocalSvg>
 );
 
+export const ColorPeopleSvg = (width) => (
+  <WithLocalSvg asset={ColorPeople} width={width} height={width}></WithLocalSvg>
+);
+
 export const SecuritySvg = (width, height) => (
   <WithLocalSvg asset={Security} width={width} height={height}></WithLocalSvg>
 );
-
 
 export const 완료Svg = <WithLocalSvg asset={완료}></WithLocalSvg>;
 
@@ -178,12 +183,8 @@ export const WaitScreenSvg = (
     height={WPer100 * 2}></WithLocalSvg>
 );
 
-
-export const RightArrowWhiteSvg = (width) => {
-  return (
-    <WithLocalSvg
-      asset={RightArrowWhite}
-      width={width}
-      height={width}></WithLocalSvg>
-  );
-};
+export const RightArrowWhiteSvg = (
+  <WithLocalSvg
+    asset={RightArrowWhite}
+    style={{marginRight: 17}}></WithLocalSvg>
+);

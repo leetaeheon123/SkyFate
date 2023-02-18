@@ -1,5 +1,12 @@
 import React, {useContext, useState} from 'react';
-import {View, Text, SafeAreaView, TouchableOpacity, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from 'react-native';
 import {WithdrawalInFbAuth} from '^/FirebaseAuth';
 import {DeleteInFbFirestore} from '^/Firebase';
 import {AppContext} from '^/Appcontext';
@@ -12,7 +19,7 @@ import {
 } from 'component/Withdrawal/Withdrawal';
 import {HPer15, HPer5, HPer8, WPer15} from '~/Per';
 import {FSStyles, FWStyles} from '~/FontWeights';
-
+import {signIn} from '^/FirebaseAuth';
 import Modal from 'react-native-modal';
 const WithdrawalScreen = ({route, navigation}: any) => {
   const {UserEmail, logout} = route.params;
@@ -20,7 +27,7 @@ const WithdrawalScreen = ({route, navigation}: any) => {
   const SendBird = Context.sendbird;
 
   const DeleteUser = async () => {
-    await WithdrawalInFbAuth(UserEmail, '123456');
+    await WithdrawalInFbAuth();
     await DeleteInFbFirestore('UserList', UserEmail);
 
     await WithdrawalInSendBird(UserEmail);
@@ -28,6 +35,28 @@ const WithdrawalScreen = ({route, navigation}: any) => {
     // Async에서 삭제하는 로직
     // firestore UserList에서 삭제하는 로직
     // SendBird에서 유저 삭제하는 로직
+  };
+
+  const PassCheck = async () => {
+    try {
+      await signIn({email: UserEmail, password: Password});
+      PassCheckToWithdrawal();
+    } catch (error: any) {
+      if (error.code === 'auth/wrong-password') {
+        Alert.alert('이메일은 존재하나 비밀번호가 다릅니다.');
+      }
+      if (error.code === 'auth/user-not-found') {
+        Alert.alert('해당 이메일이 없습니다. 다시한번 이메일을 확인해주세요');
+      }
+    }
+  };
+
+  const PassCheckToWithdrawal = () => {
+    setPasswordModalVis(false);
+
+    setTimeout(() => {
+      setWithdrawalModalVis(true);
+    }, 500);
   };
 
   const WithdrawalInSendBird = async (UserEmail: string) => {
@@ -48,30 +77,9 @@ const WithdrawalScreen = ({route, navigation}: any) => {
       .catch((error) => console.log('error', error));
   };
 
-  const WithdrawalAlert = () =>
-    Alert.alert(
-      '정말 회원탈퇴 하시겠습니까?', // 첫번째 text: 타이틀 제목
-      '.', // 두번째 text: 그 밑에 작은 제목
-      [
-        // 버튼 배열
-        {
-          text: '아니요', // 버튼 제목
-          onPress: () => console.log('아니라는데'), //onPress 이벤트시 콘솔창에 로그를 찍는다
-          style: 'cancel',
-        },
-        {
-          text: '네',
-          onPress: () => {
-            DeleteUser();
-          },
-        }, //버튼 제목
-        // 이벤트 발생시 로그를 찍는다
-      ],
-      {cancelable: false},
-    );
-
   const [WithdrawalModalVis, setWithdrawalModalVis] = useState(false);
-
+  const [PasswordModalVis, setPasswordModalVis] = useState(false);
+  const [Password, setPassword] = useState('');
   const WithdrawalModal = (
     <Modal isVisible={WithdrawalModalVis}>
       <View
@@ -137,7 +145,83 @@ const WithdrawalScreen = ({route, navigation}: any) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.RowCenter, styles.W50]}
-            onPress={() => {}}>
+            onPress={() => {
+              DeleteUser();
+            }}>
+            {탈퇴하기Svg}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const PasswordModal = (
+    <Modal isVisible={PasswordModalVis}>
+      <View
+        style={[
+          styles.Column_OnlyRowCenter,
+          {
+            width: '100%',
+            height: 260,
+            borderRadius: 20,
+            backgroundColor: '#37375B',
+          },
+        ]}>
+        <Text
+          style={[
+            {marginTop: 38},
+            FWStyles.Semibold,
+            FSStyles(20).General,
+            styles.WhiteColor,
+          ]}>
+          회원탈퇴를 정말 진행하시겠습니까?
+        </Text>
+
+        <TextInput
+          style={{
+            width: '90%',
+            height: 46,
+            // backgroundColor: 'red',
+            marginTop: 30,
+            borderRadius: 9,
+            borderColor: '#DFE5F1',
+            borderWidth: 1,
+            color: 'white',
+            padding: 10,
+          }}
+          value={Password}
+          onChangeText={(value) => {
+            setPassword(value);
+          }}></TextInput>
+
+        <View
+          style={[
+            styles.W100,
+            {
+              height: 57,
+              borderTopWidth: 0.5,
+              borderTopColor: '#FFFFFF0a',
+              position: 'absolute',
+              bottom: 0,
+            },
+            styles.Row_OnlyFlex,
+          ]}>
+          <TouchableOpacity
+            style={[
+              styles.RowCenter,
+              styles.W50,
+              {borderRightWidth: 0.5, borderRightColor: '#FFFFFF0a'},
+            ]}
+            onPress={() => {
+              setPasswordModalVis(false);
+            }}>
+            <Text style={[styles.WhiteColor]}>취소</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.RowCenter, styles.W50]}
+            onPress={() => {
+              PassCheck();
+            }}>
             {탈퇴하기Svg}
           </TouchableOpacity>
         </View>
@@ -154,6 +238,8 @@ const WithdrawalScreen = ({route, navigation}: any) => {
           backgroundColor: '#37375B',
         },
       ]}>
+      {PasswordModal}
+
       {WithdrawalModal}
       <View
         style={[
@@ -162,12 +248,13 @@ const WithdrawalScreen = ({route, navigation}: any) => {
           {
             height: '5%',
             justifyContent: 'space-between',
+            marginTop: 12,
           },
         ]}>
         <Btn_ClickableBack
           width={17}
           onPress={() => navigation.goBack()}
-          // style={{position: 'absolute', left: 12, top: 12}}
+          style={{marginLeft: 12}}
         />
         {WithdrawalTextSvg}
         {EmptyBox}
@@ -207,7 +294,7 @@ const WithdrawalScreen = ({route, navigation}: any) => {
         ]}
         onPress={() => {
           // WithdrawalAlert();
-          setWithdrawalModalVis(true);
+          setPasswordModalVis(true);
         }}>
         <Text style={[styles.WhiteColor]}>회원탈퇴</Text>
       </TouchableOpacity>

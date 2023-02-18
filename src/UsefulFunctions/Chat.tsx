@@ -32,6 +32,7 @@ export const selectFile = async (
   dispatch: Function,
   channel: Object,
 ) => {
+  console.log('channel In SelectFile:', channel);
   try {
     if (Platform.OS === 'android') {
       const permission = await check(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);

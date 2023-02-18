@@ -10,6 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   NativeModules,
+  Dimensions,
+  Alert,
 } from 'react-native';
 
 import styles from '~/ManToManBoard';
@@ -33,7 +35,12 @@ import {ILocation} from './map';
 import {UpdateMyLocationWatch} from './map';
 import {ReplacedotInEmail} from '^/Replace';
 import {parseLineString, tMapNavigate, useInterval} from '../../utils';
-import {L1ChatSvg, L1InviteSvg} from 'component/Chat/ChatSvg';
+import {
+  ChatReportNotShadowSvg,
+  ChatReportSvg,
+  L1ChatSvg,
+  L1InviteSvg,
+} from 'component/Chat/ChatSvg';
 import {L1styles} from '~/L1';
 import LinearGradient from 'react-native-linear-gradient';
 import {LinearProfileImagView} from 'component/General';
@@ -41,15 +48,15 @@ import {SecuritySvg} from 'component/General/GeneralSvg';
 import firestore from '@react-native-firebase/firestore';
 
 import {useKeyboard} from '@react-native-community/hooks';
-import {GetEpochTime, MilisToMinutes} from '^/GetTime';
-import {L1Bar10Svg, L1Bar15Svg, Result} from 'component/L1/L1';
+import {GetEpochTime, GetTime, MilisToMinutes} from '^/GetTime';
+import {Result} from 'component/L1/L1';
 import {Type2} from 'component/LinearGradient/LinearType';
-
-const MeetMapScreen = ({route}: any, props: any) => {
+import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
+import {WhyReport} from '../../../src/page/chat';
+const MeetMapScreen = ({route, navigation}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
 
   //console.log('UserData:', UserData);
-  console.log('Channel In L1:', channel);
 
   // //console.log("otherUserData:", otherUserData)
 
@@ -60,7 +67,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
   const [query, setQuery] = useState(null);
 
-  let Groupchannel: any;
+  const [Groupchannel, setGroupchannel] = useState();
 
   //console.log('Uid for SendBird url:', uid);
   const [Mylocation, locationdispatch] = useReducer(locationReducer, {
@@ -77,15 +84,31 @@ const MeetMapScreen = ({route}: any, props: any) => {
     console.log('[MeetMap.js] L1 time passed:', minutes);
     if (minutes >= 15) {
       clearInterval(intervalRef.current);
+      navigation.navigate('MapScreen', {
+        CurrentUser: UserData,
+      });
     }
   }, 10000);
 
   useEffect(() => {
     const minutes = getTimePassed();
     setCreatedAt(minutes);
+
+    SendBird.GroupChannel.getChannel(
+      uid,
+      function (groupChannel: any, error: Error) {
+        if (!error) {
+          setGroupchannel(groupChannel);
+
+          refresh();
+        }
+      },
+    );
   }, []);
 
   const getTimePassed = () => {
+    console.log('GetEpochTime:', GetEpochTime());
+    console.log('channel.createdAt:', channel.createdAt);
     const minutes = MilisToMinutes(GetEpochTime() - channel.createdAt);
     return minutes;
   };
@@ -115,7 +138,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
     error: '',
   });
 
-  const [geoJson, setGeoJson] = useState(null);
+  const [geoJson, setGeoJson] = useState(undefined);
 
   // const [location, setLocation] = useState<ILocation | undefined>(undefined);
 
@@ -134,16 +157,26 @@ const MeetMapScreen = ({route}: any, props: any) => {
 
   const channelHandler = new SendBird.ChannelHandler();
   channelHandler.onMessageReceived = (targetChannel: any, message: any) => {
-    if (targetChannel.url === Groupchannel.url) {
+    if (targetChannel.url === channel.url) {
       dispatch({type: 'receive-message', payload: {message, Groupchannel}});
     }
   };
 
   channelHandler.onMessageUpdated = (targetChannel, message) => {
-    if (targetChannel.url === Groupchannel.url) {
+    if (targetChannel.url === channel.url) {
       dispatch({type: 'update-message', payload: {message}});
     }
   };
+
+  channelHandler.onUserLeft = (targetChannel: any, user) => {
+    if (user.userId === UserData.UserEmail) {
+      navigation.navigate('IndicatorScreen', {
+        action: 'leave',
+        data: {channel: Groupchannel},
+      });
+    }
+  };
+
   const connectionHandler = new SendBird.ConnectionHandler();
   connectionHandler.onReconnectStarted = () => {
     dispatch({
@@ -186,35 +219,23 @@ const MeetMapScreen = ({route}: any, props: any) => {
     SendBird.addChannelHandler('chat', channelHandler);
     SendBird.addUserEventHandler('users', userEventHandler);
 
-    setTimeout(() => {
-      if (!SendBird.currentUser) {
-        SendBird.connect(UserData.UserEmail, (_, err) => {
-          if (!err) {
-            //console.log('refresj In UseEffect In MeetMap');
-            refresh();
-          } else {
-            dispatch({
-              type: 'error',
-              payload: {
-                error: 'Connection failed. Please check the network status.',
-              },
-            });
-          }
-        });
-      } else {
-        refresh();
-      }
-    }, 2000);
-
-    SendBird.GroupChannel.getChannel(
-      uid,
-      function (groupChannel: any, error: Error) {
-        if (!error) {
-          Groupchannel = groupChannel;
+    if (!SendBird.currentUser) {
+      SendBird.connect(UserData.UserEmail, (_, err) => {
+        if (!err) {
+          //console.log('refresj In UseEffect In MeetMap');
           refresh();
+        } else {
+          dispatch({
+            type: 'error',
+            payload: {
+              error: 'Connection failed. Please check the network status.',
+            },
+          });
         }
-      },
-    );
+      });
+    } else {
+      refresh();
+    }
 
     const MyUpdate = reference.ref(MyDBUrl).on('child_changed', (snapshot) => {
       // //console.log('MyUpdate child_changed snapshot:', snapshot.val());
@@ -240,19 +261,27 @@ const MeetMapScreen = ({route}: any, props: any) => {
         setOtherLocation(snapshot.val());
       });
 
+    const OtherDelete = reference
+      .ref(OtherDBUrl)
+      .on('child_removed', (snapshot) => {
+        setOtherLocation(undefined);
+        setGeoJson(undefined);
+        BeforeReport()
+      });
+
     return () => {
       reference.ref(MyDBUrl).off('child_changed', MyUpdate);
       reference.ref(OtherDBUrl).off('child_changed', OtherUpdate);
       reference.ref(MyDBUrl).off('child_added', MyStart);
       reference.ref(OtherDBUrl).off('child_added', OtherStart);
+      reference.ref(OtherDBUrl).off('child_removed', OtherDelete);
 
-      // SendBird.removeConnectionHandler('chat');
-      // SendBird.removeChannelHandler('chat');
+      SendBird.removeConnectionHandler('chat');
+      SendBird.removeChannelHandler('chat');
       // unsubscribe.remove();
     };
   }, []);
   useEffect(() => {
-    //console.log('useEffect MyLo, OtherLo');
     drawRoute();
   }, [MyLocationState, OtherLocation]);
 
@@ -282,8 +311,6 @@ const MeetMapScreen = ({route}: any, props: any) => {
   };
 
   const refresh = () => {
-    // channel.markAsRead();
-    // setQuery(Groupchannel.createPreviousMessageListQuery());
     SendBird.GroupChannel.getChannel(
       uid,
       function (groupChannel: any, error: Error) {
@@ -385,18 +412,10 @@ const MeetMapScreen = ({route}: any, props: any) => {
     });
   };
 
-  const UpdateSpicLocation = () => {
-    reference.ref(MyDBUrlNode).update({
-      latitude: 37.6041558,
-      longitude: 126.9456834,
-    });
-  };
-
-  const UpdateSpicLocation2 = () => {
-    reference.ref(MyDBUrlNode).update({
-      latitude: 37.6041558,
-      longitude: 126.9056834,
-    });
+  const DeleteMyLocation = async () => {
+    console.log('DeleteMyLocation');
+    const DeleteNode = `/1v1meet/${uid}/${ReplaceUserEmail}`;
+    reference.ref(DeleteNode).remove();
   };
 
   const ChatButton = () => {
@@ -413,6 +432,188 @@ const MeetMapScreen = ({route}: any, props: any) => {
       </View>
     );
   };
+
+  const [ReportModalVisiable, setRePortModalVisiable] = useState(false);
+
+  const onoffReportModal = () => {
+    setRePortModalVisiable(!ReportModalVisiable);
+  };
+  const {height} = Dimensions.get('window');
+
+  const [SelectedId, setSelectedId] = useState(0);
+
+  const ReturnTo = (message: string, id: number) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          ReportSelect(id);
+        }}
+        style={[
+          styles.Row_OnlyColumnCenter,
+          {
+            width: '100%',
+            height: '9%',
+            marginBottom: 10,
+            backgroundColor: SelectedId == id ? 'skyblue' : null,
+          },
+        ]}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            color: '#E8EBF2',
+            marginLeft: 37,
+          }}>
+          {message}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const ReportSelect = (id: number) => {
+    setSelectedId(id);
+  };
+
+  const Report = async () => {
+    onoffReportModal();
+    const ReportId = await GetReportUid();
+    await SaveReportInDB(ReportId);
+  };
+
+  const BeforeReport = async () => {
+    await DeleteL1CreatedAt();
+    await DeleteMyLocation();
+
+    setTimeout(() => {
+      SendBird.GroupChannel.getChannel(
+        uid,
+        function (groupChannel: any, error: Error) {
+          if (!error) {
+            navigation.navigate('IndicatorScreen', {
+              action: 'leave',
+              data: {channel: groupChannel},
+            });
+          } else if (error) {
+            console.log('Error In GotoMap In GetChannel', error);
+          }
+        },
+      );
+    }, 2000);
+    setTimeout(() => {
+      navigation.goBack();
+    }, 4000);
+  };
+
+  const ReportSubmit = async () => {
+    setChatModalVis(false);
+    await Report();
+    await BeforeReport();
+  };
+
+  const GetReported = () => {
+    const MemberList = [
+      Groupchannel.members[0].userId,
+      Groupchannel.members[1].userId,
+    ];
+    const ReportedList = MemberList.filter((data) => {
+      return data != UserData.UserEmail;
+    });
+
+    const Reported = ReportedList[0];
+
+    return Reported;
+  };
+
+  const Today = GetTime();
+  const collection = firestore().collection(`Report/${Today}/ReportData`);
+
+  const SaveReportInDB = async (ReportId: any) => {
+    const MemberList = [
+      Groupchannel.members[0].userId,
+      Groupchannel.members[1].userId,
+    ];
+
+    const Reported = GetReported();
+
+    collection.doc(String(ReportId)).set({
+      Reporter: UserData.UserEmail,
+      Reported: Reported,
+      Members: MemberList,
+      Cause: SelectedId,
+      CreateAt: new Date().toLocaleString(),
+    });
+  };
+
+  const DeleteL1CreatedAt = async () => {
+    const collection = firestore().collection(`UserList`);
+
+    collection.doc(UserData.UserEmail).update({
+      L1CreatedAt: 0,
+    });
+  };
+
+  const GetReportUid = async () => {
+    let ReportId;
+    await collection.get().then((querySnapshot) => {
+      ReportId = querySnapshot.size;
+    });
+
+    return ReportId;
+  };
+
+  const ReportModal = (
+    <Modal
+      isVisible={ReportModalVisiable}
+      style={{
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'skyblue',
+        marginTop: 0,
+        marginLeft: 0,
+        marginBottom: 0,
+      }}>
+      <View
+        style={[
+          styles.Column_OnlyRowCenter,
+          {
+            width: '90%',
+            height: height * 0.55,
+            backgroundColor: '#37375B',
+            marginLeft: '5%',
+            borderRadius: 15,
+          },
+        ]}>
+        {WhiteReportSvg}
+        <TouchableOpacity
+          style={{position: 'absolute', top: 22, right: 13}}
+          onPress={onoffReportModal}>
+          {취소하기Svg}
+        </TouchableOpacity>
+        {WhyReport}
+        {ReturnTo('허위 프로필', 1)}
+        {ReturnTo('욕설 및 비방', 2)}
+        {ReturnTo('불쾌한 대화', 3)}
+        {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+        <TouchableOpacity
+          onPress={() => {
+            ReportSubmit();
+          }}
+          style={[
+            styles.RowCenter,
+            {
+              width: '63%',
+              height: '8%',
+              borderRadius: 7,
+              backgroundColor: '#DFE5F1',
+              position: 'absolute',
+              bottom: 30,
+            },
+          ]}>
+          <Text style={[styles.FT16, styles.FW500]}>다음</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  );
 
   const [ChatModalVis, setChatModalVis] = useState(false);
 
@@ -499,16 +700,14 @@ const MeetMapScreen = ({route}: any, props: any) => {
             otherUserData.ProfileImageUrl,
             UserData.NickName,
           )}
-          {/* 1/27 TODO: 신고부분 생성
-          <View
-            style={{
-              position: 'absolute',
-              right: 10,
-              backgroundColor: 'red',
-            }}>
-            {Btn_Security}
-          </View> */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={{position: 'absolute', right: 24}}
+            onPress={onoffReportModal}>
+            {ChatReportNotShadowSvg}
+          </TouchableOpacity>
         </LinearGradient>
+
         <View style={L1styles.Main}>
           <View style={[styles.ColumnCenter, {marginTop: 10}]}>
             {/* {L1Bar10Svg} */}
@@ -528,7 +727,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
             renderItem={({item}) => (
               <Message
                 key={item.reqId}
-                channel={channel}
+                channel={Groupchannel}
                 message={item}
                 SendBird={SendBird}
                 onPress={(message) => viewDetail(message)}
@@ -572,7 +771,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
             <TouchableOpacity
               activeOpacity={0.85}
               style={ChatStyle.uploadButton}
-              onPress={() => selectFile(SendBird, dispatch, channel)}>
+              onPress={() => selectFile(SendBird, dispatch, Groupchannel)}>
               <Icon name="insert-photo" color="#7b53ef" size={28} />
             </TouchableOpacity>
             <TextInput
@@ -613,6 +812,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
   return (
     <View style={{width: '100%', height: '100%'}}>
       {ChatModal}
+      {ReportModal}
       {MyLocationState && (
         <MapView
           style={{width: '100%', height: '100%'}}
@@ -688,7 +888,7 @@ const MeetMapScreen = ({route}: any, props: any) => {
           colors={Type2}
           start={{x: 0, y: 0}}
           end={{x: 1, y: 0}}>
-          {Result(15)}
+          {Result(15 - CreateAt)}
         </LinearGradient>
       </View>
       {ChatButton()}

@@ -27,7 +27,7 @@ export const MapScreenStyles = StyleSheet.create({
     top: '6%',
     width: '68%',
     height: 46,
-    backgroundColor: '#606060',
+    backgroundColor: '#37375B',
     borderRadius: 6,
     justifyContent: 'space-around',
   },

@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    
     <!-- 갤러리 접근 권한으로 추가함. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 

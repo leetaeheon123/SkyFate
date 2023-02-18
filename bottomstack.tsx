@@ -10,19 +10,19 @@ import ChatListScreen from 'Screens/Map/ChatList';
 import MyProfileScreen from 'Screens/MyProfile/MyProfile';
 import MyProfileChange from 'Screens/MyProfile/MyProfileChange';
 
-import {Rending} from 'Screens/Rending';
 import MyProfileChangeScreen from 'Screens/MyProfile/MyProfileChange';
 import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
-  const {route, currentUser, navigation} = props;
-
+  const {route, navigation} = props;
+  let {currentUser} = props;
   useEffect(() => {
     if (route.params && route.params.action) {
       const {action, data} = route.params;
       switch (action) {
         case 'leave':
+          console.log('data In leave:', data);
           data.channel.leave((_, err) => {
             // if (err) {
             //   dispatch({
@@ -51,11 +51,15 @@ const BottomTabScreen = (props: any) => {
           break;
       }
     }
+
+    if (currentUser == undefined && route.params.currentUser) {
+      currentUser = route.params.currentUser;
+    }
   }, [route.params]);
 
   const ValidL1 = () => {
     if (currentUser.L1CreatedAt) {
-      console.log('L1CreatedAt');
+      console.log('L1CreatedAt:', currentUser.L1CreatedAt);
       let now = GetEpochTime();
       let milis = now - currentUser.L1CreatedAt;
       let Minutes = MilisToMinutes(milis);
@@ -70,9 +74,9 @@ const BottomTabScreen = (props: any) => {
     }
   };
 
-  useEffect(() => {
-    ValidL1();
-  }, []);
+  // useEffect(() => {
+  //   ValidL1();
+  // }, []);
 
   return (
     <BottomTab.Navigator
@@ -97,7 +101,7 @@ const BottomTabScreen = (props: any) => {
           CurrentUser: currentUser,
         }}
       />
-      {props.currentUser.Gender == 2 ? (
+      {/* {props.currentUser.Gender == 2 ? (
         <BottomTab.Screen
           name="FriendMapScreen"
           component={FriendMapScreen}
@@ -105,15 +109,9 @@ const BottomTabScreen = (props: any) => {
             CurrentUser: currentUser,
           }}
         />
-      ) : null}
+      ) : null} */}
 
-      <BottomTab.Screen
-        name="MeetMapScreen"
-        component={MeetMapScreen}
-        initialParams={{
-          CurrentUser: props.currentUser,
-        }}
-      />
+      <BottomTab.Screen name="MeetMapScreen" component={MeetMapScreen} />
       <BottomTab.Screen
         name="ChatListScreen"
         component={ChatListScreen}

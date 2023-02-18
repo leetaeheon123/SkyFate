@@ -90,6 +90,10 @@ import {
   Pay_PutoffSvg,
   Pay_HalfSvg,
   ClickedPay_HalfSvg,
+  OnSvg,
+  OffSvg,
+  OnToggleSvg,
+  OffToggleSvg,
 } from 'component/Map/MapSvg';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -97,6 +101,7 @@ import {
   CheckSvg,
   ClickedCheckSvg,
   ClickedCompleteSvg,
+  ColorPeopleSvg,
   CompleteSvg,
   MemoSvg,
   MinusSvg,
@@ -112,9 +117,11 @@ import {Type2VerticalLine} from 'component/LinearGradient/LinearGradientCircle';
 import {WithLocalSvg} from 'react-native-svg';
 import M3Main_TopBar from 'Assets/Map/M3/M3Main_TopBar.svg';
 import LinearGradient from 'react-native-linear-gradient';
-import {Type2세로} from 'component/LinearGradient/LinearType';
+import {Type2가로, Type2세로} from 'component/LinearGradient/LinearType';
 import {MapTopLine} from 'component/Map';
 import Swiper from 'react-native-swiper';
+import {LinearTextGradient} from 'react-native-text-gradient';
+import GradientText from 'component/GradientText';
 
 export interface ILocation {
   latitude: number;
@@ -407,7 +414,7 @@ const Girl_StartShowLocation = async (
 
   GetMyCoords(UpdateGirlLocation, 'Girl_StartShowLocation Function');
 };
-const logout = (navigation: any, SendBird: any) => {
+export const logout = (navigation: any, SendBird: any) => {
   RemoveIdentityToken();
   SendBird.disconnect();
   navigation.navigate('ValidInvitationCodeScreen');
@@ -452,7 +459,7 @@ export const UpdateMyLocationWatch = (
     },
     {
       enableHighAccuracy: true,
-      distanceFilter: 2,
+      distanceFilter: 50,
       interval: 5000,
       fastestInterval: 500,
     },
@@ -473,21 +480,6 @@ const MapScreen = (props: any) => {
 
   const UserData = props.route.params.CurrentUser;
   const navigation = useNavigation();
-
-  // if (UserData.L1CreatedAt) {
-  //   console.log('L1CreatedAt');
-  //   let now = GetEpochTime();
-  //   let milis = now - UserData.L1CreatedAt;
-  //   let Minutes = MilisToMinutes(milis);
-
-  //   if (Minutes > 1) {
-  //     navigation.navigate('MeetMapScreen', {
-  //       UserData: UserData,
-  //       otherUserData: UserData.otherUserData,
-  //       channel: UserData.channel,
-  //     });
-  //   }
-  // }
 
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
@@ -749,7 +741,7 @@ const MapScreen = (props: any) => {
     DirectDeleteMyLocation(UserData.UserEmail);
   };
 
-  const StopShowMyLocationMan = () => {
+  const ChangeShowStateMan = () => {
     setGpsOn((previousState) => !previousState);
   };
 
@@ -1138,7 +1130,7 @@ const MapScreen = (props: any) => {
         <Text style={MapScreenStyles.ImageBarText}>더치페이</Text>
       </View>
       <View style={MapScreenStyles.ImageBarBox}>
-        {PaySvg(22)}
+        {ColorPeopleSvg(22)}
         <Text style={styles.WhiteColor}>인원수</Text>
         <Text style={MapScreenStyles.ImageBarText}>
           {ProfileForGtoM?.PeopleNum}명
@@ -1970,15 +1962,58 @@ const MapScreen = (props: any) => {
     return Result;
   };
 
+  // const GpsOnOffSwitch = (onValueChangeFun: Function) => {
+  //   return (
+  //     <Switch
+  //       // trackColor={{false: '#202124', true: '#202124'}}
+  //       trackColor={{false: 'B5BAC0', true: '#7B68EE'}}
+  //       // thumbColor={GpsOn ? '#28FF98' : '#f4f3f4'}
+  //       thumbColor={'white'}
+  //       ios_backgroundColor="#B5BAC0"
+  //       onValueChange={onValueChangeFun}
+  //       value={GpsOn}
+  //     />
+  //   );
+  // };
+
   const GpsOnOffSwitch = (onValueChangeFun: Function) => {
+    {
+      GpsOn == false ? (
+        <TouchableOpacity
+          onPress={() => {
+            onValueChangeFun();
+          }}>
+          {OffToggleSvg}
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          onPress={() => {
+            onValueChangeFun();
+          }}>
+          {OnToggleSvg}
+        </TouchableOpacity>
+      );
+    }
+  };
+
+  const Btn_OnToggle = (onValueChangeFun: Function) => {
     return (
-      <Switch
-        trackColor={{false: '#202124', true: '#202124'}}
-        thumbColor={GpsOn ? '#28FF98' : '#f4f3f4'}
-        ios_backgroundColor="#202124"
-        onValueChange={onValueChangeFun}
-        value={GpsOn}
-      />
+      <TouchableOpacity
+        onPress={() => {
+          onValueChangeFun();
+        }}>
+        {OnToggleSvg}
+      </TouchableOpacity>
+    );
+  };
+  const Btn_OffToggle = (onValueChangeFun: Function) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          onValueChangeFun();
+        }}>
+        {OffToggleSvg}
+      </TouchableOpacity>
     );
   };
 
@@ -2016,26 +2051,54 @@ const MapScreen = (props: any) => {
     );
   };
 
+  const GradientTimeText = (
+    <GradientText
+      colors={Type2가로}
+      style={{
+        fontWeight: '500',
+        fontSize: 16,
+      }}>
+      {Math.floor(second / 60)} : {second % 60}
+    </GradientText>
+  );
+
+  const OffTimeText = (
+    <Text
+      style={{
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#9F9F9F',
+      }}>
+      {Math.floor(second / 60)} : {second % 60}
+    </Text>
+  );
+
+  const GradientLocationText = (
+    <GradientText
+      colors={Type2가로}
+      style={{
+        fontWeight: '500',
+        fontSize: 16,
+      }}>
+      내위치 표시중
+    </GradientText>
+  );
+
+  const LocationText = (
+    <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+      내 위치 표시 대기중
+    </Text>
+  );
+
   const GirlTabBar = () => {
     return (
       <SafeAreaView
         style={[styles.Row_OnlyColumnCenter, MapScreenStyles.TopView]}>
-        <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-          나의위치 표시하기
-        </Text>
-
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '500',
-            color: GpsOn == false ? '#9F9F9F' : '#28FF98',
-          }}>
-          {Math.floor(second / 60)} : {second % 60}
-        </Text>
-
-        {GpsOn == true ? GpsOnOffSwitch(StopShowMyLocation) : null}
-
-        {GpsOn == false ? View_GpsOff() : View_GpsOn()}
+        {GpsOn == false ? LocationText : null}
+        {GpsOn == false ? OffTimeText : GradientTimeText}
+        {GpsOn == true ? Btn_OnToggle(StopShowMyLocation) : null}
+        {GpsOn == false ? OffSvg : OnSvg}
+        {/* {GpsOn == false ? View_GpsOff() : View_GpsOn()} */}
       </SafeAreaView>
     );
   };
@@ -2044,12 +2107,13 @@ const MapScreen = (props: any) => {
     return (
       <SafeAreaView
         style={[styles.Row_OnlyColumnCenter, MapScreenStyles.TopView]}>
-        <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-          나의위치 표시하기
-        </Text>
-        {GpsOnOffSwitch(StopShowMyLocationMan)}
+        {GpsOn == false ? LocationText : GradientLocationText}
 
-        {GpsOn == false ? View_GpsOff() : View_GpsOn()}
+        {GpsOn == false
+          ? Btn_OffToggle(ChangeShowStateMan)
+          : Btn_OnToggle(ChangeShowStateMan)}
+
+        {GpsOn == false ? OffSvg : OnSvg}
       </SafeAreaView>
     );
   };
@@ -2124,7 +2188,7 @@ const MapScreen = (props: any) => {
         ]}>
         {Btn_EnterChat()}
         {TouchableBtn_EnterMatch()}
-        {Btn_EnterFriendMap()}
+        {/* {Btn_EnterFriendMap()} */}
       </View>
     );
   };
@@ -2138,7 +2202,7 @@ const MapScreen = (props: any) => {
           {justifyContent: 'space-around'},
         ]}>
         {Btn_EnterChat()}
-        {Btn_EnterFriendMap()}
+        {/* {Btn_EnterFriendMap()} */}
       </View>
     );
   };

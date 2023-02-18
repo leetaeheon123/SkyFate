@@ -1,4 +1,4 @@
-import {launchImageLibrary} from 'react-native-image-picker';
+// import {launchImageLibrary} from 'react-native-image-picker';
 import {Platform} from 'react-native';
 
 import {GetEpochTime} from './GetTime';
@@ -6,6 +6,7 @@ import storage from '@react-native-firebase/storage';
 
 import firestore from '@react-native-firebase/firestore';
 import {SendBirdUpdateUserInfo} from 'Screens/Indicator';
+import ImagePicker from 'react-native-image-crop-picker';
 export const ChangeMyProfileImage = async (
   UserEmail: string,
   Gender: number,
@@ -27,34 +28,45 @@ export const ChangeMyProfileImage = async (
     );
   };
 
-  ImagePicker(UploadCallback, setState);
+  ImagePickerLaunch(UploadCallback, setState);
 };
 
-const ImagePicker = (callback: Function, setState: Function) => {
+const ImagePickerLaunch = (callback: Function, setState: Function) => {
   const back: string = 'back';
   const duration: number = 10;
-  const result = launchImageLibrary(
-    {
-      mediaType: 'photo',
-      maxWidth: 512,
-      maxHeight: 512,
-      videoQuality: 'high',
-      durationLimit: duration,
-      quality: 1,
-      cameraType: back,
-      includeBase64: Platform.OS === 'android',
-      includeExtra: false,
-      saveToPhots: false,
-      selectionLimit: 1,
-      // presentationStyle:'fullScreen'
-    },
-    async (res) => {
-      if (res.didCancel) return;
-      let LocalImagePath = res.assets[0].uri;
-      setState(LocalImagePath);
-      callback(LocalImagePath);
-    },
-  );
+  // const result = launchImageLibrary(
+  //   {
+  //     mediaType: 'photo',
+  //     maxWidth: 512,
+  //     maxHeight: 512,
+  //     videoQuality: 'high',
+  //     durationLimit: duration,
+  //     quality: 1,
+  //     cameraType: back,
+  //     includeBase64: Platform.OS === 'android',
+  //     includeExtra: false,
+  //     saveToPhots: false,
+  //     selectionLimit: 1,
+  //     // presentationStyle:'fullScreen'
+  //   },
+  //   async (res) => {
+  //     if (res.didCancel) return;
+  //     let LocalImagePath = res.assets[0].uri;
+  //     setState(LocalImagePath);
+  //     callback(LocalImagePath);
+  //   },
+  // );
+
+  ImagePicker.openPicker({
+    width: 400,
+    height: 533,
+    cropping: true,
+  }).then(async (res) => {
+    // if (res?.didCancel) return;
+    let LocalImagePath = res.path;
+    setState(LocalImagePath);
+    callback(LocalImagePath);
+  });
 };
 
 const PutInStorage = async (

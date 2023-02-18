@@ -53,6 +53,27 @@ import {
 import {UpdateFbFirestore} from '^/Firebase';
 import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
 
+export const WhyReport = (
+  <View
+    style={[
+      styles.RowCenter,
+      {
+        width: '100%',
+        height: '10%',
+        marginBottom: 22,
+      },
+    ]}>
+    <Text
+      style={{
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#E8EBF2',
+      }}>
+      신고 이유는 무엇인가요?
+    </Text>
+  </View>
+);
+
 const ChatScreen = (props) => {
   const {route, navigation} = props;
 
@@ -64,16 +85,6 @@ const ChatScreen = (props) => {
   const keyboard = useKeyboard();
 
   const [chatMinutes, setChatMinutes] = useState('');
-
-  // const GetMetadata = () => {
-  //   var keys = [Key_MetaData];
-
-  //   channel.getMetaData(keys, function (response, error) {
-  //     if (error) {
-  //       console.log(response);
-  //     }
-  //   });
-  // };
 
   const [CanSendL1Invite, setCanSendL1Invite] = useState();
 
@@ -132,7 +143,6 @@ const ChatScreen = (props) => {
           style={[style.headerRightButton]}
           onPress={onoffReportModal}>
           {ChatReportSvg}
-          {/* <Icon name="directions-walk" color="black" size={28} /> */}
         </TouchableOpacity>
         {CanSendL1Invite == 0 ? (
           <TouchableOpacity
@@ -249,7 +259,7 @@ const ChatScreen = (props) => {
     }
   };
   channelHandler.onUserLeft = (channel, user) => {
-    if (user.userId === UserData.userId) {
+    if (user.userId === UserData.UserEmail) {
       navigation.navigate('IndicatorScreen', {
         action: 'leave',
         data: {channel},
@@ -627,13 +637,19 @@ const ChatScreen = (props) => {
               UserEmail: otherUserData[0].userId,
               ProfileImageUrl: otherUserData[0].plainProfileUrl,
             },
-            channel: {url: channel.url},
+            channel: {
+              url: channel.url,
+              createdAt: channel.createdAt,
+            },
           });
           UpdateFbFirestore('UserList', UserData.UserEmail, 'otherUserData', {
             UserEmail: otherUserData[0].userId,
             ProfileImageUrl: otherUserData[0].plainProfileUrl,
           });
-          UpdateFbFirestore('UserList', UserData.UserEmail, 'channel', channel);
+          UpdateFbFirestore('UserList', UserData.UserEmail, 'channel', {
+            url: channel.url,
+            createdAt: channel.createdAt,
+          });
           UpdateFbFirestore(
             'UserList',
             UserData.UserEmail,
@@ -702,27 +718,6 @@ const ChatScreen = (props) => {
     );
   };
 
-  const WhyReport = (
-    <View
-      style={[
-        styles.RowCenter,
-        {
-          width: '100%',
-          height: '10%',
-          marginBottom: 22,
-        },
-      ]}>
-      <Text
-        style={{
-          fontSize: 20,
-          fontWeight: '600',
-          color: '#E8EBF2',
-        }}>
-        신고 이유는 무엇인가요?
-      </Text>
-    </View>
-  );
-
   const ReportSelect = (id) => {
     setSelectedId(id);
   };
@@ -732,9 +727,12 @@ const ChatScreen = (props) => {
     const ReportId = await GetReportUid();
     await SaveReportInDB(ReportId);
     // Ban();
+    // 채팅창 나가는 로직도 추가
+
     setTimeout(() => {
       navigation.navigate('IndicatorScreen', {
-        From: 'ChatScreen',
+        action: 'leave',
+        data: {channel},
       });
     }, 2000);
 
@@ -942,6 +940,7 @@ const ChatScreen = (props) => {
               SendBird={SendBird}
               onPress={(message) => viewDetail(message)}
               onLongPress={(message) => showContextMenu(message)}
+              navigation={navigation}
             />
           )}
           keyExtractor={(item) => `${item.messageId}` || item.reqId}
