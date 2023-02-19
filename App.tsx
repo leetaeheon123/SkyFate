@@ -14,6 +14,16 @@ import {NativeBaseProvider} from 'native-base';
 import SendBird from 'sendbird';
 import FlipperAsyncStorage from 'rn-flipper-async-storage-advanced';
 
+import * as Sentry from '@sentry/react-native';
+import CodePush from 'react-native-code-push';
+
+Sentry.init({
+  dsn: 'https://943b85677de143c3accb57fd68f046dc@o4504704527892480.ingest.sentry.io/4504704529924096',
+  // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+  // We recommend adjusting this value in production.
+  tracesSampleRate: 1.0,
+});
+
 if (__DEV__) {
   import('react-query-native-devtools').then(({addPlugin}) => {
     addPlugin({queryClient});
@@ -68,13 +78,31 @@ const App = () => {
     }
   }, []);
 
+  const [currentRouteName, setCurrentRouteName] = useState('initRouteName');
+
   return (
     <QueryClientProvider client={queryClient}>
       <FlipperAsyncStorage />
-      <NavigationContainer>
+      <NavigationContainer
+        onStateChange={(state) => {
+          console.log('[App.tsx] NavigationContainer onStateChange:', state);
+          Sentry.addBreadcrumb({
+            category: 'Navigation',
+            data: {
+              to: `${state?.routes[state.index].name}`,
+              from: `${currentRouteName}`,
+            },
+            level: 'error',
+          });
+          setCurrentRouteName(state?.routes[state.index].name);
+
+          Sentry.captureEvent({message: 'Sentry Test'});
+        }}>
         <AppContext.Provider value={initialState}>
           <NativeBaseProvider>
-            <Routes></Routes>
+            <Sentry.TouchEventBoundary>
+              <Routes></Routes>
+            </Sentry.TouchEventBoundary>
           </NativeBaseProvider>
         </AppContext.Provider>
       </NavigationContainer>
@@ -82,6 +110,6 @@ const App = () => {
   );
 };
 
-export default App;
+export default CodePush(Sentry.wrap(App));
 
 // background-image: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%);
