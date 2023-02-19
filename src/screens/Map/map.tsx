@@ -33,7 +33,6 @@ import styles from '~/ManToManBoard';
 import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 
-import codePush from 'react-native-code-push';
 import {useQuery} from 'react-query';
 
 import {firebase} from '@react-native-firebase/database';
@@ -2457,4 +2456,4 @@ const MapScreen = (props: any) => {
   );
 };
 
-export default withAppContext(codePush(MapScreen));
+export default withAppContext(MapScreen);
