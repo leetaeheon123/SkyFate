@@ -99,6 +99,14 @@ const IndicatorScreen = (props: any) => {
           const Gender = UserData?.Gender;
           // console.log("UserData In Indicator", UserData)
 
+          const ValidAgreement = UserData?.hasOwnProperty(
+            'AgreementTermsofUse',
+          );
+          if (!ValidAgreement) {
+            GotoProfileInputScreen('AgreementScreen', UserEmail);
+            return;
+          }
+
           const ValidNickName = UserData?.hasOwnProperty('NickName');
           if (!ValidNickName) {
             GotoProfileInputScreen('NickNameSelectScreen', UserEmail);
@@ -134,21 +142,13 @@ const IndicatorScreen = (props: any) => {
             return;
           }
 
-          const ValidAgreement = UserData?.hasOwnProperty(
-            'AgreementTermsofUse',
-          );
-          if (!ValidAgreement) {
-            GotoProfileInputScreen('AgreementScreen', UserEmail, Gender);
-            return;
-          }
-
           if (
+            ValidAgreement &&
             ValidNickName &&
             ValidMbti &&
             ValidGender &&
             ValidAge &&
-            ValidProfileImageUrl &&
-            ValidAgreement
+            ValidProfileImageUrl
           ) {
             setCurrentUser(UserData);
             SBConnect(

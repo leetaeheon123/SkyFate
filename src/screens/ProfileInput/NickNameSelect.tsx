@@ -77,11 +77,11 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
             {NickNameTextInput()}
           </Pressable>
         </View>
-        <Button
+        {/* <Button
           title="RemoveToken"
           onPress={() => {
             RemoveIdentityToken();
-          }}></Button>
+          }}></Button> */}
         {NickName.length >= 4 ? (
           <Btn_ClickableNext
             onPress={() => {

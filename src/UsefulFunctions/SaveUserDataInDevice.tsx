@@ -27,7 +27,7 @@ export const RegisterUserEmail = async (
   try {
     await SaveUserEmailInDevice(UserEmail);
     await RegisterSendBirdToken(SendBird, UserEmail);
-    await navigation.navigate('NickNameSelectScreen', {
+    await navigation.navigate('AgreementScreen', {
       UserEmail,
     });
   } catch (error) {

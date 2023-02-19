@@ -47,12 +47,13 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
     setPrivacy(value);
     setLocation(value);
   };
+
   const handleBtn = async () => {
     await UpdateFbFirestore(`UserList`, UserEmail, 'AgreementTermsofUse', true);
     await UpdateFbFirestore(
       `UserList`,
       UserEmail,
-      'AgreementGiveLocaitionData ',
+      'AgreementGiveLocaitionData',
       true,
     );
     await UpdateFbFirestore(
@@ -62,8 +63,8 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
       true,
     );
 
-    navigation.navigate('IndicatorScreen', {
-      From: 'LoginAndRegister',
+    navigation.navigate('NickNameSelectScreen', {
+      UserEmail: UserEmail,
     });
   };
 
