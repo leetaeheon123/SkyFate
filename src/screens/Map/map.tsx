@@ -2290,9 +2290,7 @@ const MapScreen = (props: any) => {
           minZoomLevel={10}
           maxZoomLevel={17}>
           {GpsOn == true ? AnimationMarker(ProfileImageUrl) : null}
-
-          {/* {isLoading == false && UserData.Gender == 2 && GpsOn == true */}
-          {isLoading == false
+          {isLoading == false && UserData.Gender == 1 && GpsOn == true
             ? data?.map((data: any, index) => {
                 return (
                   <Marker

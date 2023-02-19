@@ -50,7 +50,7 @@ function Setting({navigation, route}: any) {
         </View>
       </View>
 
-      <View>
+      {/* <View>
         <Text style={SettingStyles.MainText}>푸시 알림</Text>
         <View
           style={[
@@ -77,7 +77,7 @@ function Setting({navigation, route}: any) {
           />
         </View>
         {line}
-      </View>
+      </View> */}
 
       <View>
         <Text style={SettingStyles.MainText}>개인정보 처리방침</Text>
