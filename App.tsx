@@ -95,8 +95,6 @@ const App = () => {
             level: 'error',
           });
           setCurrentRouteName(state?.routes[state.index].name);
-
-          Sentry.captureEvent({message: 'Sentry Test'});
         }}>
         <AppContext.Provider value={initialState}>
           <NativeBaseProvider>
