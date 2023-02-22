@@ -130,6 +130,15 @@ const ValidateInvitationCode = (InvitationCode: string, navigation: any) => {
     return;
   }
 
+  if (InvitationCode == 'ACDGKU') {
+    SpecialInvitation(InvitationCode, navigation);
+  } else {
+    GenearlInvitation(InvitationCode, navigation);
+  }
+};
+
+const GenearlInvitation = async (InvitationCode: string, navigation: any) => {
+  const PkNumber = await GetPkNumber();
   firestore()
     .collection('InvitationCodeList')
     .where('InvitationCode', '==', InvitationCode)
@@ -137,11 +146,9 @@ const ValidateInvitationCode = (InvitationCode: string, navigation: any) => {
     .then((querySnapshot) => {
       let Valid = 0;
       let length = querySnapshot.size;
-      let PkNumber;
       console.log(length);
       querySnapshot.forEach((doc) => {
         if (length == 1 && doc.data().Used == false) {
-          PkNumber = doc.data().Number;
           Valid = 1;
         } else if (length == 1 && doc.data().Used == true) {
           Valid = 2;
@@ -155,19 +162,62 @@ const ValidateInvitationCode = (InvitationCode: string, navigation: any) => {
       return Obj;
     })
     .then(async (Obj) => {
-      if (Obj.Valid == 1) {
-        navigation.navigate('RegisterScreen', {
-          InvitationCode: InvitationCode,
-          PkNumber: Obj.PkNumber,
-        });
-      } else if (Obj.Valid == 0) {
-        Alert.alert('존재하지 않는 초대코드입니다.');
-        return;
-      } else if (Obj.Valid == 2) {
-        Alert.alert('이미 사용된 초대코드입니다');
-        return;
-      }
+      LastPassage(Obj, InvitationCode, navigation);
     });
+};
+
+interface ValidObj {
+  Valid: number;
+  PkNumber: number | undefined;
+}
+
+const LastPassage = (
+  Obj: ValidObj,
+  InvitationCode: string,
+  navigation: any,
+) => {
+  if (Obj.Valid == 1) {
+    navigation.navigate('RegisterScreen', {
+      InvitationCode: InvitationCode,
+      PkNumber: Obj.PkNumber,
+    });
+  } else if (Obj.Valid == 0) {
+    Alert.alert('존재하지 않는 초대코드입니다.');
+    return;
+  } else if (Obj.Valid == 2) {
+    Alert.alert('이미 사용된 초대코드입니다');
+    return;
+  }
+};
+
+const SpecialInvitation = async (InvitationCode: string, navigation: any) => {
+  const PkNumber = await GetPkNumber();
+  firestore()
+    .collection('InvitationCode')
+    .doc('Special')
+    .get()
+    .then(() => {
+      let Valid = 0;
+      Valid = 1;
+
+      console.log(PkNumber);
+
+      let Obj = {
+        Valid: Valid,
+        PkNumber: PkNumber,
+      };
+      return Obj;
+    })
+    .then(async (Obj) => {
+      LastPassage(Obj, InvitationCode, navigation);
+    });
+};
+
+const GetPkNumber = async () => {
+  const Result = await firestore().collection('UserList').get();
+  const Size = Result.size;
+  console.log(Size);
+  return Size;
 };
 
 const ValidInvitationCodeScreen = () => {

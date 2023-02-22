@@ -14,11 +14,9 @@ import {
   Image,
   Dimensions,
   TextInput,
-  StyleSheet,
   Platform,
   Alert,
   TouchableOpacity,
-  ScrollView,
   AppState,
   FlatList,
   RefreshControl,
@@ -30,8 +28,6 @@ import {
 import {MapScreenStyles} from '~/MapScreen';
 
 import styles from '~/ManToManBoard';
-import {launchImageLibrary} from 'react-native-image-picker';
-import storage from '@react-native-firebase/storage';
 
 import {useQuery} from 'react-query';
 
@@ -41,7 +37,6 @@ import Geolocation from 'react-native-geolocation-service';
 import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import firestore from '@react-native-firebase/firestore';
-import AntDesgin from 'react-native-vector-icons/AntDesign';
 
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
@@ -62,15 +57,12 @@ import {Get_itaewon_HotPlaceList} from '../../UsefulFunctions/HotPlaceList';
 import {AppContext} from '../../UsefulFunctions//Appcontext';
 
 import {withAppContext} from '../../contextReducer';
-import {isEmptyObj} from '../../UsefulFunctions/isEmptyObj';
+import {isEmptyObj, OddNumValid} from '../../UsefulFunctions/isEmptyObj';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 
-import {
-  GetEpochTime,
-  MilisToMinutes,
-} from '../../../src/UsefulFunctions/GetTime';
+import {GetEpochTime} from '../../../src/UsefulFunctions/GetTime';
 import {locationReducer} from 'reducer/location';
 import {ReplacedotInEmail} from '^/Replace';
 
@@ -83,44 +75,37 @@ import {
   Enter_ChatSvg,
   Enter_SettingSvg,
   Enter_FriendMapSvg,
-  M3TopBackgroundSvg,
   M3TopSvg,
   M3Main_TopBarSvg,
-  Pay_PutoffSvg,
-  Pay_HalfSvg,
-  ClickedPay_HalfSvg,
   OnSvg,
   OffSvg,
   OnToggleSvg,
   OffToggleSvg,
 } from 'component/Map/MapSvg';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   CheckSvg,
   ClickedCheckSvg,
   ClickedCompleteSvg,
   ColorPeopleSvg,
-  CompleteSvg,
   MemoSvg,
   MinusSvg,
   PaySvg,
   PeopleAddSvg,
   PeopleSvg,
   PlusSvg,
-  VerticalLineSvg,
 } from 'component/General/GeneralSvg';
 import {M5ChatSvg} from 'component/Chat/ChatSvg';
-import channel from 'component/channel';
 import {Type2VerticalLine} from 'component/LinearGradient/LinearGradientCircle';
-import {WithLocalSvg} from 'react-native-svg';
-import M3Main_TopBar from 'Assets/Map/M3/M3Main_TopBar.svg';
 import LinearGradient from 'react-native-linear-gradient';
 import {Type2가로, Type2세로} from 'component/LinearGradient/LinearType';
-import {MapTopLine} from 'component/Map';
 import Swiper from 'react-native-swiper';
-import {LinearTextGradient} from 'react-native-text-gradient';
 import GradientText from 'component/GradientText';
+import {GetFriendProfileImage, GetUserNickNameList} from '^/Firebase';
+import {
+  AutocompleteDropdown,
+  TAutocompleteDropdownItem,
+} from 'react-native-autocomplete-dropdown';
 
 export interface ILocation {
   latitude: number;
@@ -134,6 +119,10 @@ interface ProfileForGtoM {
   ProfileImageUrl4: string;
   ProfileImageUrl5: string;
   ProfileImageUrl6: string;
+  FriendProfileImageUrl: string;
+  FriendProfileImageUrl2: string;
+  FriendMbti: string;
+  FriendNickName: string;
   UserEmail: string;
   Memo: string;
   PeopleNum: number;
@@ -155,10 +144,10 @@ const SendPushToMans = () => {
   axios
     .post('http://13.124.209.97/firebase/createPushNotificationToMan/uid', {})
     .then(function (response) {
-      console.log(response);
+      // console.log(response);
     })
     .catch(function (error) {
-      console.log(error);
+      // console.log(error);
     });
 };
 
@@ -232,12 +221,12 @@ const RequestLocationPermissionsAndroid = async () => {
       },
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('you can use the location');
+      // console.log('you can use the location');
     } else {
-      console.log('Location Permission denied');
+      // console.log('Location Permission denied');
     }
   } catch (err) {
-    console.log(err);
+    // console.log(err);
   }
 };
 
@@ -280,14 +269,14 @@ export const GetMyCoords = async (
       try {
         const {latitude, longitude} = position.coords;
         callback(latitude, longitude);
-        console.log(successtring);
+        // console.log(successtring);
       } catch (err) {
-        console.log('error:', err.message);
-        console.log(`${errstring}`);
+        // console.log('error:', err.message);
+        // console.log(`${errstring}`);
       }
     },
     (error) => {
-      console.log(error.code, error.message);
+      // console.log(error.code, error.message);
     },
     {enableHighAccuracy: true, timeout: 300000, maximumAge: 10000},
   );
@@ -319,6 +308,11 @@ const ShowManLocationForGM = async (
         ProfileImageUrl4: ProfileImageUrl4,
         ProfileImageUrl5: ProfileImageUrl5,
         ProfileImageUrl6: ProfileImageUrl6,
+        FriendProfileImageUrl: '',
+        FriendProfileImageUrl2: '',
+        FriendMbti: '',
+        FriendNickName: '',
+
         TimeStamp: EpochTime,
         NickName: NickName,
         Mbti: Mbti,
@@ -343,7 +337,7 @@ const DeleteMyLocationAfter3Min = (UserEmail: string, Gender: number) => {
     }, 180000);
   }
   // } else if(Gender == 1){
-  //   console.log("Man")
+  //   // console.log("Man")
   // }
 };
 
@@ -357,6 +351,7 @@ const Girl_StartShowLocation = async (
   UserEmail: string,
   Memo: string = '',
   PeopleNum: Number,
+  FriendEmail: string = '',
   CanPayit: Number,
   ProfileImageUrl: string,
   ProfileImageUrl2: string,
@@ -383,6 +378,15 @@ const Girl_StartShowLocation = async (
   // }
   // const CanPayStr:string = CanPayObj.CanPayit
 
+  const FriendData: Object = await GetFriendProfileImage(FriendEmail);
+  // console.log('FriendData [MapScreen]', FriendData);
+
+  const FriendProfileImageUrl = FriendData.ProfileImageUrl;
+  const FriendProfileImageUrl2 = FriendData.ProfileImageUrl2;
+
+  const FriendNickName = FriendData?.NickName;
+  const FriendMbti = FriendData?.Mbti;
+
   const EpochTime = GetEpochTime();
   let ReplaceUserEmail = ReplacedotInEmail(UserEmail);
   // 현재 위치를 db에 업데이트시키는 코드
@@ -402,7 +406,10 @@ const Girl_StartShowLocation = async (
         ProfileImageUrl4: ProfileImageUrl4,
         ProfileImageUrl5: ProfileImageUrl5,
         ProfileImageUrl6: ProfileImageUrl6,
-
+        FriendProfileImageUrl: FriendProfileImageUrl,
+        FriendProfileImageUrl2: FriendProfileImageUrl2,
+        FriendMbti: FriendMbti,
+        FriendNickName: FriendNickName,
         TimeStamp: EpochTime,
         UserEmail: UserEmail,
         NickName: NickName,
@@ -432,7 +439,7 @@ function SendPushNotificationInforeground() {
 }
 
 const AndroidPushNoti = () => {
-  console.log('AndroidPushNoti');
+  // console.log('AndroidPushNoti');
 
   localNotificationService.showNotification(1, 'title', 'body', {}, {});
 };
@@ -451,10 +458,10 @@ export const UpdateMyLocationWatch = (
       // setLocation({latitude, longitude});
       dispatch({type: 'update', payload: {latitude, longitude}});
       UpdateMyLocation(latitude, longitude);
-      console.log('state location change');
+      // console.log('state location change');
     },
     (error) => {
-      console.log(error);
+      // console.log(error);
     },
     {
       enableHighAccuracy: true,
@@ -540,16 +547,19 @@ const MapScreen = (props: any) => {
         let InviObj: Array<Object> = await GetInvitationToFriendObj(
           InvitationCodeToFriend,
         );
-        console.log('InviObj:', InviObj);
+        // console.log('InviObj:', InviObj);
 
         return InviObj;
       })
       .then((InvitationCodeToFriend) => {
-        console.log('InvitationCodeToFriend:', InvitationCodeToFriend);
+        // console.log('InvitationCodeToFriend:', InvitationCodeToFriend);
 
         setInvitationCodeToFriend(InvitationCodeToFriend);
       });
   };
+
+  const [NickNameList, setNickNameList] =
+    useState<TAutocompleteDropdownItem[]>();
 
   const [locationState, locationdispatch] = useReducer(locationReducer, {
     latlng: {},
@@ -558,13 +568,13 @@ const MapScreen = (props: any) => {
   const [token, setToken] = useState('');
 
   const onRegister = (tk: string) => {
-    console.log('[App] onRegister : token :', tk);
+    // console.log('[App] onRegister : token :', tk);
     if (tk) setToken(tk);
   };
   // notify를 인수로 받아
   // notify의 title, body, notify를
   const onNotification = (notify: any) => {
-    console.log('[App] onNotification : notify :', notify);
+    // console.log('[App] onNotification : notify :', notify);
 
     const options = {
       soundName: 'default',
@@ -581,7 +591,7 @@ const MapScreen = (props: any) => {
   };
 
   const onOpenNotification = (notify: any) => {
-    console.log('[App] onOpenNotification : notify :', notify);
+    // console.log('[App] onOpenNotification : notify :', notify);
     Alert.alert('누군가가 위치 공유를 시작했습니다!');
     // Alert.alert('Open Notification : notify.body :'+ );
   };
@@ -596,27 +606,6 @@ const MapScreen = (props: any) => {
   const SetMyLocation = (latitude: number, longitude: number) => {
     setLocation({latitude, longitude});
   };
-
-  // async function CheckL1() {
-  //   if (UserData.L1CreatedAt) {
-  //     console.log('L1CreatedAt');
-  //     let now = GetEpochTime();
-  //     let milis = now - UserData.L1CreatedAt;
-  //     let Minutes = MilisToMinutes(milis);
-
-  //     if (Minutes < 15) {
-  //       console.log('15Limit Kick!!');
-
-  //       navigation.navigate('MeetMapScreen', {
-  //         UserData: UserData,
-  //         otherUserData: UserData.otherUserData,
-  //         channel: UserData.channel,
-  //       });
-  //     }
-  //   }
-  // }
-
-  // CheckL1();
 
   useEffect(() => {
     async function SaveInDevice() {
@@ -637,6 +626,7 @@ const MapScreen = (props: any) => {
         'Success SetMyLocation Reducer',
       );
 
+      await GetUserNickNameList(UserData.Gender, setNickNameList);
       // 현재위치를 state화 &추적
 
       // UpdateMyLocationWatch(setLocation, locationdispatch);
@@ -676,7 +666,7 @@ const MapScreen = (props: any) => {
     const onChildRemove = database()
       .ref('/Location')
       .on('child_removed', (snapshot) => {
-        console.log(snapshot);
+        // console.log(snapshot);
         GirlsLocationsrefetch();
       });
 
@@ -686,26 +676,26 @@ const MapScreen = (props: any) => {
         MansLocationsretech();
       });
 
-    // console.log("AppState In MapScreen:", AppState.currentState)
-    // console.log("appState.current", appState.current);
+    // // console.log("AppState In MapScreen:", AppState.currentState)
+    // // console.log("appState.current", appState.current);
 
     // const subscription = AppState.addEventListener("change", (nextAppState) => {
     //   if (
     //     appState.current.match(/inactive|background/) &&
     //     nextAppState === "active"
     //   ) {
-    //     // console.log("appState.current2",appState.current)
-    //     console.log("App has come to the foreground!");
+    //     // // console.log("appState.current2",appState.current)
+    //     // console.log("App has come to the foreground!");
     //   } else if(appState.current.match(/active/) && nextAppState === "background") {
-    //     console.log("App has come to the background")
+    //     // console.log("App has come to the background")
     //     // SendBird.disconnect()
     //   }
     //     appState.current = nextAppState;
-    //     console.log("AppState", nextAppState);
+    //     // console.log("AppState", nextAppState);
 
     //   })
 
-    const unsubscribe = AppState.addEventListener('change', handleStateChange);
+    // const unsubscribe = AppState.addEventListener('change', handleStateChange);
 
     // Stop listening for updates when no longer required
     return () => {
@@ -713,7 +703,7 @@ const MapScreen = (props: any) => {
       reference.ref('/ManLocation').off('child_added', ManonChildAdd);
       reference.ref('/Location').off('child_moved', onChildRemove);
 
-      unsubscribe.remove();
+      // unsubscribe.remove();
       // clearInterval(Result)
       // unsubscribe.remove();
       // subscription.remove();
@@ -726,7 +716,7 @@ const MapScreen = (props: any) => {
     // ios - active - inactive
     // aos - active - background니
     // active를 기준으로 나눠주면 나누면 두 운영체제 모두 포함하는 코드가 된다.
-    console.log('handleStateChange');
+    // console.log('handleStateChange');
     if (newState === 'active') {
       SendBird.setForegroundState();
     } else {
@@ -753,8 +743,8 @@ const MapScreen = (props: any) => {
   const [ProfileForGtoM, setProfileForGtoM] = useState<Object>({});
 
   const [Memo, setMemo] = useState('');
-  const [FriendSelect, setFriendSelect] = useState('');
-  const [PeopleNum, setPeopleNum] = useState(1);
+  const [FriendEmail, setFriendEmail] = useState<string>('');
+  const [PeopleNum, setPeopleNum] = useState(2);
   const [MoenyRadioBox, setMoneyRadioBox] = useState(0);
 
   const [second, setSecond] = useState<number>(180);
@@ -780,13 +770,14 @@ const MapScreen = (props: any) => {
     const date = new Date();
     let day = date.getHours();
     day = 23;
-    console.log(day);
+    // console.log(day);
     // day가 오후 10시 ~ 새벽 7시
     if ((day >= 22 && day <= 24) || (day >= 1 && day <= 7)) {
       Girl_StartShowLocation(
         UserData.UserEmail,
         Memo,
         PeopleNum,
+        FriendEmail,
         MoenyRadioBox,
         UserData.ProfileImageUrl,
         UserData.ProfileImageUrl2,
@@ -808,9 +799,15 @@ const MapScreen = (props: any) => {
     setShowUserModal(!ShowUserModal);
   };
 
+  const [ShowMbti, setShowMbti] = useState('');
+  const [ShowNickName, setShowNickName] = useState('');
+
   const Stateize = async (Obj: ProfileForGtoM) => {
     setProfileForGtoM(Obj);
-    console.log('stateize');
+    // setShowMbti(Obj.Mbti);
+    // setShowNickName(Obj.NickName);
+
+    // console.log('stateize');
   };
 
   const GirlMarkerOnPress = async (Obj: ProfileForGtoM) => {
@@ -819,7 +816,7 @@ const MapScreen = (props: any) => {
   };
 
   const DeleteChannelAfter10Minutes = (Channel: Object) => {
-    console.log('ChannelUrl In DeleteChannelAfter10Minutes:', Channel.url);
+    // console.log('ChannelUrl In DeleteChannelAfter10Minutes:', Channel.url);
     UploadChannelUrlInDb(Channel.url);
     ChannelDeleteTimer(Channel);
   };
@@ -844,7 +841,7 @@ const MapScreen = (props: any) => {
   };
 
   const CreateChating = () => {
-    console.log('StartChatingBetweenGirls In TwoMapScreen');
+    // console.log('StartChatingBetweenGirls In TwoMapScreen');
     let params = new SendBird.GroupChannelParams();
 
     // 추가로 고려할거 : 이미 채팅하기를 눌러 채팅방이 생성된 상태와 처음 채팅하기를 눌러서 채팅방이 생성되는 상황을 분기처리 하기
@@ -869,7 +866,7 @@ const MapScreen = (props: any) => {
         params,
         function (groupChannel: any, error: Error) {
           if (error) {
-            console.log(error.message);
+            // console.log(error.message);
             // Handle error.
           } else if (!error) {
             SwitchShowUserModal();
@@ -885,10 +882,10 @@ const MapScreen = (props: any) => {
 
             // DeleteChannelAfter10Minutes(groupChannel);
 
-            console.log(
-              'groupChannel In CreateChating Function In MapScreen:',
-              groupChannel,
-            );
+            // console.log(
+            // 'groupChannel In CreateChating Function In MapScreen:',
+            // groupChannel,
+            // );
           }
         },
       );
@@ -940,9 +937,9 @@ const MapScreen = (props: any) => {
 
   const moveToMyLocation = () => {
     const region = {...location, ...LOCATION_DELTA};
-    console.log(region);
+    // console.log(region);
     mapRef.current.animateToRegion(region);
-    console.log('[MapScreen] moveToMyLocation called');
+    // console.log('[MapScreen] moveToMyLocation called');
   };
 
   const AnimationMarker = (ProfileImageUrl: string) => {
@@ -1013,7 +1010,9 @@ const MapScreen = (props: any) => {
   const MainImage = () => {
     const ImageArray = [
       ProfileForGtoM.ProfileImageUrl,
+      // ProfileForGtoM.FriendProfileImageUrl,
       ProfileForGtoM.ProfileImageUrl2,
+      // ProfileForGtoM.FriendProfileImageUrl2,
       ProfileForGtoM.ProfileImageUrl3,
       ProfileForGtoM.ProfileImageUrl4,
       ProfileForGtoM.ProfileImageUrl5,
@@ -1032,6 +1031,18 @@ const MapScreen = (props: any) => {
           marginTop: 10,
         }}>
         <Swiper
+          // onTouchEnd={(e, state, context) => {
+          //   if (ProfileForGtoM.FriendProfileImageUrl != '') {
+          //     if (OddNumValid(state.index) == true) {
+          //       setShowMbti(ProfileForGtoM.Mbti);
+          //       setShowNickName(ProfileForGtoM.NickName);
+          //     } else if (OddNumValid(state.index) == false) {
+          //       setShowMbti(ProfileForGtoM.FriendMbti);
+          //       setShowNickName(ProfileForGtoM.FriendNickName);
+          //     }
+          //   }
+          // }}
+
           paginationStyle={{
             width: '70%',
             height: 2.5,
@@ -1061,7 +1072,7 @@ const MapScreen = (props: any) => {
               }}></View>
           }>
           {FiliterImageArray.map((data, index) => {
-            console.log(data);
+            // console.log(data);
             return (
               <Image
                 key={index}
@@ -1171,9 +1182,10 @@ const MapScreen = (props: any) => {
               }}>
               <Text style={{color: 'white', fontWeight: '700', fontSize: 17}}>
                 {ProfileForGtoM.NickName} {ProfileForGtoM.Age}
+                {/* {ShowNickName} */}
               </Text>
               <Text style={{color: 'white', marginTop: 5, fontWeight: '400'}}>
-                {ProfileForGtoM.Mbti}
+                {/* {ShowMbti} */}
               </Text>
               <Text
                 style={{color: 'white', marginTop: 5, fontWeight: '400'}}
@@ -1406,22 +1418,89 @@ const MapScreen = (props: any) => {
     </View>
   );
 
-  const M3Main_FriendSelect = (
+  const M3Main_FriendEmail = (
     <View style={[styles.Row_OnlyColumnCenter, {height: H11, width: '100%'}]}>
       <View style={MapScreenStyles.M3MainAside}>
         {Type2VerticalLine('100%')}
 
-        {FriendSelect == '' ? CheckSvg(22) : ClickedCheckSvg(22)}
+        {FriendEmail == '' ? CheckSvg(22) : ClickedCheckSvg(22)}
       </View>
       <View style={MapScreenStyles.M3MainSection}>
         <Text style={MapScreenStyles.M3MainSectionText}>인원 추가</Text>
         <View style={[MapScreenStyles.FriendAdd]}>
           {PeopleAddSvg(width * 0.06, {marginLeft: 10, marginRight: 5})}
           <TextInput
-            value={FriendSelect}
-            onChangeText={(text) => setFriendSelect(text)}
+            value={FriendEmail}
+            onChangeText={(text) => setFriendEmail(text)}
             style={MapScreenStyles.MemoTextInput}
             placeholder="닉네임을 입력해주세요"></TextInput>
+        </View>
+
+        <Text
+          numberOfLines={1}
+          style={{
+            fontSize: 10,
+            fontWeight: '500',
+            color: '#DFE5F180',
+            marginLeft: 10,
+          }}>
+          랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요
+        </Text>
+      </View>
+    </View>
+  );
+
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const searchRef = useRef(null);
+  const dropdownController = useRef(null);
+
+  const M3Main_FriendEmail_Auto = (
+    <View
+      style={[
+        styles.Row_OnlyColumnCenter,
+        {height: H11, width: '100%', zIndex: 1},
+      ]}>
+      <View style={MapScreenStyles.M3MainAside}>
+        {Type2VerticalLine('100%')}
+
+        {FriendEmail == '' ? CheckSvg(22) : ClickedCheckSvg(22)}
+      </View>
+      <View style={MapScreenStyles.M3MainSection}>
+        <Text style={MapScreenStyles.M3MainSectionText}>인원 추가</Text>
+        <View style={[MapScreenStyles.FriendAdd]}>
+          {/* <TextInput
+            value={FriendEmail}
+            onChangeText={(text) => setFriendEmail(text)}
+            style={MapScreenStyles.MemoTextInput}
+            placeholder="닉네임을 입력해주세요"></TextInput> */}
+
+          <AutocompleteDropdown
+            ref={searchRef}
+            useFilter={false}
+            controller={(controller) => {
+              dropdownController.current = controller;
+            }}
+            clearOnFocus={false}
+            closeOnBlur={true}
+            closeOnSubmit={false}
+            initialValue={{id: '2'}} // or just '2'
+            onSelectItem={(item) => {
+              item && // console.log(item.UserEmail);
+                item &&
+                setFriendEmail(item.UserEmail);
+            }}
+            dataSet={NickNameList}
+            containerStyle={{flex: 1}}
+            p
+            // ChevronIconComponent={
+            //   <MaterialIcons name="my-location" size={27} color="#6713D2" />
+            // }
+            // ClearIconComponent={
+            //   <MaterialIcons name="my-location" size={27} color="#6713D2" />
+            // }
+            keyExtractor={(item: any) => item.id}
+          />
         </View>
 
         <Text
@@ -1828,22 +1907,12 @@ const MapScreen = (props: any) => {
               marginTop: '5%',
             }}>
             {M3Main_TopBarSvg(width * 0.84)}
-            {/* <View style={[{backgroundColor: 'red'}, styles.RowCenter]}>
-            <WithLocalSvg
-              asset={M3Main_TopBar}
-              width={width * 0.84}
-              style={{display: 'flex'}}>
-              <Text style={{position: 'absolute', color: 'white', right: 0}}>
-                Hello
-              </Text>
-            </WithLocalSvg>
-          </View> */}
           </View>
 
           <View
             style={{
               width: '84%',
-              // height: '55%',
+
               height: height * 0.55,
               marginLeft: '8%',
               marginTop: '-3%',
@@ -1852,7 +1921,7 @@ const MapScreen = (props: any) => {
               borderBottomStartRadius: 48,
             }}>
             {M3Main_PeopleNumSelect}
-            {PeopleNum >= 2 ? M3Main_FriendSelect : null}
+            {PeopleNum >= 2 ? M3Main_FriendEmail_Auto : null}
             {M3Main_MemoInput}
             {M3Main_PaySelect}
             <View
@@ -1890,7 +1959,6 @@ const MapScreen = (props: any) => {
                     ]}>
                     <Text>완료</Text>
                   </LinearGradient>
-                  {/* {ClickedCompleteSvg(width * 0.37)} */}
                 </TouchableOpacity>
               ) : (
                 <View
@@ -2319,6 +2387,10 @@ const MapScreen = (props: any) => {
                         ProfileImageUrl4: data?.ProfileImageUrl4,
                         ProfileImageUrl5: data?.ProfileImageUrl5,
                         ProfileImageUrl6: data?.ProfileImageUrl6,
+                        FriendProfileImageUrl: data?.FriendProfileImageUrl,
+                        FriendProfileImageUrl2: data?.FriendProfileImageUrl2,
+                        FriendMbti: data?.FriendMbti,
+                        FriendNickName: data?.FriendNickName,
                         UserEmail: data?.UserEmail,
                         Memo: data.Memo,
                         PeopleNum: data.PeopleNum,
@@ -2370,6 +2442,11 @@ const MapScreen = (props: any) => {
                         ProfileImageUrl4: MansData?.ProfileImageUrl4,
                         ProfileImageUrl5: MansData?.ProfileImageUrl5,
                         ProfileImageUrl6: MansData?.ProfileImageUrl6,
+                        FriendProfileImageUrl: MansData?.FriendProfileImageUrl,
+                        FriendProfileImageUrl2:
+                          MansData?.FriendProfileImageUrl2,
+                        FriendMbti: MansData?.FriendMbti,
+                        FriendNickName: MansData?.FriendNickName,
                         UserEmail: MansData?.UserEmail,
                         Memo: '',
                         PeopleNum: 1,

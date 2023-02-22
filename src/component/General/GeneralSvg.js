@@ -180,7 +180,8 @@ export const WaitScreenSvg = (
   <WithLocalSvg
     asset={WaitScreen}
     width={WPer100}
-    height={WPer100 * 2}></WithLocalSvg>
+    // height={WPer100 * 2}
+  ></WithLocalSvg>
 );
 
 export const RightArrowWhiteSvg = (

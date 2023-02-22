@@ -100,17 +100,21 @@ const BasicImage = (Gender: number) => {
 };
 
 const UpdateInvitationCodeToFriend = async (InvitationCode: string) => {
-  fetch('http:/13.124.209.97/invitation/InvitationCode', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: qs.stringify({
-      InvitationCode: `${InvitationCode}`,
-    }),
-  }).then((Result) => {
-    console.log('Result In UpdateInvitationCodeToFriend Function:', Result);
-  });
+  if (InvitationCode == 'ACDGKU') {
+    return;
+  } else {
+    fetch('http:/13.124.209.97/invitation/InvitationCode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: qs.stringify({
+        InvitationCode: `${InvitationCode}`,
+      }),
+    }).then((Result) => {
+      console.log('Result In UpdateInvitationCodeToFriend Function:', Result);
+    });
+  }
 };
 
 const ReigsterScreen = ({navigation, route}: Register2ScreenProps) => {

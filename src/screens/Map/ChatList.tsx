@@ -94,8 +94,8 @@ const ChatListScreen = ({navigation, route}: any) => {
         if (!err) {
           dispatch({
             type: 'fetch-channels',
-            // payload: {channels: distinctChannels},
-            payload: {channels: fetchedChannels},
+            payload: {channels: distinctChannels},
+            // payload: {channels: fetchedChannels},
           });
         } else {
           dispatch({

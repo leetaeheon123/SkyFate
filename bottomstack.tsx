@@ -12,6 +12,7 @@ import MyProfileChange from 'Screens/MyProfile/MyProfileChange';
 
 import MyProfileChangeScreen from 'Screens/MyProfile/MyProfileChange';
 import {GetEpochTime, MilisToMinutes} from '^/GetTime';
+import AutoComScreen from 'Screens/Map/AutoCom';
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
@@ -74,9 +75,9 @@ const BottomTabScreen = (props: any) => {
     }
   };
 
-  // useEffect(() => {
-  //   ValidL1();
-  // }, []);
+  useEffect(() => {
+    ValidL1();
+  }, []);
 
   return (
     <BottomTab.Navigator
@@ -122,6 +123,8 @@ const BottomTabScreen = (props: any) => {
         name="MyProfileChangeScreen"
         component={MyProfileChangeScreen}
       />
+
+      <BottomTab.Screen name="AutoComScreen" component={AutoComScreen} />
     </BottomTab.Navigator>
   );
 };

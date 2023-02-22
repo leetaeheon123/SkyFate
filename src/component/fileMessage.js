@@ -7,8 +7,8 @@ import moment from 'moment';
 
 import {withAppContext} from '../contextReducer';
 
-const DEFAULT_IMAGE_WIDTH = 240;
-const DEFAULT_IMAGE_HEIGHT = 160;
+const DEFAULT_IMAGE_WIDTH = 160;
+const DEFAULT_IMAGE_HEIGHT = 240;
 
 const FileMessage = (props) => {
   const {

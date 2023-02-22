@@ -50,7 +50,7 @@ import firestore from '@react-native-firebase/firestore';
 import {useKeyboard} from '@react-native-community/hooks';
 import {GetEpochTime, GetTime, MilisToMinutes} from '^/GetTime';
 import {Result} from 'component/L1/L1';
-import {Type2} from 'component/LinearGradient/LinearType';
+import {Type2, Type2가로} from 'component/LinearGradient/LinearType';
 import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
 import {WhyReport} from '../../../src/page/chat';
 const MeetMapScreen = ({route, navigation}: any, props: any) => {
@@ -266,7 +266,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
       .on('child_removed', (snapshot) => {
         setOtherLocation(undefined);
         setGeoJson(undefined);
-        BeforeReport()
+        BeforeReport();
       });
 
     return () => {
@@ -572,46 +572,51 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
         marginLeft: 0,
         marginBottom: 0,
       }}>
-      <View
-        style={[
-          styles.Column_OnlyRowCenter,
-          {
-            width: '90%',
-            height: height * 0.55,
-            backgroundColor: '#37375B',
-            marginLeft: '5%',
-            borderRadius: 15,
-          },
-        ]}>
-        {WhiteReportSvg}
-        <TouchableOpacity
-          style={{position: 'absolute', top: 22, right: 13}}
-          onPress={onoffReportModal}>
-          {취소하기Svg}
-        </TouchableOpacity>
-        {WhyReport}
-        {ReturnTo('허위 프로필', 1)}
-        {ReturnTo('욕설 및 비방', 2)}
-        {ReturnTo('불쾌한 대화', 3)}
-        {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
-        <TouchableOpacity
-          onPress={() => {
-            ReportSubmit();
-          }}
+      <LinearGradient
+        colors={Type2가로}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 0}}
+        style={[styles.W100H100, styles.RowCenter]}>
+        <View
           style={[
-            styles.RowCenter,
+            styles.Column_OnlyRowCenter,
             {
-              width: '63%',
-              height: '8%',
-              borderRadius: 7,
-              backgroundColor: '#DFE5F1',
-              position: 'absolute',
-              bottom: 30,
+              width: '90%',
+              height: height * 0.55,
+              backgroundColor: '#37375B',
+              borderRadius: 15,
             },
           ]}>
-          <Text style={[styles.FT16, styles.FW500]}>다음</Text>
-        </TouchableOpacity>
-      </View>
+          {WhiteReportSvg}
+          <TouchableOpacity
+            style={{position: 'absolute', top: 22, right: 13}}
+            onPress={onoffReportModal}>
+            {취소하기Svg}
+          </TouchableOpacity>
+          {WhyReport}
+          {ReturnTo('허위 프로필', 1)}
+          {ReturnTo('욕설 및 비방', 2)}
+          {ReturnTo('불쾌한 대화', 3)}
+          {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+          <TouchableOpacity
+            onPress={() => {
+              ReportSubmit();
+            }}
+            style={[
+              styles.RowCenter,
+              {
+                width: '63%',
+                height: '8%',
+                borderRadius: 7,
+                backgroundColor: '#DFE5F1',
+                position: 'absolute',
+                bottom: 30,
+              },
+            ]}>
+            <Text style={[styles.FT16, styles.FW500]}>다음</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
     </Modal>
   );
 

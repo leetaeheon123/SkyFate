@@ -9,6 +9,7 @@ import {AppContext} from '../UsefulFunctions/Appcontext';
 import {handleNotificationAction} from '../utils';
 import {GetUserData} from '../UsefulFunctions/SaveUserDataInDevice';
 import {WaitScreen} from './Wait';
+import {ft} from '^/Firebase';
 // import { SBConnect } from '../UsefulFunctions/SaveUserDataInDevice';
 
 export const SendBirdUpdateUserInfo = (
@@ -65,24 +66,53 @@ const IndicatorScreen = (props: any) => {
   const [IsUseTime, setIsUseTime] = useState(false);
   const [IsUseDay, setIsUseDay] = useState(false);
 
-  const CheckHoursofuse = () => {
+  const CheckHoursofuse = async () => {
+    const OpenHours = await GetOpenHours();
     const date = new Date();
     let day = date.getHours();
-    day = 23;
 
-    console.log(day);
+    console.log(OpenHours);
+    const TodayOpenHours = OpenHours.TodayOpenHours;
+    const NextDayCloseHours = OpenHours.NextDayCloseHours;
     // day가 오후 10시 ~ 새벽 7시
-    if ((day >= 22 && day <= 24) || (day >= 1 && day <= 7)) {
+    if (
+      (day >= TodayOpenHours && day <= 24) ||
+      (day >= 1 && day <= NextDayCloseHours)
+    ) {
       setIsUseTime(true);
     } else {
       setIsUseTime(false);
     }
   };
 
-  const CheckDaysofuse = () => {
+  const GetOpenDay = async () => {
+    const Result = await ft
+      .collection('SettingData')
+      .doc('OpenTime')
+      .get()
+      .then((doc) => doc.data());
+    return Result?.Day;
+  };
+
+  const GetOpenHours = async () => {
+    const Result = await ft
+      .collection('SettingData')
+      .doc('OpenTime')
+      .get()
+      .then((doc) => doc.data());
+    return Result?.Hours;
+  };
+
+  const CheckDaysofuse = async () => {
     const date = new Date();
     let day = date.getDay();
-    day = 6;
+    day = 5;
+    // 서버에서 오픈 요일 배열 불러오기
+    // ex) [0, 4,5,6]
+    // day 값이 그 배열안에 속하는지 체크
+    const OpenDay = await GetOpenDay();
+
+    console.log(OpenDay);
     if (day == 0 || day == 5 || day == 6) {
       setIsUseDay(true);
     } else {
