@@ -80,7 +80,9 @@ const Channel = (props) => {
   };
 
   const updateChannelName = (channel) => {
-    setName(otherUserData[0].nickname);
+    if (otherUserData) {
+      setName(otherUserData[0].nickname);
+    }
   };
   const updateLastMessage = (channel) => {
     if (channel.lastMessage) {
@@ -133,7 +135,7 @@ const Channel = (props) => {
       }}>
       <Image
         source={
-          channel.coverUrl
+          channel.coverUrl && otherUserData
             ? {uri: otherUserData[0].plainProfileUrl}
             : require('../Assets/logo-icon-purple.png')
         }

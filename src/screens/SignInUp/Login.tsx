@@ -64,8 +64,8 @@ const LoginWithEmail = async (
 const LoginScreen = (props: any) => {
   const [Selected, setSelected] = useState('');
 
-  const [TextInputEmail, setTextInputEmail] = useState('8269apk@naver.com');
-  const [TextInputPassword, setTextInputPassword] = useState('123456');
+  const [TextInputEmail, setTextInputEmail] = useState('');
+  const [TextInputPassword, setTextInputPassword] = useState('');
 
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;

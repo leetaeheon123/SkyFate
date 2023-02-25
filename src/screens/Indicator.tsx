@@ -7,10 +7,12 @@ import ValidInvitationCodeScreen from './ValidInvitationCode';
 
 import {AppContext} from '../UsefulFunctions/Appcontext';
 import {handleNotificationAction} from '../utils';
-import {GetUserData} from '../UsefulFunctions/SaveUserDataInDevice';
+import {
+  GetUserData,
+  RegisterSendBirdToken,
+} from '../UsefulFunctions/SaveUserDataInDevice';
 import {WaitScreen} from './Wait';
 import {ft} from '^/Firebase';
-// import { SBConnect } from '../UsefulFunctions/SaveUserDataInDevice';
 
 export const SendBirdUpdateUserInfo = (
   SendBird: any,
@@ -23,6 +25,8 @@ export const SendBirdUpdateUserInfo = (
     async (user: any, err: any) => {
       console.log('In sendbird.updateCurrentUserInfo User:', user);
       if (!err) {
+        RegisterSendBirdToken(SendBird, user.email);
+
         console.log(
           'Succes updateCurrentUserInfo SendBird In SBconnect Function In Indicator Screen',
         );
@@ -66,7 +70,7 @@ const IndicatorScreen = (props: any) => {
   const [IsUseTime, setIsUseTime] = useState(false);
   const [IsUseDay, setIsUseDay] = useState(false);
 
-  const CheckHoursofuse = async () => {
+  const CheckHoursofuse = async (UserType: string) => {
     const OpenHours = await GetOpenHours();
     const date = new Date();
     let day = date.getHours();
@@ -81,7 +85,9 @@ const IndicatorScreen = (props: any) => {
     ) {
       setIsUseTime(true);
     } else {
-      setIsUseTime(false);
+      {
+        UserType == 'Admin' ? setIsUseTime(true) : setIsUseTime(false);
+      }
     }
   };
 
@@ -103,7 +109,7 @@ const IndicatorScreen = (props: any) => {
     return Result?.Hours;
   };
 
-  const CheckDaysofuse = async () => {
+  const CheckDaysofuse = async (UserType: string) => {
     const date = new Date();
     let day = date.getDay();
     day = 5;
@@ -116,7 +122,9 @@ const IndicatorScreen = (props: any) => {
     if (day == 0 || day == 5 || day == 6) {
       setIsUseDay(true);
     } else {
-      setIsUseDay(false);
+      {
+        UserType == 'Admin' ? setIsUseDay(true) : setIsUseDay(false);
+      }
     }
   };
 
@@ -187,8 +195,8 @@ const IndicatorScreen = (props: any) => {
               UserData?.NickName,
               UserData?.ProfileImageUrl,
             );
-            CheckDaysofuse();
-            CheckHoursofuse();
+            CheckDaysofuse(UserData?.Type);
+            CheckHoursofuse(UserData?.Type);
           }
         }
         setInitialized(true);
@@ -235,8 +243,9 @@ const IndicatorScreen = (props: any) => {
             UserData?.ProfileImageUrl,
           );
         }
-        CheckDaysofuse();
-        CheckHoursofuse();
+
+        CheckDaysofuse(UserData?.Type);
+        CheckHoursofuse(UserData?.Type);
         setInitialized(true);
 
         // return handleNotificationAction(

@@ -46,7 +46,6 @@ const SignUpWithEmail = async (
 
   try {
     const result = await signUp({email: Email, password: Password});
-    Alert.alert('회원가입 완료');
     // await InvitationCodeToFriend를 서버로부터 가져오는 함수
     let UserEmail: string = result.user.email;
     await SignUpFirestore(UserEmail, InvitationCode, PkNumber);
@@ -87,6 +86,7 @@ const SignUpFirestore = async (
     ProfileImageUrl4: '',
     ProfileImageUrl5: '',
     ProfileImageUrl6: '',
+    Type: 'User',
   });
 };
 
@@ -133,8 +133,8 @@ const ReigsterScreen = ({navigation, route}: Register2ScreenProps) => {
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
-  const [TextInputEmail, setTextInputEmail] = useState('8269apk9@naver.com');
-  const [TextInputPassword, setTextInputPassword] = useState('123456');
+  const [TextInputEmail, setTextInputEmail] = useState('');
+  const [TextInputPassword, setTextInputPassword] = useState('');
 
   const [Selected, setSelected] = useState('');
   const EmailTextInput = () => (

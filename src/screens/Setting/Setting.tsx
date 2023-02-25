@@ -140,6 +140,24 @@ function Setting({navigation, route}: any) {
         </TouchableOpacity>
       </View>
 
+      <View>
+        <Text style={SettingStyles.MainText}>랑데부 학습시키기</Text>
+        <TouchableOpacity
+          onPress={() => {}}
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: 18,
+            width: '100%',
+          }}>
+          <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
+            랑데부를 도와주세요
+          </Text>
+          {RightArrowWhiteSvg}
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity
         onPress={() => {
           logout(navigation, SendBird);

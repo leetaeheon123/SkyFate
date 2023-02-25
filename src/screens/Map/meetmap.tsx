@@ -168,14 +168,14 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
     }
   };
 
-  channelHandler.onUserLeft = (targetChannel: any, user) => {
-    if (user.userId === UserData.UserEmail) {
-      navigation.navigate('IndicatorScreen', {
-        action: 'leave',
-        data: {channel: Groupchannel},
-      });
-    }
-  };
+  // channelHandler.onUserLeft = (targetChannel: any, user) => {
+  //   if (user.userId === UserData.UserEmail) {
+  //     navigation.navigate('IndicatorScreen', {
+  //       action: 'leave',
+  //       data: {channel: Groupchannel},
+  //     });
+  //   }
+  // };
 
   const connectionHandler = new SendBird.ConnectionHandler();
   connectionHandler.onReconnectStarted = () => {
@@ -500,7 +500,9 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
       );
     }, 2000);
     setTimeout(() => {
-      navigation.goBack();
+      navigation.navigate('MapScreen', {
+        CurrentUser: UserData,
+      });
     }, 4000);
   };
 

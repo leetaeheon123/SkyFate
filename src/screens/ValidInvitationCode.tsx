@@ -225,8 +225,7 @@ const ValidInvitationCodeScreen = () => {
 
   const {width} = Dimensions.get('window');
   console.log(width);
-  const [TextInputInvitationCode, setTextInputInvitationCode] =
-    useState('AHfPqW');
+  const [TextInputInvitationCode, setTextInputInvitationCode] = useState('');
   const navigation = useNavigation();
 
   const TextInputStyle = StyleSheet.create({

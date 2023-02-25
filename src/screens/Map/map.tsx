@@ -299,6 +299,7 @@ const ShowManLocationForGM = async (
 
     const UpdateManLocation = (latitude: any, longitude: any) => {
       reference.ref(`/ManLocation/${ReplaceUserEmail}`).update({
+        // reference.ref(`/ManLocation/Sample@naver`).update({
         UserEmail: UserEmail,
         latitude: latitude,
         longitude: longitude,
@@ -312,7 +313,6 @@ const ShowManLocationForGM = async (
         FriendProfileImageUrl2: '',
         FriendMbti: '',
         FriendNickName: '',
-
         TimeStamp: EpochTime,
         NickName: NickName,
         Mbti: Mbti,
@@ -632,7 +632,7 @@ const MapScreen = (props: any) => {
       // UpdateMyLocationWatch(setLocation, locationdispatch);
       UpdateMyLocationWatch(locationdispatch);
 
-      if (UserData.Gender == '1') {
+      if (UserData.Gender == 1) {
         let Result = ShowManLocationForGM(
           UserData.UserEmail,
           UserData.ProfileImageUrl,
@@ -646,7 +646,7 @@ const MapScreen = (props: any) => {
         );
         return Result;
       }
-      await GetInvitationToFriendCode(UserData.PkNumber);
+      // await GetInvitationToFriendCode(UserData.PkNumber);
       await GetAsyncStorageEmail();
     }
 
@@ -734,7 +734,7 @@ const MapScreen = (props: any) => {
     setGpsOn((previousState) => !previousState);
   };
 
-  const [GpsOn, setGpsOn] = useState(UserData.Gender == 1);
+  const [GpsOn, setGpsOn] = useState(false);
 
   const [ModalVisiable, setModalVisiable] = useState(false);
   const [ProfileModalVisiable, setProfileModalVisiable] = useState(false);
@@ -1186,6 +1186,7 @@ const MapScreen = (props: any) => {
               </Text>
               <Text style={{color: 'white', marginTop: 5, fontWeight: '400'}}>
                 {/* {ShowMbti} */}
+                {ProfileForGtoM?.Mbti}
               </Text>
               <Text
                 style={{color: 'white', marginTop: 5, fontWeight: '400'}}
@@ -1223,165 +1224,6 @@ const MapScreen = (props: any) => {
   //     />
   //   </View>
   // );
-
-  const ShowMyProfileModal = () => {
-    return (
-      <Modal
-        // animationType='slide'
-        animationIn={'slideInUp'}
-        isVisible={ProfileModalVisiable}
-        onBackdropPress={() => setProfileModalVisiable(false)}
-        // visible={ProfileModalVisiable}
-        transparent={true}
-        style={{width: '100%', height: '100%'}}
-        onSwipeComplete={() => setProfileModalVisiable(false)}
-        swipeDirection="down"
-        // coverScreen={false}
-      >
-        <SafeAreaView style={MapScreenStyles.ProfileModalParent}>
-          <View style={styles.W90ML5}>
-            {/* {TopLine} */}
-
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                marginTop: 40,
-              }}>
-              <TouchableOpacity
-                style={{
-                  width: 100,
-                  height: 100,
-                  backgroundColor: 'white',
-                  borderRadius: 10,
-                }}
-                onPress={() => {
-                  ChangeMyProfileImage(
-                    UserData.UserEmail,
-                    UserData.Gender,
-                    navigation,
-                    1,
-                    setProfileImageUrl,
-                    UserData.NickName,
-                    SendBird,
-                  );
-                }}>
-                {ProfileImage()}
-              </TouchableOpacity>
-            </View>
-
-            <Text style={{color: 'white', fontSize: 22, fontWeight: '600'}}>
-              내 등급
-            </Text>
-            <Text style={{color: 'white', marginLeft: '50%'}}>50%</Text>
-            <Progress.Bar
-              progress={0.5}
-              width={width * 0.9}
-              // indeterminate={true}
-              color={'skyblue'}
-              // unfilledColor={'black'}
-              borderWidth={1}
-              // borderColor="red"
-              height={8}
-              borderRadius={15}
-            />
-            <Button
-              title="X"
-              onPress={() => {
-                setProfileModalVisiable(false);
-              }}
-            />
-
-            <Text style={[styles.WhiteColor]}>
-              내 latitude:{location?.latitude}
-            </Text>
-            <Text style={[styles.WhiteColor]}>
-              내 longitude:{location?.longitude}
-            </Text>
-
-            {InvitationCodeToFriend.length != 0 ? (
-              <>
-                <Text style={styles.WhiteColor}>
-                  초대코드1: {InvitationCodeToFriend[0].InvitationCode}{' '}
-                  {InvitationCodeToFriend[0].Used ? '사용됨' : '초대하기'}
-                </Text>
-                <Text style={styles.WhiteColor}>
-                  초대코드2: {InvitationCodeToFriend[1].InvitationCode}{' '}
-                  {InvitationCodeToFriend[1].Used ? '사용됨' : '초대하기'}
-                </Text>
-              </>
-            ) : null}
-
-            <Text style={styles.WhiteColor}>
-              Email: {UserData.UserEmail} / NickName: {UserData.NickName}
-            </Text>
-            <Text style={styles.WhiteColor}>
-              Async에 저장된 email: {AsyncEmail}
-            </Text>
-
-            <Button
-              title="로그아웃 하기"
-              color={'red'}
-              onPress={() => {
-                setProfileModalVisiable(!ProfileModalVisiable);
-                logout(navigation, SendBird);
-              }}></Button>
-
-            <Button
-              title="남자로 변경"
-              onPress={() => {
-                firestore()
-                  .collection('UserList')
-                  .doc(UserData.UserEmail)
-                  .update({
-                    Gender: 1,
-                  });
-
-                navigation.navigate('IndicatorScreen', {
-                  From: 'Map',
-                });
-              }}
-            />
-
-            <Button
-              title="여자로 변경"
-              onPress={() => {
-                firestore()
-                  .collection('UserList')
-                  .doc(UserData.UserEmail)
-                  .update({
-                    Gender: 2,
-                  });
-
-                navigation.navigate('IndicatorScreen', {
-                  From: 'Map',
-                });
-              }}
-            />
-
-            <Button
-              title="L1으로 이동"
-              onPress={() => {
-                navigation.navigate('MeetMapScreen', {});
-                setProfileModalVisiable(false);
-              }}
-            />
-
-            <Button
-              title="회원탈퇴 하기"
-              color={'red'}
-              onPress={() => {
-                navigation.navigate('WithdrawalScreen', {
-                  logout: logout,
-                  UserEmail: UserData.UserEmail,
-                });
-              }}></Button>
-          </View>
-        </SafeAreaView>
-      </Modal>
-    );
-  };
 
   const M3Main_PeopleNumSelect = (
     <View
@@ -2336,7 +2178,6 @@ const MapScreen = (props: any) => {
   return (
     <View style={{width: '100%', height: '100%'}}>
       {/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
-      {ShowMyProfileModal()}
       {GirlInputStateModal()}
       {ShowClickedUserDataModal()}
       {Enter_MatchModal()}
@@ -2469,7 +2310,7 @@ const MapScreen = (props: any) => {
               })
             : null}
 
-          {itaewon_HotPlaceListisLoading == false
+          {/* {itaewon_HotPlaceListisLoading == false
             ? HPMarker(itaewon_HotPlaceList)
             : null}
 
@@ -2479,7 +2320,7 @@ const MapScreen = (props: any) => {
 
           {Sinsa_HotPlaceListisLoading == false
             ? HPMarker(Sinsa_HotPlaceList)
-            : null}
+            : null} */}
         </MapView>
       )}
 

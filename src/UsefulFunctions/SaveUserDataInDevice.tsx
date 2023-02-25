@@ -26,7 +26,7 @@ export const RegisterUserEmail = async (
 ) => {
   try {
     await SaveUserEmailInDevice(UserEmail);
-    await RegisterSendBirdToken(SendBird, UserEmail);
+    // await RegisterSendBirdToken(SendBird, UserEmail);
     await navigation.navigate('AgreementScreen', {
       UserEmail,
     });
@@ -45,7 +45,7 @@ export const LoginUserEmail = async (
 ) => {
   try {
     await SaveUserEmailInDevice(UserEmail);
-    await RegisterSendBirdToken(SendBird, UserEmail);
+    // await RegisterSendBirdToken(SendBird, UserEmail);
     await navigation.navigate('IndicatorScreen', {
       From: 'LoginAndRegister',
     });
@@ -58,7 +58,7 @@ export const LoginUserEmail = async (
 };
 
 export const RegisterSendBirdToken = async (
-  SendBird: Object,
+  SendBird: any,
   UserEmail: string,
 ) => {
   try {
@@ -70,13 +70,15 @@ export const RegisterSendBirdToken = async (
       if (Platform.OS === 'ios') {
         const Token = await messaging().getAPNSToken();
         console.log('iostoken', Token);
-        UpdateFCMToken(UserEmail, Token);
         SendBird.registerAPNSPushTokenForCurrentUser(Token);
+
+        // UpdateFCMToken(UserEmail, Token);
       } else {
         const Token = await messaging().getToken();
-        UpdateFCMToken(UserEmail, Token);
         console.log('aostoken', Token);
+
         SendBird.registerGCMPushTokenForCurrentUser(Token);
+        // UpdateFCMToken(UserEmail, Token);
       }
     }
   } catch (err) {
