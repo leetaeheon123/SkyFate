@@ -134,7 +134,10 @@ const IndicatorScreen = (props: any) => {
         if (user) {
           const UserEmail = user;
           const UserData = await GetUserData(user);
+          const NickName = UserData?.NickName;
           const Gender = UserData?.Gender;
+          const Age = UserData?.Age;
+
           // console.log("UserData In Indicator", UserData)
 
           const ValidAgreement = UserData?.hasOwnProperty(
@@ -151,31 +154,54 @@ const IndicatorScreen = (props: any) => {
             return;
           }
 
-          const ValidMbti = UserData?.hasOwnProperty('Mbti');
-          if (!ValidMbti) {
-            GotoProfileInputScreen('MbtiSelectScreen', UserEmail);
+          const ValidGender = UserData?.hasOwnProperty('Gender');
+          if (!ValidGender) {
+            GotoProfileInputScreen('GenderSelectScreen', UserEmail, NickName);
             return;
           }
 
-          const ValidGender = UserData?.hasOwnProperty('Gender');
-          if (!ValidGender) {
-            GotoProfileInputScreen('GenderSelectScreen', UserEmail);
+          const ValidMbti = UserData?.hasOwnProperty('Mbti');
+          if (!ValidMbti) {
+            GotoProfileInputScreen(
+              'MbtiSelectScreen',
+              UserEmail,
+              NickName,
+              Gender,
+            );
             return;
           }
 
           const ValidAge = UserData?.hasOwnProperty('Age');
           if (!ValidAge) {
-            GotoProfileInputScreen('AgeSelectScreen', UserEmail, Gender);
+            GotoProfileInputScreen(
+              'AgeSelectScreen',
+              UserEmail,
+              NickName,
+              Gender,
+            );
             return;
           }
 
-          const ValidProfileImageUrl =
-            UserData?.hasOwnProperty('ProfileImageUrl');
-          if (!ValidProfileImageUrl) {
+          // const ValidProfileImageUrl =
+          //   UserData?.hasOwnProperty('ProfileImageUrl');
+          // if (!ValidProfileImageUrl) {
+          //   GotoProfileInputScreen(
+          //     'ProfileImageSelectScreen',
+          //     UserEmail,
+          //     NickName,
+          //     Gender,
+          //     Age,
+          //   );
+          //   return;
+          // }
+
+          if (UserData?.ProfileImageUrl == '') {
             GotoProfileInputScreen(
               'ProfileImageSelectScreen',
               UserEmail,
+              NickName,
               Gender,
+              Age,
             );
             return;
           }
@@ -209,12 +235,45 @@ const IndicatorScreen = (props: any) => {
   const GotoProfileInputScreen = (
     ScreenName: string,
     UserEmail: string,
+    NickName: string = '',
     Gender: number = 0,
+    Age: number = 0,
   ) => {
+    if (NickName == '') {
+      navigation.navigate(`${ScreenName}`, {
+        UserEmail,
+        NickName: '',
+      });
+      return;
+    }
+
+    if (Gender == 0) {
+      navigation.navigate(`${ScreenName}`, {
+        UserEmail,
+        NickName,
+      });
+
+      return;
+    }
+
+    if (Age == 0) {
+      navigation.navigate(`${ScreenName}`, {
+        UserEmail,
+        NickName,
+        Gender,
+      });
+
+      return;
+    }
+
     navigation.navigate(`${ScreenName}`, {
       UserEmail,
+      NickName,
       Gender,
+      Age,
     });
+
+    return;
   };
 
   useEffect(() => {

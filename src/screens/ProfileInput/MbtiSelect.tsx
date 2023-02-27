@@ -20,9 +20,11 @@ import {MbtiBtn} from 'component/Profile/ProfileSvg';
 import styles from '~/ManToManBoard';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import {MbtiStyles} from '~/ProfileInput';
+import {Btn_ClickableBack} from 'component/General';
 const MbtiSelectScreen = ({navigation, route}: any) => {
-  console.log(route.params.UserEmail);
   const {UserEmail, Gender, NickName} = route.params;
+
+  console.log(UserEmail, NickName, Gender);
 
   const [one, setone] = useState('');
   const [two, settwo] = useState('');
@@ -64,6 +66,17 @@ const MbtiSelectScreen = ({navigation, route}: any) => {
   return (
     <SafeAreaView style={LoginAndReigsterStyles.Body}>
       <View style={LoginAndReigsterStyles.Main}>
+        <Btn_ClickableBack
+          width={12}
+          style={{position: 'absolute', top: 12, left: '-2.5%'}}
+          onPress={() => {
+            navigation.navigate('GenderSelectScreen', {
+              UserEmail: UserEmail,
+              NickName: NickName,
+              Gender: Gender,
+            });
+          }}
+        />
         <View style={LoginAndReigsterStyles.Description}>
           {TextComponent('Mbti')}
         </View>

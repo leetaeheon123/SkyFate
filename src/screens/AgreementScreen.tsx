@@ -20,6 +20,7 @@ import {
 } from 'component/SignInUp/SignInUp';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import {UpdateFbFirestore} from '^/Firebase';
+import {Btn_ClickableBack} from 'component/General';
 
 export type AgreementScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -65,6 +66,7 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
 
     navigation.navigate('NickNameSelectScreen', {
       UserEmail: UserEmail,
+      NickName: '',
     });
   };
 

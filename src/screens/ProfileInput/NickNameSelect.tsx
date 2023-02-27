@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Button,
@@ -23,18 +23,19 @@ import styles from '~/ManToManBoard';
 import {RemoveIdentityToken} from 'Screens/Map/map';
 const NickNameSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
-  const {UserEmail} = route.params;
+  const {UserEmail, NickName} = route.params;
 
-  const [NickName, setNickName] = useState('');
+  const [NickNameValue, setNickName] = useState(NickName);
   const [Selected, setSelected] = useState(false);
   const UpdateNickName = async () => {
     await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
-      NickName: NickName,
+      NickName: NickNameValue,
     });
 
     navigation.navigate('GenderSelectScreen', {
       UserEmail: UserEmail,
-      NickName: NickName,
+      NickName: NickNameValue,
+      Gender: 0,
     });
   };
 
@@ -46,7 +47,9 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
           LoginAndRegisterTextInputStyle().TextInput,
           {
             borderBottomColor:
-              Selected == true || NickName.length >= 1 ? 'white' : 'lightgray',
+              Selected == true || NickNameValue.length >= 1
+                ? 'white'
+                : 'lightgray',
           },
         ]}
         placeholder="닉네임을 입력해주세요"
@@ -57,12 +60,12 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
         onEndEditing={() => {
           setSelected(false);
         }}
-        value={NickName}
+        value={NickNameValue}
         onChangeText={(value) => {
           setNickName(value);
         }}
       />
-      {Selected == true || NickName.length >= 1 ? LongLineFixSvg() : null}
+      {Selected == true || NickNameValue.length >= 1 ? LongLineFixSvg() : null}
     </View>
   );
 
@@ -82,7 +85,7 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
           onPress={() => {
             RemoveIdentityToken();
           }}></Button> */}
-        {NickName.length >= 4 ? (
+        {NickNameValue.length >= 4 ? (
           <Btn_ClickableNext
             onPress={() => {
               UpdateNickName();
