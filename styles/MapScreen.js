@@ -227,12 +227,20 @@ export const MapScreenStyles = StyleSheet.create({
     bottom: '50%',
   },
 
-  GirlsMarker: {
+  MarkerImage: {
     width: 35,
     height: 35,
     borderRadius: 50,
     borderWidth: 2,
     borderColor: 'white',
+  },
+  SecondMarkerImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: 'white',
+    marginLeft: -10,
   },
   HP_Marker: {
     width: 24,

@@ -106,6 +106,7 @@ import {
   AutocompleteDropdown,
   TAutocompleteDropdownItem,
 } from 'react-native-autocomplete-dropdown';
+import {background} from 'native-base/lib/typescript/theme/styled-system';
 
 export interface ILocation {
   latitude: number;
@@ -2207,20 +2208,8 @@ const MapScreen = (props: any) => {
                       latitude: data.latitude,
                       longitude: data.longitude,
                     }}
-                    // title={data?.Memo}
                     tracksViewChanges={false}
-                    // description={'인원: ' + data.PeopleNum + ' 지불여부: ' + data.CanPayit + " 메모: " + data.Memo}
                     onPress={() => {
-                      // let obj = {
-                      //   data.ProfileImageUrl,
-                      //   data.UserEmail,
-                      //   data.Memo,
-                      //   data.PeopleNum,
-                      //   data.CanPayit,
-                      //   data.NickName,
-                      //   data.latitude,
-                      //   data.longitude,
-                      // }
                       GirlMarkerOnPress({
                         ProfileImageUrl: data?.ProfileImageUrl,
                         ProfileImageUrl2: data?.ProfileImageUrl2,
@@ -2242,12 +2231,7 @@ const MapScreen = (props: any) => {
                         Mbti: data.Mbti,
                       });
                     }}>
-                    <View
-                      style={[
-                        MarkerAnimationStyles.dot,
-                        MarkerAnimationStyles.center,
-                        {},
-                      ]}>
+                    <View style={[MarkerAnimationStyles.dot, styles.RowCenter]}>
                       {Platform.OS == 'ios'
                         ? [...Array(2).keys()].map((_, index) => (
                             <OtherRing key={index} index={index} />
@@ -2255,10 +2239,17 @@ const MapScreen = (props: any) => {
                         : null}
 
                       <Image
-                        style={MapScreenStyles.GirlsMarker}
+                        style={MapScreenStyles.MarkerImage}
                         source={{uri: data.ProfileImageUrl}}
                         resizeMode="cover"
                       />
+                      {data?.FriendProfileImageUrl == '' ? null : (
+                        <Image
+                          style={MapScreenStyles.SecondMarkerImage}
+                          source={{uri: data?.FriendProfileImageUrl}}
+                          resizeMode="cover"
+                        />
+                      )}
                     </View>
                   </Marker>
                 );
@@ -2301,9 +2292,17 @@ const MapScreen = (props: any) => {
                     <View>
                       <Image
                         source={{uri: MansData.ProfileImageUrl}}
-                        style={MapScreenStyles.GirlsMarker}
+                        style={MapScreenStyles.MarkerImage}
                         resizeMode="cover"
                       />
+
+                      {MansData?.FriendProfileImageUrl == '' ? null : (
+                        <Image
+                          style={MapScreenStyles.SecondMarkerImage}
+                          source={{uri: MansData?.FriendProfileImageUrl}}
+                          resizeMode="cover"
+                        />
+                      )}
                     </View>
                   </Marker>
                 );

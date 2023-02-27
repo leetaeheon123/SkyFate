@@ -25,7 +25,7 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
   console.log(route.params.UserEmail);
   const {UserEmail} = route.params;
 
-  const [NickName, setNickName] = useState('Taeheon9');
+  const [NickName, setNickName] = useState('');
   const [Selected, setSelected] = useState(false);
   const UpdateNickName = async () => {
     await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
