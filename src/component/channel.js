@@ -38,6 +38,8 @@ const Channel = (props) => {
 
     // setCreatedAt(moment(channel.createdAt).fromNow());
     setCreatedAt(minutes);
+
+    return () => clearInterval(intervalRef);
   }, []);
 
   const getTimePassed = () => {

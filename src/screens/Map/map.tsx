@@ -327,7 +327,7 @@ const ShowManLocationForGM = async (
     );
   }, 20000);
 
-  return id;
+  return () => clearInterval(id);
 };
 
 const DeleteMyLocationAfter3Min = (UserEmail: string, Gender: number) => {
@@ -705,8 +705,7 @@ const MapScreen = (props: any) => {
       reference.ref('/Location').off('child_moved', onChildRemove);
 
       // unsubscribe.remove();
-      // clearInterval(Result)
-      // unsubscribe.remove();
+      clearInterval(Result);
       // subscription.remove();
     };
   }, []);

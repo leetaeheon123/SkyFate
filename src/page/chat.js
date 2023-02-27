@@ -223,6 +223,7 @@ const ChatScreen = (props) => {
       SendBird.removeConnectionHandler('chat');
       SendBird.removeChannelHandler('chat');
       unsubscribe.remove();
+      clearInterval(intervalRef);
     };
   }, []);
 

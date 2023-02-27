@@ -80,12 +80,7 @@ const NickNameSelectScreen = ({navigation, route}: any) => {
             {NickNameTextInput()}
           </Pressable>
         </View>
-        {/* <Button
-          title="RemoveToken"
-          onPress={() => {
-            RemoveIdentityToken();
-          }}></Button> */}
-        {NickNameValue.length >= 4 ? (
+        {NickNameValue.length >= 3 ? (
           <Btn_ClickableNext
             onPress={() => {
               UpdateNickName();

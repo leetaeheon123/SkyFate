@@ -278,6 +278,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
 
       SendBird.removeConnectionHandler('chat');
       SendBird.removeChannelHandler('chat');
+      // clearInterval(intervalRef);
       // unsubscribe.remove();
     };
   }, []);
