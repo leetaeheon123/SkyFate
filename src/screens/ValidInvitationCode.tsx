@@ -31,6 +31,7 @@ import {Btn_ClickableNext} from 'component/Profile';
 
 import {
   MainText_InvitationSvg,
+  SubTextComponent,
   SubText_InvitationSvg,
 } from 'component/Profile/ProfileSvg';
 import {LineSvg, LongLineSvg} from 'component/General/GeneralSvg';
@@ -293,56 +294,8 @@ const ValidInvitationCodeScreen = () => {
               Keyboard.dismiss();
             }}>
             {InvitationCode()}
-
-            {/* <Button
-              title="닉네임 입력창 이동"
-              onPress={() => {
-                navigation.navigate('NickNameSelectScreen', {
-                  UserEmail: '8269apk@naver.com',
-                });
-              }}
-            /> */}
-
-            {/* <Button
-              title="나이 입력창 이동"
-              onPress={() => {
-                navigation.navigate('AgeSelectScreen', {
-                  UserEmail: '8269apk@naver.com',
-                  Gender: 2,
-                });
-              }}
-            /> */}
           </Pressable>
         </View>
-
-        {/* <Button
-          title="이미지 업로드로 이동"
-          onPress={() => {
-            navigation.navigate('ProfileImageSelectScreen', {
-              UserEmail: '8269apk@naver.com',
-              Gender: 2,
-            });
-          }}
-        />
-
-        <Button
-          title="즉시 이용약관 페이지로 이동"
-          onPress={() => {
-            navigation.navigate('AgreementScreen', {
-              InvitationCode: 'AHfPqW',
-              PkNumber: 0,
-            });
-          }}></Button>
-
-        <Button
-          title="즉시 회원가입으로 이동"
-          onPress={() => {
-            navigation.navigate('RegisterScreen', {
-              InvitationCode: 'AHfPqW',
-              PkNumber: 0,
-            });
-          }}
-        /> */}
 
         <Btn_ClickableNext
           onPress={() => {
@@ -362,15 +315,13 @@ const ValidInvitationCodeScreen = () => {
             style={[
               styles.RowCenter,
               {
-                // backgroundColor: 'red',
-
                 height: 30,
               },
             ]}
             onPress={() => {
               navigation.navigate('LoginScreen');
             }}>
-            <Text>이미 계정이 있습니다 &gt;</Text>
+            {SubTextComponent('AccountExistText', {})}
           </TouchableOpacity>
         </View>
       </View>

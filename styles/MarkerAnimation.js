@@ -29,6 +29,12 @@ const MarkerAnimationStyles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
   },
+  SecondImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginLeft: -15,
+  },
 });
 
 export default MarkerAnimationStyles;

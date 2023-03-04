@@ -1,4 +1,5 @@
 import firestore from '@react-native-firebase/firestore';
+import {Alert} from 'react-native';
 import {TAutocompleteDropdownItem} from 'react-native-autocomplete-dropdown';
 export const ft = firestore();
 
@@ -78,15 +79,18 @@ export const GetFriendProfileImage = async (FriendEmail: string = '') => {
     };
   }
 
-  console.log(FriendEmail);
+  try {
+    const FriendData = await ft
+      .collection('UserList')
+      .doc(FriendEmail)
+      .get()
+      .then((doc) => doc.data());
 
-  const FriendData = await ft
-    .collection('UserList')
-    .doc(FriendEmail)
-    .get()
-    .then((doc) => doc.data());
+    console.log(FriendData);
 
-  console.log(FriendData);
-
-  return FriendData;
+    return FriendData;
+  } catch (e) {
+    Alert.alert('입력된 사용자가 존재하지 않습니다');
+    console.log('Error');
+  }
 };

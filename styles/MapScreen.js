@@ -21,6 +21,14 @@ export const MapScreenStyles = StyleSheet.create({
     width: '90%',
     marginLeft: '5%',
   },
+
+  TagFriendModal: [
+    styles.W100H100,
+    styles.FullModal,
+    {
+      // backgroundColor: 'red',
+    },
+  ],
   TopView: {
     position: 'absolute',
     left: '5%',

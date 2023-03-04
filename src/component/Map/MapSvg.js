@@ -19,16 +19,18 @@ import M3TopBackground from 'Assets/Map/M3/M3TopBackground.svg';
 import M3Top from 'Assets/Map/M3/M3Top.svg';
 import M3Main_TopBar from 'Assets/Map/M3/M3Main_TopBar.svg';
 
+import M3Main_TopBarWhiteHeart from 'Assets/Map/M3/M3Main_TopBarWhiteHeart.svg';
+
 import Pay_Putoff from 'Assets/Map/M3/Pay_Putoff.svg';
 import ClickedPay_Half from 'Assets/Map/M3/ClickedPay_Half.svg';
 
 import Pay_Half from 'Assets/Map/M3/Pay_Half.svg';
-import {Text} from 'react-native';
 
 import On from 'Assets/On.svg';
 import Off from 'Assets/Off.svg';
 import OnToggle from 'Assets/Map/OnToggle.svg';
 import OffToggle from 'Assets/Map/OffToggle.svg';
+import {HPer1, HPer2, HPer5} from '~/Per';
 
 export const GeneralMatchSvg = (width) => {
   let height = width;
@@ -93,6 +95,17 @@ export const M3TopSvg = (width) => {
 export const M3Main_TopBarSvg = (width) => {
   return <WithLocalSvg asset={M3Main_TopBar} width={width}></WithLocalSvg>;
 };
+export const M3Main_TopBarWhiteHeartSvg = (width) => (
+  <WithLocalSvg
+    asset={M3Main_TopBarWhiteHeart}
+    style={{
+      position: 'absolute',
+      left: '2.2%',
+      top: -HPer1,
+    }}
+    width={width}
+    height={width}></WithLocalSvg>
+);
 
 export const Pay_PutoffSvg = (width) => {
   return <WithLocalSvg asset={Pay_Putoff} width={width} height={65} />;

@@ -128,6 +128,14 @@ const IndicatorScreen = (props: any) => {
     }
   };
 
+  const ValidProfileImageUrlFun = (ProfileImageUr: any) => {
+    if (ProfileImageUr == '') {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
   useEffect(() => {
     AsyncStorage.getItem('UserEmail')
       .then(async (user) => {
@@ -182,20 +190,11 @@ const IndicatorScreen = (props: any) => {
             return;
           }
 
-          // const ValidProfileImageUrl =
-          //   UserData?.hasOwnProperty('ProfileImageUrl');
-          // if (!ValidProfileImageUrl) {
-          //   GotoProfileInputScreen(
-          //     'ProfileImageSelectScreen',
-          //     UserEmail,
-          //     NickName,
-          //     Gender,
-          //     Age,
-          //   );
-          //   return;
-          // }
+          const ValidProfileImageUrl = ValidProfileImageUrlFun(
+            UserData?.ProfileImageUrl,
+          );
 
-          if (UserData?.ProfileImageUrl == '') {
+          if (!ValidProfileImageUrl) {
             GotoProfileInputScreen(
               'ProfileImageSelectScreen',
               UserEmail,
