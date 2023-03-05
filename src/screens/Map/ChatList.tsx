@@ -82,7 +82,7 @@ const ChatListScreen = ({navigation, route}: any) => {
           let second = Math.floor(milis / 1000);
 
           console.log('second In distn:', second);
-          return second < 600;
+          return second < 600 && data.name != '상담원';
         });
 
         console.log('distinctChannels:', distinctChannels);

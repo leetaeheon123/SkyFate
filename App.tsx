@@ -85,7 +85,7 @@ const App = () => {
       <FlipperAsyncStorage />
       <NavigationContainer
         onStateChange={(state) => {
-          console.log('[App.tsx] NavigationContainer onStateChange:', state);
+          // console.log('[App.tsx] NavigationContainer onStateChange:', state);
           Sentry.addBreadcrumb({
             category: 'Navigation',
             data: {

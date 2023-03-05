@@ -53,6 +53,31 @@ import {Result} from 'component/L1/L1';
 import {Type2, Type2가로} from 'component/LinearGradient/LinearType';
 import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
 import {WhyReport} from '../../../src/page/chat';
+
+const SendBirdChatLeave = (
+  UserEmail: string,
+  application_id: string,
+  channel_url: string,
+) => {
+  let UserIds = {user_ids: [`${UserEmail}`]};
+
+  const options = {
+    method: 'PUT',
+    headers: new Headers({
+      'Api-Token': '1522cd6e34542ab8c7542dd0200b69273c2af102',
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(UserIds),
+  };
+
+  fetch(
+    `https://api-${application_id}.sendbird.com/v3/group_channels/${channel_url}/leave`,
+    options,
+  )
+    .then((response) => response.text())
+    .then((result) => console.log(result))
+    .catch((error) => console.log('error', error));
+};
 const MeetMapScreen = ({route, navigation}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
 
@@ -69,7 +94,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
 
   const [Groupchannel, setGroupchannel] = useState();
 
-  //console.log('Uid for SendBird url:', uid);
+  console.log('Uid for SendBird url:', uid);
   const [Mylocation, locationdispatch] = useReducer(locationReducer, {
     latlng: {},
   });
@@ -238,14 +263,14 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
     }
 
     const MyUpdate = reference.ref(MyDBUrl).on('child_changed', (snapshot) => {
-      // //console.log('MyUpdate child_changed snapshot:', snapshot.val());
+      console.log('MyUpdate child_changed snapshot:', snapshot.val());
       setMyLocation(snapshot.val());
     });
 
     const OtherUpdate = reference
       .ref(OtherDBUrl)
       .on('child_changed', (snapshot) => {
-        // //console.log('OtherUpdate child_changed snapshot:', snapshot.val());
+        console.log('OtherUpdate child_changed snapshot:', snapshot.val());
         setOtherLocation(snapshot.val());
       });
 
@@ -485,26 +510,17 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
     await DeleteL1CreatedAt();
     await DeleteMyLocation();
 
-    setTimeout(() => {
-      SendBird.GroupChannel.getChannel(
-        uid,
-        function (groupChannel: any, error: Error) {
-          if (!error) {
-            navigation.navigate('IndicatorScreen', {
-              action: 'leave',
-              data: {channel: groupChannel},
-            });
-          } else if (error) {
-            console.log('Error In GotoMap In GetChannel', error);
-          }
-        },
-      );
-    }, 2000);
+    SendBirdChatLeave(
+      UserData.UserEmail,
+      'B0BDC2B5-FF59-4D00-98C2-BADBAA9215E7',
+      uid,
+    );
+
     setTimeout(() => {
       navigation.navigate('MapScreen', {
         CurrentUser: UserData,
       });
-    }, 4000);
+    }, 2000);
   };
 
   const ReportSubmit = async () => {
@@ -841,7 +857,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
               <View>
                 <Image
                   source={{uri: UserData.ProfileImageUrl}}
-                  style={MapScreenStyles.GirlsMarker}
+                  style={MapScreenStyles.MarkerImage}
                   resizeMode="cover"
                 />
               </View>
@@ -852,7 +868,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
               <View>
                 <Image
                   source={{uri: otherUserData.ProfileImageUrl}}
-                  style={MapScreenStyles.GirlsMarker}
+                  style={MapScreenStyles.MarkerImage}
                   resizeMode="cover"
                 />
               </View>

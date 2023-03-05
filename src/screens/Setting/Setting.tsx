@@ -12,7 +12,7 @@ import styles from '~/ManToManBoard';
 import {logout} from 'Screens/Map/map';
 import {AppContext} from '^/Appcontext';
 
-function Setting({navigation, route}: any) {
+const Setting = ({navigation, route}: any) => {
   const [notification, setNotification] = useState(false);
   const {UserData} = route.params;
   const Context = useContext(AppContext);
@@ -27,6 +27,41 @@ function Setting({navigation, route}: any) {
         marginTop: 15,
       }}></View>
   );
+
+  const HelpOurs = () => {
+    // console.log('StartChatingBetweenGirls In TwoMapScreen');
+    let params = new SendBird.GroupChannelParams();
+
+    // 추가로 고려할거 : 이미 채팅하기를 눌러 채팅방이 생성된 상태와 처음 채팅하기를 눌러서 채팅방이 생성되는 상황을 분기처리 하기
+    let Member = ['8269apk@naver.com', UserData.UserEmail];
+    let NickNames = ['상담원', UserData.NickName];
+
+    params.addUserIds(Member);
+    params.coverUrl = UserData.ProfileImageUrl;
+    params.name = NickNames[0];
+    params.operatorUserIds = Member;
+    (params.isDistinct = true), (params.isPublic = false);
+
+    SendBird.GroupChannel.createChannel(
+      params,
+      function (groupChannel: any, error: Error) {
+        if (error) {
+          // console.log(error.message);
+          // Handle error.
+        } else if (!error) {
+          chat(groupChannel);
+        }
+      },
+    );
+  };
+
+  const chat = (channel: any) => {
+    navigation.navigate('CsChatScreen', {
+      channel,
+      UserData,
+    });
+  };
+
   return (
     <SafeAreaView style={SettingStyles.Body}>
       <View
@@ -87,19 +122,7 @@ function Setting({navigation, route}: any) {
             // height: 72,
           }}>
           <TouchableOpacity
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              height: 24,
-              marginTop: 18,
-            }}>
-            <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
-              개인정보 처리방침
-            </Text>
-            {RightArrowWhiteSvg}
-          </TouchableOpacity>
-          <TouchableOpacity
+            onPress={() => openWebView('service', navigation)}
             style={{
               display: 'flex',
               flexDirection: 'row',
@@ -110,6 +133,20 @@ function Setting({navigation, route}: any) {
             }}>
             <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
               이용 약관
+            </Text>
+            {RightArrowWhiteSvg}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => openWebView('privacy', navigation)}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              height: 24,
+              marginTop: 18,
+            }}>
+            <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
+              개인정보 처리방침
             </Text>
             {RightArrowWhiteSvg}
           </TouchableOpacity>
@@ -143,7 +180,7 @@ function Setting({navigation, route}: any) {
       <View>
         <Text style={SettingStyles.MainText}>랑데부 학습시키기</Text>
         <TouchableOpacity
-          onPress={() => {}}
+          onPress={() => HelpOurs()}
           style={{
             display: 'flex',
             flexDirection: 'row',
@@ -171,6 +208,6 @@ function Setting({navigation, route}: any) {
       </TouchableOpacity>
     </SafeAreaView>
   );
-}
+};
 
 export default Setting;

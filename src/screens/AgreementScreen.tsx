@@ -26,15 +26,32 @@ export type AgreementScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'InvitationCodeSet'
 >;
+const AGREEMENT_LOCATION_URL =
+  'https://zealous-jumpsuit-7f6.notion.site/844c74cb6068412a98b5afcc529ec7c2';
+const AGREEMENT_SERVICE_URL =
+  'https://zealous-jumpsuit-7f6.notion.site/e746adc75467454f9a5364be8b90c93d';
+const AGREEMENT_PRIVACY_URL =
+  'https://zealous-jumpsuit-7f6.notion.site/b0d186174c2f4db7adbc97b3c7f2b0ae';
 
+export const openWebView = (type: string, navigation: any) => {
+  let uri = '';
+  switch (type) {
+    case 'service':
+      uri = AGREEMENT_SERVICE_URL;
+      break;
+    case 'location':
+      uri = AGREEMENT_LOCATION_URL;
+      break;
+    case 'privacy':
+      uri = AGREEMENT_PRIVACY_URL;
+      break;
+  }
+
+  navigation.navigate('WebViewScreen', {
+    uri,
+  });
+};
 const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
-  const AGREEMENT_LOCATION_URL =
-    'https://zealous-jumpsuit-7f6.notion.site/844c74cb6068412a98b5afcc529ec7c2';
-  const AGREEMENT_SERVICE_URL =
-    'https://zealous-jumpsuit-7f6.notion.site/e746adc75467454f9a5364be8b90c93d';
-  const AGREEMENT_PRIVACY_URL =
-    'https://zealous-jumpsuit-7f6.notion.site/b0d186174c2f4db7adbc97b3c7f2b0ae';
-
   const {UserEmail} = route.params;
 
   const [all, setAll] = useState(false);
@@ -70,25 +87,6 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
     });
   };
 
-  const openWebView = (type: string) => {
-    let uri = '';
-    switch (type) {
-      case 'service':
-        uri = AGREEMENT_SERVICE_URL;
-        break;
-      case 'location':
-        uri = AGREEMENT_LOCATION_URL;
-        break;
-      case 'privacy':
-        uri = AGREEMENT_PRIVACY_URL;
-        break;
-    }
-
-    navigation.navigate('WebViewScreen', {
-      uri,
-    });
-  };
-
   const ViewMore = (type: string) => {
     return (
       <Pressable
@@ -97,7 +95,7 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
           right: '5%',
         }}
         onPress={() => {
-          openWebView(type);
+          openWebView(type, navigation);
         }}>
         {RightArrowSvg()}
       </Pressable>

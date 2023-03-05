@@ -109,6 +109,7 @@ import {
   TAutocompleteDropdownItem,
 } from 'react-native-autocomplete-dropdown';
 import {background} from 'native-base/lib/typescript/theme/styled-system';
+import SwiperFlatList from 'react-native-swiper-flatlist';
 
 export interface ILocation {
   latitude: number;
@@ -748,6 +749,10 @@ const MapScreen = (props: any) => {
   };
 
   const ChangeShowStateMan = () => {
+    // Alert.alert(
+    //   '남성유저 160명, 여성유저 200명이 가입하기 전까진 사용할 수 없습니다',
+    // );
+    // return;
     setGpsOn((previousState) => !previousState);
   };
 
@@ -821,6 +826,10 @@ const MapScreen = (props: any) => {
   );
 
   const ShowMyLocation = async () => {
+    // Alert.alert(
+    //   '남성유저 160명, 여성유저 200명이 가입하기 전까진 사용할 수 없습니다',
+    // );
+    // return;
     const date = new Date();
     let day = date.getHours();
     day = 23;
@@ -1205,6 +1214,58 @@ const MapScreen = (props: any) => {
     </View>
   );
 
+  const MainImageFlat = (
+    <View
+      style={{
+        width: '95%',
+        marginLeft: '2.5%',
+        height: '81%',
+        borderRadius: 31,
+        marginTop: 10,
+      }}>
+      <SwiperFlatList
+        showPagination={true}
+        data={FiliterImageArray}
+        paginationStyle={{
+          width: '70%',
+          height: 2.5,
+          position: 'absolute',
+          top: 24,
+          left: '15%',
+          display: 'flex',
+          flexDirection: 'row',
+          zIndex: 10,
+        }}
+        paginationStyleItem={{
+          height: '100%',
+          width: `${100 / FiliterImageArray.length}%`,
+          backgroundColor: '#00000014',
+          borderRadius: 4,
+        }}
+        paginationStyleItemActive={{
+          height: '100%',
+          width: `${100 / FiliterImageArray.length}%`,
+          backgroundColor: 'white',
+          borderRadius: 4,
+        }}
+        renderItem={({item}) => (
+          <Image
+            // key={index}
+            resizeMode="cover"
+            style={{
+              width: width * 0.855,
+              height: '100%',
+              borderRadius: 31,
+            }}
+            source={{
+              uri: item,
+            }}
+          />
+        )}
+      />
+    </View>
+  );
+
   const Desc = (
     <View style={{marginBottom: 10}}>
       <Text
@@ -1270,16 +1331,15 @@ const MapScreen = (props: any) => {
         // transparent={true}
         isVisible={ShowUserModal}
         coverScreen={false}
-        // onBackdropPress={() => setShowUserModal(false)}
+        onBackdropPress={() => setShowUserModal(false)}
         // onSwipeComplete={() => setShowUserModal(false)}
         // swipeDirection="down"
       >
         <View
           style={[
-            styles.W95ML5,
             {height: '65%', backgroundColor: '#313A5B', borderRadius: 26},
           ]}>
-          {ProfileForGtoM.ProfileImageUrl != undefined ? MainImage : null}
+          {ProfileForGtoM.ProfileImageUrl != undefined ? MainImageFlat : null}
           {/* <MapTopLine /> */}
 
           <View
@@ -2078,7 +2138,7 @@ const MapScreen = (props: any) => {
         ]}>
         {/* <View style={MapScreenStyles.MatchModal}> */}
         {Btn_MatchComponent()}
-        {Btn_RandomMatchComponent()}
+        {/* {Btn_RandomMatchComponent()} */}
         {ClickedBottomBar()}
         {/* </View> */}
       </Modal>
@@ -2565,12 +2625,17 @@ const MapScreen = (props: any) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
+          //줌고정
+          // zoomEnabled={false}
+          // 카메라고정
+          // scrollEnabled={false}
           ref={mapRef}
           showsUserLocation={true}
           loadingEnabled={true}
           // userInterfaceStyle="light"
           userInterfaceStyle="dark"
           minZoomLevel={10}
+          // minZoomLevel={14}
           maxZoomLevel={17}>
           {GpsOn == true ? AnimationMarker(ProfileImageUrl) : null}
           {isLoading == false && UserData.Gender == 1 && GpsOn == true

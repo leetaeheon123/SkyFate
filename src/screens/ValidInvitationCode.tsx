@@ -297,6 +297,9 @@ const ValidInvitationCodeScreen = () => {
           </Pressable>
         </View>
 
+        <Text>가입한 남성유저수: 82명</Text>
+        <Text>가입한 여성유저수: 98명</Text>
+
         <Btn_ClickableNext
           onPress={() => {
             ValidateInvitationCode(TextInputInvitationCode, navigation);
