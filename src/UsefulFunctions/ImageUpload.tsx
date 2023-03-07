@@ -18,6 +18,9 @@ export const ChangeMyProfileImage = async (
 ) => {
   let UploadCallback = async (LocalImagePath: string) => {
     const StorageUrl = await PutInStorage(LocalImagePath, UserEmail, Gender);
+
+    setState(StorageUrl);
+
     await UpdateProfileImageUrl(
       UserEmail,
       StorageUrl,
@@ -28,10 +31,10 @@ export const ChangeMyProfileImage = async (
     );
   };
 
-  ImagePickerLaunch(UploadCallback, setState);
+  ImagePickerLaunch(UploadCallback);
 };
 
-const ImagePickerLaunch = (callback: Function, setState: Function) => {
+const ImagePickerLaunch = (callback: Function) => {
   const back: string = 'back';
   const duration: number = 10;
   // const result = launchImageLibrary(
@@ -64,7 +67,6 @@ const ImagePickerLaunch = (callback: Function, setState: Function) => {
   }).then(async (res) => {
     // if (res?.didCancel) return;
     let LocalImagePath = res.path;
-    setState(LocalImagePath);
     callback(LocalImagePath);
   });
 };

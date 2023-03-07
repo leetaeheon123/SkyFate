@@ -35,6 +35,7 @@ import {
   SubText_InvitationSvg,
 } from 'component/Profile/ProfileSvg';
 import {LineSvg, LongLineSvg} from 'component/General/GeneralSvg';
+import {GetFbFirestore} from '^/Firebase';
 
 export type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -124,18 +125,44 @@ const ValidInvitationCodeLength = (InvitationCode: string) => {
   return false;
 };
 
-const ValidateInvitationCode = (InvitationCode: string, navigation: any) => {
+const ValidateInvitationCode = async (
+  InvitationCode: string,
+  navigation: any,
+) => {
   let Valid = ValidInvitationCodeLength(InvitationCode);
   if (Valid == false) {
     Alert.alert('초대코드를 다시한번 확인해주세요');
     return;
   }
 
-  if (InvitationCode == 'ACDGKU') {
+  let SpecialInvitationCode = await GetFbFirestore('InvitationCode', 'Special');
+  let SpecialArray: string[] = [];
+
+  for (const property in SpecialInvitationCode) {
+    const value = SpecialInvitationCode[property]['InvitationCode'];
+    SpecialArray = [...SpecialArray, value];
+  }
+
+  const isincludesSpecialArray = SpecialArray.includes(InvitationCode);
+  console.log(isincludesSpecialArray);
+  if (isincludesSpecialArray == true) {
     SpecialInvitation(InvitationCode, navigation);
   } else {
     GenearlInvitation(InvitationCode, navigation);
   }
+};
+
+const CheckUsed = (querySnapshot: any): number => {
+  let length = querySnapshot.size;
+  querySnapshot.forEach((doc: any) => {
+    if (length == 1 && doc.data().Used == false) {
+      return 1;
+    } else if (length == 1 && doc.data().Used == true) {
+      return 2;
+    }
+  });
+
+  return 0;
 };
 
 const GenearlInvitation = async (InvitationCode: string, navigation: any) => {
@@ -145,20 +172,13 @@ const GenearlInvitation = async (InvitationCode: string, navigation: any) => {
     .where('InvitationCode', '==', InvitationCode)
     .get()
     .then((querySnapshot) => {
-      let Valid = 0;
-      let length = querySnapshot.size;
-      console.log(length);
-      querySnapshot.forEach((doc) => {
-        if (length == 1 && doc.data().Used == false) {
-          Valid = 1;
-        } else if (length == 1 && doc.data().Used == true) {
-          Valid = 2;
-        }
-      });
+      // 사용되었는지 안되었는지 판단하는 로직
+      let Valid = CheckUsed(querySnapshot);
 
       let Obj = {
         Valid: Valid,
         PkNumber: PkNumber,
+        CodeType: 'General',
       };
       return Obj;
     })
@@ -170,6 +190,7 @@ const GenearlInvitation = async (InvitationCode: string, navigation: any) => {
 interface ValidObj {
   Valid: number;
   PkNumber: number | undefined;
+  CodeType: string;
 }
 
 const LastPassage = (
@@ -181,6 +202,7 @@ const LastPassage = (
     navigation.navigate('RegisterScreen', {
       InvitationCode: InvitationCode,
       PkNumber: Obj.PkNumber,
+      CodeType: Obj.CodeType,
     });
   } else if (Obj.Valid == 0) {
     Alert.alert('존재하지 않는 초대코드입니다.');
@@ -193,25 +215,13 @@ const LastPassage = (
 
 const SpecialInvitation = async (InvitationCode: string, navigation: any) => {
   const PkNumber = await GetPkNumber();
-  firestore()
-    .collection('InvitationCode')
-    .doc('Special')
-    .get()
-    .then(() => {
-      let Valid = 0;
-      Valid = 1;
-
-      console.log(PkNumber);
-
-      let Obj = {
-        Valid: Valid,
-        PkNumber: PkNumber,
-      };
-      return Obj;
-    })
-    .then(async (Obj) => {
-      LastPassage(Obj, InvitationCode, navigation);
-    });
+  let Valid = 1;
+  let Obj = {
+    Valid: Valid,
+    PkNumber: PkNumber,
+    CodeType: 'Special',
+  };
+  LastPassage(Obj, InvitationCode, navigation);
 };
 
 const GetPkNumber = async () => {

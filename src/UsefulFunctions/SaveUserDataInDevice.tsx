@@ -41,7 +41,6 @@ export const RegisterUserEmail = async (
 export const LoginUserEmail = async (
   UserEmail: string,
   navigation: any,
-  SendBird: Object,
 ) => {
   try {
     await SaveUserEmailInDevice(UserEmail);

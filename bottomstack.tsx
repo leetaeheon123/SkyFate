@@ -11,13 +11,15 @@ import MyProfileScreen from 'Screens/MyProfile/MyProfile';
 import MyProfileChange from 'Screens/MyProfile/MyProfileChange';
 
 import MyProfileChangeScreen from 'Screens/MyProfile/MyProfileChange';
+
+import {WaitScreen} from 'Screens/Wait';
+
 import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 import AutoComScreen from 'Screens/Map/AutoCom';
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
-  const {route, navigation} = props;
-  let {currentUser} = props;
+  const {route, navigation, currentUser} = props;
   useEffect(() => {
     if (route.params && route.params.action) {
       const {action, data} = route.params;
@@ -125,6 +127,7 @@ const BottomTabScreen = (props: any) => {
       />
 
       <BottomTab.Screen name="AutoComScreen" component={AutoComScreen} />
+      <BottomTab.Screen name="WaitScreen" component={WaitScreen} />
     </BottomTab.Navigator>
   );
 };

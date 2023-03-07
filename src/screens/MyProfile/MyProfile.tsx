@@ -28,6 +28,7 @@ import {ChangeProfileSvg} from 'component/Profile/ProfileSvg';
 import {Btn_ClickableBack, Btn_ClickableEnter_Setting} from 'component/General';
 import {ProfileTopLine} from 'component/Profile';
 import Swiper from 'react-native-swiper';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const DescCricle = (
   <LinearGradient
@@ -77,16 +78,20 @@ const MyProfileScreen = ({route, navigation}: any) => {
         end={{x: 0.5, y: 1}}
         colors={['#5B5AF3', '#5B59F3', '#835CF0', '#B567DB']}
         style={MyProfileStyles.linearGradient}>
-        <Image
-          resizeMode="cover"
-          style={MyProfileStyles.SubImage}
-          source={{uri: ImageArray[0]}}></Image>
+        {UserData.ProfileImageUrl == '' ? (
+          <Ionicons name="person" size={80} />
+        ) : (
+          <Image
+            resizeMode="cover"
+            style={MyProfileStyles.SubImage}
+            source={{uri: ImageArray[0]}}></Image>
+        )}
       </LinearGradient>
       <TouchableOpacity
         onPress={() => {
-          // navigation.navigate('MyProfileChangeScreen', {
-          //   UserData,
-          // });
+          navigation.navigate('MyProfileChangeScreen', {
+            UserData,
+          });
         }}
         style={{
           width: 27,

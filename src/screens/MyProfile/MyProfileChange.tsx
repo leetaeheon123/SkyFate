@@ -25,6 +25,7 @@ import {ChangeMyProfileImage} from '^/ImageUpload';
 import {완료Svg} from 'component/General/GeneralSvg';
 import {UpdateFbFirestore} from '^/Firebase';
 import {Btn_ClickableBack} from 'component/General';
+import {FSStyles, FWStyles} from '~/FontWeights';
 const ProfileImageUploadComponentGen = (
   index: number,
   setState: Function,
@@ -44,7 +45,6 @@ const ProfileImageUploadComponentGen = (
           index,
           setState,
           NickName,
-          // SendBird,
         );
       }}>
       {ProfileImageUploadComponentReact(width)}
@@ -65,6 +65,7 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
   const [Url5, setUrl5] = useState(UserData.ProfileImageUrl5);
   const [Url6, setUrl6] = useState(UserData.ProfileImageUrl6);
 
+  const [Age, setAge] = useState(String(UserData.Age));
   const [IntroduceText, setIntroduceText] = useState(UserData.IntroduceText);
 
   const CheckImageNull = (
@@ -84,12 +85,34 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
       );
     } else {
       return (
-        <Image
-          source={{uri: ImageUrl}}
-          style={MyProfileChangeStyles.ProfileImage}
-        />
+        <TouchableOpacity
+          onPress={() => {
+            ChangeMyProfileImage(
+              UserData.UserEmail,
+              UserData.Gender,
+              navigation,
+              index,
+              setState,
+              UserData.NickName,
+            );
+          }}>
+          <Image
+            source={{uri: ImageUrl}}
+            style={MyProfileChangeStyles.ProfileImage}
+          />
+        </TouchableOpacity>
       );
     }
+  };
+
+  const ChangedUserData = {
+    ...UserData,
+    ProfileImageUrl: Url,
+    ProfileImageUrl2: Url2,
+    ProfileImageUrl3: Url3,
+    ProfileImageUrl4: Url4,
+    ProfileImageUrl5: Url5,
+    ProfileImageUrl6: Url6,
   };
 
   const InforBoxSection = (Desc: string) => {
@@ -121,8 +144,12 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
       ]}
       onPress={() => {
         // console.log('Hello');
-        ChangeUserData();
-        navigation.goBack();
+        // ChangeUserData();
+        // navigation.goBack();
+
+        navigation.navigate('MapScreen', {
+          CurrentUser: ChangedUserData,
+        });
       }}>
       {완료Svg}
     </TouchableOpacity>
@@ -190,7 +217,14 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
 
             <View style={MyProfileChangeStyles.InforBox}>
               <View style={MyProfileChangeStyles.InforBoxSection}>
-                <Text style={styles.WhiteColor}>기본 정보</Text>
+                <Text
+                  style={[
+                    styles.WhiteColor,
+                    FWStyles.Semibold,
+                    FSStyles(14).General,
+                  ]}>
+                  기본 정보
+                </Text>
               </View>
               {InforBoxSection('MBTI')}
               <View style={MyProfileChangeStyles.InforBoxColumnSection}>
@@ -205,7 +239,11 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
               <View style={MyProfileChangeStyles.InforBoxColumnSection}>
                 <TextInput
                   style={MyProfileChangeStyles.TI}
-                  maxLength={2}></TextInput>
+                  maxLength={2}
+                  value={Age}
+                  onChangeText={(value) => {
+                    setAge(value);
+                  }}></TextInput>
                 {DescBottomlineCustom({width: '88%', height: 1})}
               </View>
               {InforBoxSection('한줄소개')}

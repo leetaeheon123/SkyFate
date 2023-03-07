@@ -84,7 +84,7 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
       checkvalue++;
     }
     console.log(checkvalue);
-    if (checkvalue >= 2) {
+    if (checkvalue >= 2 || Gender == 2) {
       return (
         <TouchableOpacity
           style={LoginAndReigsterStyles.Btn_Clickable}
@@ -111,7 +111,10 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
         </View>
         <View
           style={[LoginAndReigsterStyles.Center, styles.Column_OnlyRowCenter]}>
-          {SubTextComponent('ProfileImage', {marginTop: 20})}
+          {Gender == 2
+            ? SubTextComponent('ProfileImageGirl', {marginTop: 20})
+            : SubTextComponent('ProfileImage', {marginTop: 20})}
+
           <View style={ProfileImageStyles.ImageSelectView}>
             {Url == '' ? (
               ProfileImageUploadComponentGen(

@@ -6,6 +6,7 @@ export type RootStackParamList = {
     imp_uid: string;
     NickName: string;
     UserEmail: string;
+    CodeType: string;
   };
 };
 import type {IMPData} from 'iamport-react-native';

@@ -81,7 +81,6 @@ import {
   OffSvg,
   OnToggleSvg,
   OffToggleSvg,
-  HWHW,
   M3Main_TopBarWhiteHeartSvg,
 } from 'component/Map/MapSvg';
 
@@ -92,7 +91,6 @@ import {
   ColorPeopleSvg,
   MemoSvg,
   MinusSvg,
-  PaySvg,
   PeopleAddSvg,
   PeopleSvg,
   PlusSvg,
@@ -110,7 +108,9 @@ import {
 } from 'react-native-autocomplete-dropdown';
 import {background} from 'native-base/lib/typescript/theme/styled-system';
 import SwiperFlatList from 'react-native-swiper-flatlist';
-
+import {HPer90, WPer90} from '~/Per';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 export interface ILocation {
   latitude: number;
   longitude: number;
@@ -512,14 +512,13 @@ const MapScreen = (props: any) => {
   };
 
   const UserData = props.route.params.CurrentUser;
+
+  console.log('UserData [MapScreen.tsx]:', UserData);
   const navigation = useNavigation();
 
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
-  const [ProfileImageUrl, setProfileImageUrl] = useState(
-    UserData.ProfileImageUrl,
-  );
   const {width, height} = Dimensions.get('window');
 
   const H11 = height * 0.11;
@@ -529,60 +528,49 @@ const MapScreen = (props: any) => {
 
   const [InvitationCodeToFriend, setInvitationCodeToFriend] = useState([]);
 
+  const GetInvitationCodeUsed = (InvitationCodeToFriend: String) => {
+    return firestore()
+      .collection('InvitationCodeList')
+      .where('InvitationCode', '==', InvitationCodeToFriend)
+      .get()
+      .then((querySnapshot) => {
+        let Used;
+        querySnapshot.forEach((doc) => {
+          Used = doc.data().Used;
+        });
+      });
+  };
+
   const GetInvitationToFriendObj = async (
     InvitationCodeToFriend: Array<string>,
   ) => {
-    let Array: Array<Object> = [];
-    await firestore()
-      .collection('InvitationCodeList')
-      .where('InvitationCode', '==', InvitationCodeToFriend[0])
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          let Obj = {
-            InvitationCode: InvitationCodeToFriend[0],
-            Used: doc.data().Used,
-          };
-          Array.push(Obj);
-        });
-      });
+    const Used1 = GetInvitationCodeUsed(InvitationCodeToFriend[0]);
+    const Used2 = GetInvitationCodeUsed(InvitationCodeToFriend[1]);
 
-    await firestore()
-      .collection('InvitationCodeList')
-      .where('InvitationCode', '==', InvitationCodeToFriend[1])
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          let Obj = {
-            InvitationCode: InvitationCodeToFriend[1],
-            Used: doc.data().Used,
-          };
+    let Obj1 = {
+      InvitationCode: InvitationCodeToFriend[0],
+      Used: Used1,
+    };
 
-          Array.push(Obj);
-        });
-      });
+    let Obj2 = {
+      InvitationCode: InvitationCodeToFriend[1],
+      Used: Used2,
+    };
+
+    let Array: Array<Object> = [Obj1, Obj2];
+
     return Array;
   };
-  const GetInvitationToFriendCode = async (PkNumber: string) => {
-    firestore()
-      .collection(`InvitationCodeList`)
-      .doc(String(PkNumber))
-      .get()
-      .then(async (doc) => {
-        const Result = doc.data();
-        const InvitationCodeToFriend = Result?.InvitationCodeToFriend;
-        let InviObj: Array<Object> = await GetInvitationToFriendObj(
-          InvitationCodeToFriend,
-        );
-        // console.log('InviObj:', InviObj);
+  const GetInvitationToFriendCode = async () => {
+    if (UserData.InvitationCodeToFriend == null) {
+      return;
+    }
 
-        return InviObj;
-      })
-      .then((InvitationCodeToFriend) => {
-        // console.log('InvitationCodeToFriend:', InvitationCodeToFriend);
-
-        setInvitationCodeToFriend(InvitationCodeToFriend);
-      });
+    const InvitationCodeToFriend = UserData.InvitationCodeToFriend;
+    let InviObj: Array<Object> = await GetInvitationToFriendObj(
+      InvitationCodeToFriend,
+    );
+    setInvitationCodeToFriend(InviObj);
   };
 
   const [NickNameList, setNickNameList] =
@@ -658,7 +646,7 @@ const MapScreen = (props: any) => {
 
       // UpdateMyLocationWatch(setLocation, locationdispatch);
       UpdateMyLocationWatch(locationdispatch);
-      // await GetInvitationToFriendCode(UserData.PkNumber);
+      await GetInvitationToFriendCode();
       await GetAsyncStorageEmail();
     }
 
@@ -749,17 +737,25 @@ const MapScreen = (props: any) => {
   };
 
   const ChangeShowStateMan = () => {
-    // Alert.alert(
-    //   '남성유저 160명, 여성유저 200명이 가입하기 전까진 사용할 수 없습니다',
-    // );
+    Alert.alert(
+      '남성유저 160명, 여성유저 200명이 가입하기 전까진 사용할 수 없습니다',
+    );
+    return;
+
+    // setWaitModalVis(true);
+    // navigation.navigate('WaitScreen');
     // return;
+
     setGpsOn((previousState) => !previousState);
   };
 
   const [GpsOn, setGpsOn] = useState(false);
 
   const [ModalVisiable, setModalVisiable] = useState(false);
+
   const [ProfileModalVisiable, setProfileModalVisiable] = useState(false);
+  const [WaitModalVis, setWaitModalVis] = useState(false);
+
   const [ShowUserModal, setShowUserModal] = useState(false);
 
   const [ProfileForGtoM, setProfileForGtoM] = useState<Object>({});
@@ -825,11 +821,30 @@ const MapScreen = (props: any) => {
     },
   );
 
+  const ProfileNullCheck = (ProfileImage: string) => {
+    if (ProfileImage == '') {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const WarnProfileNull = () => {
+    Alert.alert('프로필 사진을 입력해주세요');
+  };
+
   const ShowMyLocation = async () => {
     // Alert.alert(
     //   '남성유저 160명, 여성유저 200명이 가입하기 전까진 사용할 수 없습니다',
     // );
     // return;
+
+    const ProfileCheck = ProfileNullCheck(UserData.ProfileImageUrl);
+    if (ProfileCheck == false) {
+      WarnProfileNull();
+      return;
+    }
+
     const date = new Date();
     let day = date.getHours();
     day = 23;
@@ -923,6 +938,11 @@ const MapScreen = (props: any) => {
 
   const CreateChating = () => {
     // console.log('StartChatingBetweenGirls In TwoMapScreen');
+    const ProfileCheck = ProfileNullCheck(UserData.ProfileImageUrl);
+    if (ProfileCheck == false) {
+      WarnProfileNull();
+      return;
+    }
     let params = new SendBird.GroupChannelParams();
 
     // 추가로 고려할거 : 이미 채팅하기를 눌러 채팅방이 생성된 상태와 처음 채팅하기를 눌러서 채팅방이 생성되는 상황을 분기처리 하기
@@ -1023,7 +1043,7 @@ const MapScreen = (props: any) => {
     // console.log('[MapScreen] moveToMyLocation called');
   };
 
-  const AnimationMarker = (ProfileImageUrl: string) => {
+  const AnimationMarker = () => {
     return (
       <Marker
         coordinate={{
@@ -1036,7 +1056,7 @@ const MapScreen = (props: any) => {
           ))}
           <Image
             style={MarkerAnimationStyles.Image}
-            source={{uri: ProfileImageUrl}}
+            source={{uri: UserData.ProfileImageUrl}}
           />
           {ManFriendData.NickName != '' ? (
             <Image
@@ -1092,15 +1112,6 @@ const MapScreen = (props: any) => {
       {PlusSvg(30)}
     </TouchableOpacity>
   );
-
-  const ProfileImage = () => {
-    return (
-      <Image
-        source={{uri: ProfileImageUrl}}
-        style={{width: 100, height: 100, borderRadius: 10}}
-      />
-    );
-  };
 
   const M5NickName = (
     <Text
@@ -1497,7 +1508,8 @@ const MapScreen = (props: any) => {
             color: '#DFE5F180',
             marginLeft: 10,
           }}>
-          랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요
+          {/* 랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요 */}
+          친구의 닉네임을 입력해주세요
         </Text>
       </View>
     </View>
@@ -1584,7 +1596,8 @@ const MapScreen = (props: any) => {
               color: '#DFE5F180',
               marginLeft: 10,
             }}>
-            랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요
+            {/* 랑데부 가입자가 아닌 유저일 시 닉네임을 입력해주세요 */}
+            친구의 닉네임을 입력해주세요
           </Text>
         </View>
       </View>
@@ -2609,6 +2622,71 @@ const MapScreen = (props: any) => {
   //   );
   // };
 
+  const ProfileImageBox = (
+    <View
+      style={[styles.NoFlexDirectionCenter, MapScreenStyles.ChangeProfileView]}>
+      <TouchableOpacity
+        style={[
+          {
+            backgroundColor: '#202632',
+            borderRadius: 25,
+            width: 46,
+            height: 46,
+          },
+          styles.NoFlexDirectionCenter,
+        ]}
+        onPress={() => {
+          navigation.navigate('MyProfileScreen', {
+            UserData,
+          });
+        }}>
+        {UserData.ProfileImageUrl == '' ? (
+          <Ionicons name="person" size={40}></Ionicons>
+        ) : (
+          <Image
+            source={{uri: UserData.ProfileImageUrl}}
+            style={{width: 43, height: 43, borderRadius: 35}}
+          />
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+
+  const ProfileImageWithFriend = (
+    <View style={[styles.RowCenter, MapScreenStyles.SecondChangeProfileView]}>
+      <TouchableOpacity
+        style={[styles.RowCenter]}
+        onPress={() => {
+          navigation.navigate('MyProfileScreen', {
+            UserData,
+          });
+        }}>
+        <Image
+          source={{uri: UserData.ProfileImageUrl}}
+          style={{width: 43, height: 43, borderRadius: 35}}
+        />
+        <Image
+          source={{uri: ManFriendData.ProfileImageUrl}}
+          style={{width: 43, height: 43, borderRadius: 35, marginLeft: -10}}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+
+  const WaitScreenModal = (
+    <Modal
+      animationIn={'slideInUp'}
+      isVisible={WaitModalVis}
+      onBackdropPress={() => setWaitModalVis(false)}
+      style={[styles.FullModal, {width: '90%', right: 0}, styles.RowCenter]}>
+      <TouchableOpacity onPress={() => setWaitModalVis(false)}>
+        <Image
+          style={{width: WPer90, height: HPer90}}
+          source={require('../../Assets/WaitScreenBorder.png')}></Image>
+      </TouchableOpacity>
+    </Modal>
+  );
+
   return (
     <View style={{width: '100%', height: '100%'}}>
       {/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
@@ -2616,6 +2694,7 @@ const MapScreen = (props: any) => {
       {ShowClickedUserDataModal()}
       {Enter_MatchModal()}
       {Enter_TagFriendModal}
+      {WaitScreenModal}
       {location && (
         <MapView
           style={{width: '100%', height: '100%'}}
@@ -2637,7 +2716,7 @@ const MapScreen = (props: any) => {
           minZoomLevel={10}
           // minZoomLevel={14}
           maxZoomLevel={17}>
-          {GpsOn == true ? AnimationMarker(ProfileImageUrl) : null}
+          {GpsOn == true ? AnimationMarker() : null}
           {isLoading == false && UserData.Gender == 1 && GpsOn == true
             ? data?.map((data: any, index) => {
                 return (
@@ -2764,31 +2843,7 @@ const MapScreen = (props: any) => {
 
       {UserData.Gender == 2 ? GirlTabBar() : ManTabBar()}
 
-      <View
-        style={[
-          styles.NoFlexDirectionCenter,
-          MapScreenStyles.ChangeProfileView,
-        ]}>
-        <TouchableOpacity
-          style={[
-            {
-              backgroundColor: '#202632',
-              borderRadius: 25,
-            },
-            styles.NoFlexDirectionCenter,
-          ]}
-          onPress={() => {
-            navigation.navigate('MyProfileScreen', {
-              UserData,
-            });
-            // setProfileModalVisiable(true);
-          }}>
-          <Image
-            source={{uri: ProfileImageUrl}}
-            style={{width: 43, height: 43, borderRadius: 35}}
-          />
-        </TouchableOpacity>
-      </View>
+      {ManFriendData.NickName != '' ? ProfileImageWithFriend : ProfileImageBox}
 
       {UserData.Gender == 2 ? BottomBar_Girl() : BottomBar_Man()}
 

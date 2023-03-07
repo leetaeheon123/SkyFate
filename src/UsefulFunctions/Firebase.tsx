@@ -3,6 +3,17 @@ import {Alert} from 'react-native';
 import {TAutocompleteDropdownItem} from 'react-native-autocomplete-dropdown';
 export const ft = firestore();
 
+export const GetFbFirestore = async (
+  CollectionPath: string,
+  DocPath: string,
+) => {
+  return ft
+    .collection(`${CollectionPath}`)
+    .doc(`${DocPath}`)
+    .get()
+    .then((doc) => doc.data());
+};
+
 export const DeleteInFbFirestore = async (
   CollectionPath: string,
   DocPath: string,

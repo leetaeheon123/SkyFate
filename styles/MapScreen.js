@@ -173,6 +173,14 @@ export const MapScreenStyles = StyleSheet.create({
     borderStyle: 'solid',
   },
 
+  SecondChangeProfileView: {
+    width: 46,
+    height: 46,
+    position: 'absolute',
+    right: '7%',
+    top: '6%',
+  },
+
   NS: {
     width: '20%',
     height: 46,
@@ -226,7 +234,7 @@ export const MapScreenStyles = StyleSheet.create({
 
   Btn_Match: {
     position: 'absolute',
-    left: '15%',
+    left: '35.5%',
     bottom: '50%',
   },
   Btn_RandomMatch: {

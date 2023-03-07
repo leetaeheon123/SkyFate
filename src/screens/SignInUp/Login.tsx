@@ -48,7 +48,8 @@ const LoginWithEmail = async (
   try {
     const result = await signIn({email: Email, password: Password});
     let UserEmail = result.user.email;
-    LoginUserEmail(UserEmail, navigation, SendBird);
+    let UserUid = result.user.uid
+    LoginUserEmail(UserEmail, navigation);
   } catch (error) {
     if (error.code === 'auth/wrong-password') {
       Alert.alert('이메일은 존재하나 비밀번호가 다릅니다.');

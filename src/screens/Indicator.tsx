@@ -190,9 +190,13 @@ const IndicatorScreen = (props: any) => {
             return;
           }
 
-          const ValidProfileImageUrl = ValidProfileImageUrlFun(
+          let ValidProfileImageUrl = ValidProfileImageUrlFun(
             UserData?.ProfileImageUrl,
           );
+
+          if (UserData.Gender == 2) {
+            ValidProfileImageUrl = true;
+          }
 
           if (!ValidProfileImageUrl) {
             GotoProfileInputScreen(
@@ -320,19 +324,11 @@ const IndicatorScreen = (props: any) => {
       {initialized ? (
         // Best Partice?
         currentUser ? (
-          IsUseDay ? (
-            IsUseTime ? (
-              <BottomTabScreen
-                currentUser={currentUser}
-                SendBird={SendBird}
-                {...props}
-              />
-            ) : (
-              <WaitScreen />
-            )
-          ) : (
-            <WaitScreen />
-          )
+          <BottomTabScreen
+            currentUser={currentUser}
+            SendBird={SendBird}
+            {...props}
+          />
         ) : (
           <ValidInvitationCodeScreen />
         )
