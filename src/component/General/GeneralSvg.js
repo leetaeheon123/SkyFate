@@ -33,7 +33,7 @@ import Security from 'Assets/Security.svg';
 
 import 완료 from 'Assets/완료.svg';
 import WaitScreen from 'Assets/WaitScreen.svg';
-import {WPer100, WPer15} from '~/Per';
+import {WPer100, WPer15, WPer50, WPer90} from '~/Per';
 
 const Gwidth = Dimensions.get('window').width;
 export const BackSvg = (width) => {
@@ -180,7 +180,16 @@ export const WaitScreenSvg = (
   <WithLocalSvg
     asset={WaitScreen}
     width={WPer100}
-    height={WPer100 * 2}></WithLocalSvg>
+    // height={WPer100 * 2}
+  ></WithLocalSvg>
+);
+
+export const WaitScreen90Svg = (
+  <WithLocalSvg
+    asset={WaitScreen}
+    width={WPer90}
+    // height={WPer100 * 2}
+  ></WithLocalSvg>
 );
 
 export const RightArrowWhiteSvg = (

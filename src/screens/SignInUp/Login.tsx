@@ -48,7 +48,8 @@ const LoginWithEmail = async (
   try {
     const result = await signIn({email: Email, password: Password});
     let UserEmail = result.user.email;
-    LoginUserEmail(UserEmail, navigation, SendBird);
+    let UserUid = result.user.uid
+    LoginUserEmail(UserEmail, navigation);
   } catch (error) {
     if (error.code === 'auth/wrong-password') {
       Alert.alert('이메일은 존재하나 비밀번호가 다릅니다.');
@@ -64,8 +65,8 @@ const LoginWithEmail = async (
 const LoginScreen = (props: any) => {
   const [Selected, setSelected] = useState('');
 
-  const [TextInputEmail, setTextInputEmail] = useState('8269apk@naver.com');
-  const [TextInputPassword, setTextInputPassword] = useState('123456');
+  const [TextInputEmail, setTextInputEmail] = useState('');
+  const [TextInputPassword, setTextInputPassword] = useState('');
 
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;

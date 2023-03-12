@@ -7,9 +7,12 @@ import ValidInvitationCodeScreen from './ValidInvitationCode';
 
 import {AppContext} from '../UsefulFunctions/Appcontext';
 import {handleNotificationAction} from '../utils';
-import {GetUserData} from '../UsefulFunctions/SaveUserDataInDevice';
+import {
+  GetUserData,
+  RegisterSendBirdToken,
+} from '../UsefulFunctions/SaveUserDataInDevice';
 import {WaitScreen} from './Wait';
-// import { SBConnect } from '../UsefulFunctions/SaveUserDataInDevice';
+import {ft} from '^/Firebase';
 
 export const SendBirdUpdateUserInfo = (
   SendBird: any,
@@ -22,6 +25,8 @@ export const SendBirdUpdateUserInfo = (
     async (user: any, err: any) => {
       console.log('In sendbird.updateCurrentUserInfo User:', user);
       if (!err) {
+        RegisterSendBirdToken(SendBird, user.email);
+
         console.log(
           'Succes updateCurrentUserInfo SendBird In SBconnect Function In Indicator Screen',
         );
@@ -65,28 +70,69 @@ const IndicatorScreen = (props: any) => {
   const [IsUseTime, setIsUseTime] = useState(false);
   const [IsUseDay, setIsUseDay] = useState(false);
 
-  const CheckHoursofuse = () => {
+  const CheckHoursofuse = async (UserType: string) => {
+    const OpenHours = await GetOpenHours();
     const date = new Date();
     let day = date.getHours();
-    day = 23;
 
-    console.log(day);
+    console.log(OpenHours);
+    const TodayOpenHours = OpenHours.TodayOpenHours;
+    const NextDayCloseHours = OpenHours.NextDayCloseHours;
     // day가 오후 10시 ~ 새벽 7시
-    if ((day >= 22 && day <= 24) || (day >= 1 && day <= 7)) {
+    if (
+      (day >= TodayOpenHours && day <= 24) ||
+      (day >= 1 && day <= NextDayCloseHours)
+    ) {
       setIsUseTime(true);
     } else {
-      setIsUseTime(false);
+      {
+        UserType == 'Admin' ? setIsUseTime(true) : setIsUseTime(false);
+      }
     }
   };
 
-  const CheckDaysofuse = () => {
+  const GetOpenDay = async () => {
+    const Result = await ft
+      .collection('SettingData')
+      .doc('OpenTime')
+      .get()
+      .then((doc) => doc.data());
+    return Result?.Day;
+  };
+
+  const GetOpenHours = async () => {
+    const Result = await ft
+      .collection('SettingData')
+      .doc('OpenTime')
+      .get()
+      .then((doc) => doc.data());
+    return Result?.Hours;
+  };
+
+  const CheckDaysofuse = async (UserType: string) => {
     const date = new Date();
     let day = date.getDay();
-    day = 6;
+    day = 5;
+    // 서버에서 오픈 요일 배열 불러오기
+    // ex) [0, 4,5,6]
+    // day 값이 그 배열안에 속하는지 체크
+    const OpenDay = await GetOpenDay();
+
+    console.log(OpenDay);
     if (day == 0 || day == 5 || day == 6) {
       setIsUseDay(true);
     } else {
-      setIsUseDay(false);
+      {
+        UserType == 'Admin' ? setIsUseDay(true) : setIsUseDay(false);
+      }
+    }
+  };
+
+  const ValidProfileImageUrlFun = (ProfileImageUr: any) => {
+    if (ProfileImageUr == '') {
+      return false;
+    } else {
+      return true;
     }
   };
 
@@ -96,8 +142,19 @@ const IndicatorScreen = (props: any) => {
         if (user) {
           const UserEmail = user;
           const UserData = await GetUserData(user);
+          const NickName = UserData?.NickName;
           const Gender = UserData?.Gender;
+          const Age = UserData?.Age;
+
           // console.log("UserData In Indicator", UserData)
+
+          const ValidAgreement = UserData?.hasOwnProperty(
+            'AgreementTermsofUse',
+          );
+          if (!ValidAgreement) {
+            GotoProfileInputScreen('AgreementScreen', UserEmail);
+            return;
+          }
 
           const ValidNickName = UserData?.hasOwnProperty('NickName');
           if (!ValidNickName) {
@@ -105,50 +162,60 @@ const IndicatorScreen = (props: any) => {
             return;
           }
 
-          const ValidMbti = UserData?.hasOwnProperty('Mbti');
-          if (!ValidMbti) {
-            GotoProfileInputScreen('MbtiSelectScreen', UserEmail);
-            return;
-          }
-
           const ValidGender = UserData?.hasOwnProperty('Gender');
           if (!ValidGender) {
-            GotoProfileInputScreen('GenderSelectScreen', UserEmail);
+            GotoProfileInputScreen('GenderSelectScreen', UserEmail, NickName);
             return;
           }
 
-          const ValidAge = UserData?.hasOwnProperty('Age');
-          if (!ValidAge) {
-            GotoProfileInputScreen('AgeSelectScreen', UserEmail, Gender);
-            return;
-          }
-
-          const ValidProfileImageUrl =
-            UserData?.hasOwnProperty('ProfileImageUrl');
-          if (!ValidProfileImageUrl) {
+          const ValidMbti = UserData?.hasOwnProperty('Mbti');
+          if (!ValidMbti) {
             GotoProfileInputScreen(
-              'ProfileImageSelectScreen',
+              'MbtiSelectScreen',
               UserEmail,
+              NickName,
               Gender,
             );
             return;
           }
 
-          const ValidAgreement = UserData?.hasOwnProperty(
-            'AgreementTermsofUse',
+          const ValidAge = UserData?.hasOwnProperty('Age');
+          if (!ValidAge) {
+            GotoProfileInputScreen(
+              'AgeSelectScreen',
+              UserEmail,
+              NickName,
+              Gender,
+            );
+            return;
+          }
+
+          let ValidProfileImageUrl = ValidProfileImageUrlFun(
+            UserData?.ProfileImageUrl,
           );
-          if (!ValidAgreement) {
-            GotoProfileInputScreen('AgreementScreen', UserEmail, Gender);
+
+          if (UserData.Gender == 2) {
+            ValidProfileImageUrl = true;
+          }
+
+          if (!ValidProfileImageUrl) {
+            GotoProfileInputScreen(
+              'ProfileImageSelectScreen',
+              UserEmail,
+              NickName,
+              Gender,
+              Age,
+            );
             return;
           }
 
           if (
+            ValidAgreement &&
             ValidNickName &&
             ValidMbti &&
             ValidGender &&
             ValidAge &&
-            ValidProfileImageUrl &&
-            ValidAgreement
+            ValidProfileImageUrl
           ) {
             setCurrentUser(UserData);
             SBConnect(
@@ -157,8 +224,8 @@ const IndicatorScreen = (props: any) => {
               UserData?.NickName,
               UserData?.ProfileImageUrl,
             );
-            CheckDaysofuse();
-            CheckHoursofuse();
+            CheckDaysofuse(UserData?.Type);
+            CheckHoursofuse(UserData?.Type);
           }
         }
         setInitialized(true);
@@ -171,12 +238,45 @@ const IndicatorScreen = (props: any) => {
   const GotoProfileInputScreen = (
     ScreenName: string,
     UserEmail: string,
+    NickName: string = '',
     Gender: number = 0,
+    Age: number = 0,
   ) => {
+    if (NickName == '') {
+      navigation.navigate(`${ScreenName}`, {
+        UserEmail,
+        NickName: '',
+      });
+      return;
+    }
+
+    if (Gender == 0) {
+      navigation.navigate(`${ScreenName}`, {
+        UserEmail,
+        NickName,
+      });
+
+      return;
+    }
+
+    if (Age == 0) {
+      navigation.navigate(`${ScreenName}`, {
+        UserEmail,
+        NickName,
+        Gender,
+      });
+
+      return;
+    }
+
     navigation.navigate(`${ScreenName}`, {
       UserEmail,
+      NickName,
       Gender,
+      Age,
     });
+
+    return;
   };
 
   useEffect(() => {
@@ -205,8 +305,9 @@ const IndicatorScreen = (props: any) => {
             UserData?.ProfileImageUrl,
           );
         }
-        CheckDaysofuse();
-        CheckHoursofuse();
+
+        CheckDaysofuse(UserData?.Type);
+        CheckHoursofuse(UserData?.Type);
         setInitialized(true);
 
         // return handleNotificationAction(
@@ -223,19 +324,11 @@ const IndicatorScreen = (props: any) => {
       {initialized ? (
         // Best Partice?
         currentUser ? (
-          IsUseDay ? (
-            IsUseTime ? (
-              <BottomTabScreen
-                currentUser={currentUser}
-                SendBird={SendBird}
-                {...props}
-              />
-            ) : (
-              <WaitScreen />
-            )
-          ) : (
-            <WaitScreen />
-          )
+          <BottomTabScreen
+            currentUser={currentUser}
+            SendBird={SendBird}
+            {...props}
+          />
         ) : (
           <ValidInvitationCodeScreen />
         )

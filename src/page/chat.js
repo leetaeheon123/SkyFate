@@ -54,6 +54,7 @@ import {UpdateFbFirestore} from '^/Firebase';
 import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
 import {GetUserData} from '^/SaveUserDataInDevice';
 import Swiper from 'react-native-swiper';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 export const WhyReport = (
   <View
@@ -222,6 +223,7 @@ const ChatScreen = (props) => {
       SendBird.removeConnectionHandler('chat');
       SendBird.removeChannelHandler('chat');
       unsubscribe.remove();
+      clearInterval(intervalRef);
     };
   }, []);
 
@@ -659,22 +661,38 @@ const ChatScreen = (props) => {
       } else if (Platform.OS === 'ios') {
         // TODO:
       }
-      const result = await DocumentPicker.pickSingle({
-        type: [
-          DocumentPicker.types.images,
-          DocumentPicker.types.video,
-          DocumentPicker.types.audio,
-          DocumentPicker.types.plainText,
-          DocumentPicker.types.zip,
-        ],
+      // const result = await DocumentPicker.pickSingle({
+      //   type: [
+      //     DocumentPicker.types.images,
+      //     DocumentPicker.types.video,
+      //     DocumentPicker.types.audio,
+      //     DocumentPicker.types.plainText,
+      //     DocumentPicker.types.zip,
+      //   ],
+      // });
+
+      const result = await launchImageLibrary({
+        mediaType: 'mixed',
+        // maxWidth: 512,
+        //     maxHeight: 512,
+        videoQuality: 'high',
+        // durationLimit: duration,
+        quality: 1,
+        //     cameraType: back,
+        includeBase64: Platform.OS === 'android',
+        includeExtra: false,
+        saveToPhots: false,
+        selectionLimit: 1,
       });
+
+      console.log(result.assets[0]);
 
       const params = new SendBird.FileMessageParams();
       params.file = {
-        size: result.size,
-        uri: result.uri,
-        name: result.name,
-        type: result.type,
+        size: result.assets[0].fileSize,
+        uri: result.assets[0].uri,
+        name: result.assets[0].fileName,
+        type: result.assets[0].type,
       };
       dispatch({type: 'start-loading'});
       channel.sendFileMessage(params, (message, err) => {
@@ -963,49 +981,53 @@ const ChatScreen = (props) => {
       style={{
         width: '100%',
         height: '100%',
-        backgroundColor: 'skyblue',
         margintop: 0,
         marginLeft: 0,
         marginBottom: 0,
       }}>
-      <View
-        style={[
-          styles.Column_OnlyRowCenter,
-          {
-            width: '90%',
-            height: height * 0.55,
-            backgroundColor: '#37375B',
-            marginLeft: '5%',
-            borderRadius: 15,
-          },
-        ]}>
-        {WhiteReportSvg}
-        <TouchableOpacity
-          style={{position: 'absolute', top: 22, right: 13}}
-          onPress={onoffReportModal}>
-          {취소하기Svg}
-        </TouchableOpacity>
-        {WhyReport}
-        {ReturnTo('허위 프로필', 1)}
-        {ReturnTo('욕설 및 비방', 2)}
-        {ReturnTo('불쾌한 대화', 3)}
-        {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
-        <TouchableOpacity
-          onPress={ReportSubmit}
+      <LinearGradient
+        colors={Type2가로}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 0}}
+        style={[styles.W100H100, styles.RowCenter]}>
+        <View
           style={[
-            styles.RowCenter,
+            styles.Column_OnlyRowCenter,
             {
-              width: '63%',
-              height: '8%',
-              borderRadius: 7,
-              backgroundColor: '#DFE5F1',
-              position: 'absolute',
-              bottom: 30,
+              width: '90%',
+              height: height * 0.55,
+              backgroundColor: '#37375B',
+              borderRadius: 15,
             },
           ]}>
-          <Text style={[styles.FT16, styles.FW500]}>다음</Text>
-        </TouchableOpacity>
-      </View>
+          {WhiteReportSvg}
+          <TouchableOpacity
+            style={{position: 'absolute', top: 22, right: 13}}
+            onPress={onoffReportModal}>
+            {취소하기Svg}
+          </TouchableOpacity>
+          {WhyReport}
+          {ReturnTo('허위 프로필', 1)}
+          {ReturnTo('욕설 및 비방', 2)}
+          {ReturnTo('불쾌한 대화', 3)}
+          {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+          <TouchableOpacity
+            onPress={ReportSubmit}
+            style={[
+              styles.RowCenter,
+              {
+                width: '63%',
+                height: '8%',
+                borderRadius: 7,
+                backgroundColor: '#DFE5F1',
+                position: 'absolute',
+                bottom: 30,
+              },
+            ]}>
+            <Text style={[styles.FT16, styles.FW500]}>다음</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
     </Modal>
   );
 

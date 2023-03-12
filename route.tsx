@@ -24,6 +24,8 @@ import {RootStackParamList} from 'Screens/RootStackParamList';
 
 import BottomTabScreen from './bottomstack';
 import ChatScreen from './src/page/chat';
+import CsChatScreen from './src/page/CsChat';
+
 import MbtiSelectScreen from 'Screens/ProfileInput/MbtiSelect';
 import GenderSelectScreen from 'Screens/ProfileInput/GenderSelect';
 import AgeSelectScreen from 'Screens/ProfileInput/AgeSelect';
@@ -116,6 +118,8 @@ const Routes = (props: any) => {
         }}
       />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+      <Stack.Screen name="CsChatScreen" component={CsChatScreen} />
+
       <Stack.Screen
         name="ProfileImageViewScreen"
         component={ProfileImageViewScreen}

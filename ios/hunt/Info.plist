@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.1.2</string>
+	<string>2.1.9</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -59,7 +59,7 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>$(PRODUCT_NAME) would like to use your camera</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key> 
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>남성 유저분들께서 여성분들에게 접근하기 위해 요청합니다</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>남성 유저분들께서 여성분들에게 접근하기 위해 요청합니다</string>
@@ -106,10 +106,9 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>
 </plist>
-
-<!-- 남성 유저분들께서 여성분들에게 접근하기 위해 요청합니다. -->

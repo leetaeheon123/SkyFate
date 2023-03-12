@@ -73,5 +73,3 @@ export const Type3Rectangle = (props) => {
       style={style}></LinearGradient>
   );
 };
-
-

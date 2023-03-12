@@ -18,26 +18,38 @@ import {TextComponent} from 'component/Profile/ProfileSvg';
 import {GenderBtnComponent} from 'component/Profile/ProfileSvg';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import styles from '~/ManToManBoard';
+import {Btn_ClickableBack} from 'component/General';
 const GenderSelectScreen = ({navigation, route}: any) => {
-  console.log(route.params.UserEmail);
-  const {UserEmail, NickName} = route.params;
+  const {UserEmail, NickName, Gender} = route.params;
+
+  console.log(UserEmail, NickName, Gender);
 
   const UpdateGender = async () => {
     await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
-      Gender: Gender,
+      Gender: GenderValue,
     });
 
     navigation.navigate('MbtiSelectScreen', {
       UserEmail: UserEmail,
-      Gender: Gender,
+      Gender: GenderValue,
       NickName: NickName,
     });
   };
 
-  const [Gender, setGender] = useState(0);
+  const [GenderValue, setGender] = useState(Gender);
   return (
     <SafeAreaView style={LoginAndReigsterStyles.Body}>
       <View style={LoginAndReigsterStyles.Main}>
+        <Btn_ClickableBack
+          width={12}
+          style={{position: 'absolute', top: 12, left: '-2.5%'}}
+          onPress={() => {
+            navigation.navigate('NickNameSelectScreen', {
+              UserEmail: UserEmail,
+              NickName: NickName,
+            });
+          }}
+        />
         <View style={LoginAndReigsterStyles.Description}>
           {TextComponent('Gender')}
         </View>
@@ -50,7 +62,7 @@ const GenderSelectScreen = ({navigation, route}: any) => {
               justifyContent: 'space-evenly',
             },
           ]}>
-          {Gender == 1 ? (
+          {GenderValue == 1 ? (
             <TouchableOpacity
               onPress={() => {
                 setGender(0);
@@ -66,7 +78,7 @@ const GenderSelectScreen = ({navigation, route}: any) => {
             </TouchableOpacity>
           )}
 
-          {Gender == 2 ? (
+          {GenderValue == 2 ? (
             <TouchableOpacity
               onPress={() => {
                 setGender(0);
@@ -83,14 +95,14 @@ const GenderSelectScreen = ({navigation, route}: any) => {
           )}
         </View>
 
-        {Gender == 0 ? (
-          <Btn_NotClickableNext />
-        ) : (
+        {GenderValue == 1 || GenderValue == 2 ? (
           <Btn_ClickableNext
             onPress={() => {
               UpdateGender();
             }}
           />
+        ) : (
+          <Btn_NotClickableNext />
         )}
       </View>
     </SafeAreaView>

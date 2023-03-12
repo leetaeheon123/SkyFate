@@ -31,9 +31,11 @@ import {Btn_ClickableNext} from 'component/Profile';
 
 import {
   MainText_InvitationSvg,
+  SubTextComponent,
   SubText_InvitationSvg,
 } from 'component/Profile/ProfileSvg';
 import {LineSvg, LongLineSvg} from 'component/General/GeneralSvg';
+import {GetFbFirestore} from '^/Firebase';
 
 export type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -123,51 +125,110 @@ const ValidInvitationCodeLength = (InvitationCode: string) => {
   return false;
 };
 
-const ValidateInvitationCode = (InvitationCode: string, navigation: any) => {
+const ValidateInvitationCode = async (
+  InvitationCode: string,
+  navigation: any,
+) => {
   let Valid = ValidInvitationCodeLength(InvitationCode);
   if (Valid == false) {
     Alert.alert('초대코드를 다시한번 확인해주세요');
     return;
   }
 
+  let SpecialInvitationCode = await GetFbFirestore('InvitationCode', 'Special');
+  let SpecialArray: string[] = [];
+
+  for (const property in SpecialInvitationCode) {
+    const value = SpecialInvitationCode[property]['InvitationCode'];
+    SpecialArray = [...SpecialArray, value];
+  }
+
+  const isincludesSpecialArray = SpecialArray.includes(InvitationCode);
+  console.log(isincludesSpecialArray);
+  if (isincludesSpecialArray == true) {
+    SpecialInvitation(InvitationCode, navigation);
+  } else {
+    GenearlInvitation(InvitationCode, navigation);
+  }
+};
+
+const CheckUsed = (querySnapshot: any): number => {
+  let length = querySnapshot.size;
+  querySnapshot.forEach((doc: any) => {
+    if (length == 1 && doc.data().Used == false) {
+      return 1;
+    } else if (length == 1 && doc.data().Used == true) {
+      return 2;
+    }
+  });
+
+  return 0;
+};
+
+const GenearlInvitation = async (InvitationCode: string, navigation: any) => {
+  const PkNumber = await GetPkNumber();
   firestore()
     .collection('InvitationCodeList')
     .where('InvitationCode', '==', InvitationCode)
     .get()
     .then((querySnapshot) => {
-      let Valid = 0;
-      let length = querySnapshot.size;
-      let PkNumber;
-      console.log(length);
-      querySnapshot.forEach((doc) => {
-        if (length == 1 && doc.data().Used == false) {
-          PkNumber = doc.data().Number;
-          Valid = 1;
-        } else if (length == 1 && doc.data().Used == true) {
-          Valid = 2;
-        }
-      });
+      // 사용되었는지 안되었는지 판단하는 로직
+      let Valid = CheckUsed(querySnapshot);
 
       let Obj = {
         Valid: Valid,
         PkNumber: PkNumber,
+        CodeType: 'General',
       };
       return Obj;
     })
     .then(async (Obj) => {
-      if (Obj.Valid == 1) {
-        navigation.navigate('RegisterScreen', {
-          InvitationCode: InvitationCode,
-          PkNumber: Obj.PkNumber,
-        });
-      } else if (Obj.Valid == 0) {
-        Alert.alert('존재하지 않는 초대코드입니다.');
-        return;
-      } else if (Obj.Valid == 2) {
-        Alert.alert('이미 사용된 초대코드입니다');
-        return;
-      }
+      LastPassage(Obj, InvitationCode, navigation);
     });
+};
+
+interface ValidObj {
+  Valid: number;
+  PkNumber: number | undefined;
+  CodeType: string;
+}
+
+const LastPassage = (
+  Obj: ValidObj,
+  InvitationCode: string,
+  navigation: any,
+) => {
+  if (Obj.Valid == 1) {
+    navigation.navigate('RegisterScreen', {
+      InvitationCode: InvitationCode,
+      PkNumber: Obj.PkNumber,
+      CodeType: Obj.CodeType,
+    });
+  } else if (Obj.Valid == 0) {
+    Alert.alert('존재하지 않는 초대코드입니다.');
+    return;
+  } else if (Obj.Valid == 2) {
+    Alert.alert('이미 사용된 초대코드입니다');
+    return;
+  }
+};
+
+const SpecialInvitation = async (InvitationCode: string, navigation: any) => {
+  const PkNumber = await GetPkNumber();
+  let Valid = 1;
+  let Obj = {
+    Valid: Valid,
+    PkNumber: PkNumber,
+    CodeType: 'Special',
+  };
+  LastPassage(Obj, InvitationCode, navigation);
+};
+
+const GetPkNumber = async () => {
+  const Result = await firestore().collection('UserList').get();
+  const Size = Result.size;
+  console.log(Size);
+  return Size;
 };
 
 const ValidInvitationCodeScreen = () => {
@@ -175,8 +236,7 @@ const ValidInvitationCodeScreen = () => {
 
   const {width} = Dimensions.get('window');
   console.log(width);
-  const [TextInputInvitationCode, setTextInputInvitationCode] =
-    useState('AHfPqW');
+  const [TextInputInvitationCode, setTextInputInvitationCode] = useState('');
   const navigation = useNavigation();
 
   const TextInputStyle = StyleSheet.create({
@@ -244,56 +304,11 @@ const ValidInvitationCodeScreen = () => {
               Keyboard.dismiss();
             }}>
             {InvitationCode()}
-
-            {/* <Button
-              title="닉네임 입력창 이동"
-              onPress={() => {
-                navigation.navigate('NickNameSelectScreen', {
-                  UserEmail: '8269apk@naver.com',
-                });
-              }}
-            /> */}
-
-            {/* <Button
-              title="나이 입력창 이동"
-              onPress={() => {
-                navigation.navigate('AgeSelectScreen', {
-                  UserEmail: '8269apk@naver.com',
-                  Gender: 2,
-                });
-              }}
-            /> */}
           </Pressable>
         </View>
 
-        {/* <Button
-          title="이미지 업로드로 이동"
-          onPress={() => {
-            navigation.navigate('ProfileImageSelectScreen', {
-              UserEmail: '8269apk@naver.com',
-              Gender: 2,
-            });
-          }}
-        />
-
-        <Button
-          title="즉시 이용약관 페이지로 이동"
-          onPress={() => {
-            navigation.navigate('AgreementScreen', {
-              InvitationCode: 'AHfPqW',
-              PkNumber: 0,
-            });
-          }}></Button>
-
-        <Button
-          title="즉시 회원가입으로 이동"
-          onPress={() => {
-            navigation.navigate('RegisterScreen', {
-              InvitationCode: 'AHfPqW',
-              PkNumber: 0,
-            });
-          }}
-        /> */}
+        <Text>가입한 남성유저수: 82명</Text>
+        <Text>가입한 여성유저수: 98명</Text>
 
         <Btn_ClickableNext
           onPress={() => {
@@ -313,15 +328,13 @@ const ValidInvitationCodeScreen = () => {
             style={[
               styles.RowCenter,
               {
-                // backgroundColor: 'red',
-
                 height: 30,
               },
             ]}
             onPress={() => {
               navigation.navigate('LoginScreen');
             }}>
-            <Text>이미 계정이 있습니다 &gt;</Text>
+            {SubTextComponent('AccountExistText', {})}
           </TouchableOpacity>
         </View>
       </View>

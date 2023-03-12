@@ -43,6 +43,9 @@ import ClickedP from 'Assets/Profile/Mbti/ClickedP.svg';
 
 import SubTextMbti from 'Assets/Profile/Mbti/MbtiSubText.svg';
 import SubTextProfileImage from 'Assets/Profile/ProfileImage/ProfileImageSubText.svg';
+import SubTextGirlProfileImage from 'Assets/Profile/ProfileImage/SubTextGirlProfileImage.svg';
+
+import AccountExistText from 'Assets/SignInUp/AccountExistText.svg';
 
 import ProfileImageUpload from 'Assets/Profile/ProfileImage/ProfileImageUpload.svg';
 import ProfileImageUpload87 from 'Assets/Profile/ProfileImage/ProfileImageUpload87.svg';
@@ -77,6 +80,9 @@ const SubTextObj = {
   Mbti: SubTextMbti,
   Age: AgeInputText,
   ProfileImage: SubTextProfileImage,
+  ProfileImageGirl: SubTextGirlProfileImage,
+
+  AccountExistText: AccountExistText,
 };
 
 const MbtiBtnObj = {

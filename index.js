@@ -14,6 +14,7 @@ import {LogBox} from 'react-native';
 LogBox.ignoreLogs(['Non-serializable']);
 LogBox.ignoreLogs(['The native module']);
 LogBox.ignoreLogs(['Encountered']);
+LogBox.ignoreLogs(['RNVectorIconsManager']);
 
 function SendPushNotificationInforeground() {
   PushNotificationIOS.addNotificationRequest({

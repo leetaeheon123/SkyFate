@@ -29,6 +29,7 @@ import {
 } from 'component/SignInUp/SignInUp';
 import {LongLineFixSvg} from 'component/General/GeneralSvg';
 import {HPer50} from '~/Per';
+import {Btn_ClickableBack} from 'component/General';
 export type Register2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'InvitationCodeSet'
@@ -41,16 +42,17 @@ const SignUpWithEmail = async (
   InvitationCode: string,
   PkNumber: number,
   SendBird: any,
+  CodeType: string,
 ) => {
   // let BasicImageUrl = BasicImage(Gender)
 
   try {
     const result = await signUp({email: Email, password: Password});
-    Alert.alert('회원가입 완료');
     // await InvitationCodeToFriend를 서버로부터 가져오는 함수
     let UserEmail: string = result.user.email;
-    await SignUpFirestore(UserEmail, InvitationCode, PkNumber);
-    await UpdateInvitationCodeToFriend(InvitationCode);
+    let UserUid: string = result.user.uid;
+    await SignUpFirestore(UserEmail, InvitationCode, PkNumber, UserUid);
+    await UpdateInvitationCodeToFriend(InvitationCode, CodeType, UserEmail);
     await RegisterUserEmail(UserEmail, navigation, SendBird);
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
@@ -72,6 +74,7 @@ const SignUpFirestore = async (
   Email: string,
   InvitationCode: string,
   PkNumber: number,
+  UserUid: string,
 ) => {
   firestore().collection('UserList').doc(Email).set({
     UserEmail: Email,
@@ -87,39 +90,52 @@ const SignUpFirestore = async (
     ProfileImageUrl4: '',
     ProfileImageUrl5: '',
     ProfileImageUrl6: '',
+    Type: 'User',
+    UserUid: UserUid,
   });
 };
 
-const BasicImage = (Gender: number) => {
-  if (Gender == 1) {
-    return 'https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FMans%2FBasicSetting%2FBasicSettingM.jpeg?alt=media&token=1e7d09a6-81e7-42bf-a01c-ad36fab58069';
-  } else if (Gender == 2) {
-    return 'https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/ProfileImage%2FGrils%2FBasicSetting%2FBasicSetting.jpeg?alt=media&token=fd69ef3f-cde5-4a36-a657-765f8ba9d42d';
+const UpdateInvitationCodeToFriend = async (
+  InvitationCode: string,
+  CodeType: string,
+  UserEmail: string,
+) => {
+  if (CodeType == 'Special') {
+    fetch('http:/13.124.209.97/invitation/SpecialInvitationCode', {
+      // fetch('https:/10.0.2.2:3000/invitation/SpecialInvitationCode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: qs.stringify({
+        UserEmail: `${UserEmail}`,
+      }),
+    }).then((Result) => {
+      console.log('Result In UpdateInvitationCodeToFriend Function:', Result);
+    });
+  } else if (CodeType == 'General') {
+    // fetch('https:/10.0.2.2:3000/invitation/InvitationCode', {
+    fetch('http:/13.124.209.97/invitation/InvitationCode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: qs.stringify({
+        InvitationCode: `${InvitationCode}`,
+        UserEmail: `${UserEmail}`,
+      }),
+    }).then((Result) => {
+      console.log('Result In UpdateInvitationCodeToFriend Function:', Result);
+    });
   }
-  return '';
-};
-
-const UpdateInvitationCodeToFriend = async (InvitationCode: string) => {
-  fetch('http:/13.124.209.97/invitation/InvitationCode', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: qs.stringify({
-      InvitationCode: `${InvitationCode}`,
-    }),
-  }).then((Result) => {
-    console.log('Result In UpdateInvitationCodeToFriend Function:', Result);
-  });
 };
 
 const ReigsterScreen = ({navigation, route}: Register2ScreenProps) => {
-  const {InvitationCode} = route.params;
+  const {InvitationCode, CodeType, PkNumber} = route.params;
+
   // const {Gender} = route.params
   // const GenderNumber = Number(Gender)
   // const {NickName} = route.params
-
-  const {PkNumber} = route.params;
 
   // console.log("Gender In RegisterScreen:",Gender)
   console.log('InvitationCode In RegisterScreen:', InvitationCode);
@@ -129,8 +145,8 @@ const ReigsterScreen = ({navigation, route}: Register2ScreenProps) => {
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
-  const [TextInputEmail, setTextInputEmail] = useState('8269apk9@naver.com');
-  const [TextInputPassword, setTextInputPassword] = useState('123456');
+  const [TextInputEmail, setTextInputEmail] = useState('');
+  const [TextInputPassword, setTextInputPassword] = useState('');
 
   const [Selected, setSelected] = useState('');
   const EmailTextInput = () => (
@@ -188,6 +204,13 @@ const ReigsterScreen = ({navigation, route}: Register2ScreenProps) => {
   return (
     <SafeAreaView style={LoginAndReigsterStyles.Body}>
       <View style={LoginAndReigsterStyles.Main}>
+        <Btn_ClickableBack
+          width={12}
+          style={{position: 'absolute', top: 12, left: '-2.5%'}}
+          onPress={() => {
+            navigation.goBack();
+          }}
+        />
         <View style={LoginAndReigsterStyles.Description}>
           {MainText_RegisterSvg()}
         </View>
@@ -216,6 +239,7 @@ const ReigsterScreen = ({navigation, route}: Register2ScreenProps) => {
                 InvitationCode,
                 PkNumber,
                 SendBird,
+                CodeType,
               );
             }}
           />

@@ -50,9 +50,34 @@ import firestore from '@react-native-firebase/firestore';
 import {useKeyboard} from '@react-native-community/hooks';
 import {GetEpochTime, GetTime, MilisToMinutes} from '^/GetTime';
 import {Result} from 'component/L1/L1';
-import {Type2} from 'component/LinearGradient/LinearType';
+import {Type2, Type2가로} from 'component/LinearGradient/LinearType';
 import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
 import {WhyReport} from '../../../src/page/chat';
+
+const SendBirdChatLeave = (
+  UserEmail: string,
+  application_id: string,
+  channel_url: string,
+) => {
+  let UserIds = {user_ids: [`${UserEmail}`]};
+
+  const options = {
+    method: 'PUT',
+    headers: new Headers({
+      'Api-Token': '1522cd6e34542ab8c7542dd0200b69273c2af102',
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(UserIds),
+  };
+
+  fetch(
+    `https://api-${application_id}.sendbird.com/v3/group_channels/${channel_url}/leave`,
+    options,
+  )
+    .then((response) => response.text())
+    .then((result) => console.log(result))
+    .catch((error) => console.log('error', error));
+};
 const MeetMapScreen = ({route, navigation}: any, props: any) => {
   const {UserData, otherUserData, channel} = route.params;
 
@@ -69,7 +94,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
 
   const [Groupchannel, setGroupchannel] = useState();
 
-  //console.log('Uid for SendBird url:', uid);
+  console.log('Uid for SendBird url:', uid);
   const [Mylocation, locationdispatch] = useReducer(locationReducer, {
     latlng: {},
   });
@@ -168,14 +193,14 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
     }
   };
 
-  channelHandler.onUserLeft = (targetChannel: any, user) => {
-    if (user.userId === UserData.UserEmail) {
-      navigation.navigate('IndicatorScreen', {
-        action: 'leave',
-        data: {channel: Groupchannel},
-      });
-    }
-  };
+  // channelHandler.onUserLeft = (targetChannel: any, user) => {
+  //   if (user.userId === UserData.UserEmail) {
+  //     navigation.navigate('IndicatorScreen', {
+  //       action: 'leave',
+  //       data: {channel: Groupchannel},
+  //     });
+  //   }
+  // };
 
   const connectionHandler = new SendBird.ConnectionHandler();
   connectionHandler.onReconnectStarted = () => {
@@ -238,14 +263,14 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
     }
 
     const MyUpdate = reference.ref(MyDBUrl).on('child_changed', (snapshot) => {
-      // //console.log('MyUpdate child_changed snapshot:', snapshot.val());
+      console.log('MyUpdate child_changed snapshot:', snapshot.val());
       setMyLocation(snapshot.val());
     });
 
     const OtherUpdate = reference
       .ref(OtherDBUrl)
       .on('child_changed', (snapshot) => {
-        // //console.log('OtherUpdate child_changed snapshot:', snapshot.val());
+        console.log('OtherUpdate child_changed snapshot:', snapshot.val());
         setOtherLocation(snapshot.val());
       });
 
@@ -266,7 +291,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
       .on('child_removed', (snapshot) => {
         setOtherLocation(undefined);
         setGeoJson(undefined);
-        BeforeReport()
+        BeforeReport();
       });
 
     return () => {
@@ -278,6 +303,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
 
       SendBird.removeConnectionHandler('chat');
       SendBird.removeChannelHandler('chat');
+      // clearInterval(intervalRef);
       // unsubscribe.remove();
     };
   }, []);
@@ -484,24 +510,17 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
     await DeleteL1CreatedAt();
     await DeleteMyLocation();
 
+    SendBirdChatLeave(
+      UserData.UserEmail,
+      'B0BDC2B5-FF59-4D00-98C2-BADBAA9215E7',
+      uid,
+    );
+
     setTimeout(() => {
-      SendBird.GroupChannel.getChannel(
-        uid,
-        function (groupChannel: any, error: Error) {
-          if (!error) {
-            navigation.navigate('IndicatorScreen', {
-              action: 'leave',
-              data: {channel: groupChannel},
-            });
-          } else if (error) {
-            console.log('Error In GotoMap In GetChannel', error);
-          }
-        },
-      );
+      navigation.navigate('MapScreen', {
+        CurrentUser: UserData,
+      });
     }, 2000);
-    setTimeout(() => {
-      navigation.goBack();
-    }, 4000);
   };
 
   const ReportSubmit = async () => {
@@ -572,46 +591,51 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
         marginLeft: 0,
         marginBottom: 0,
       }}>
-      <View
-        style={[
-          styles.Column_OnlyRowCenter,
-          {
-            width: '90%',
-            height: height * 0.55,
-            backgroundColor: '#37375B',
-            marginLeft: '5%',
-            borderRadius: 15,
-          },
-        ]}>
-        {WhiteReportSvg}
-        <TouchableOpacity
-          style={{position: 'absolute', top: 22, right: 13}}
-          onPress={onoffReportModal}>
-          {취소하기Svg}
-        </TouchableOpacity>
-        {WhyReport}
-        {ReturnTo('허위 프로필', 1)}
-        {ReturnTo('욕설 및 비방', 2)}
-        {ReturnTo('불쾌한 대화', 3)}
-        {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
-        <TouchableOpacity
-          onPress={() => {
-            ReportSubmit();
-          }}
+      <LinearGradient
+        colors={Type2가로}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 0}}
+        style={[styles.W100H100, styles.RowCenter]}>
+        <View
           style={[
-            styles.RowCenter,
+            styles.Column_OnlyRowCenter,
             {
-              width: '63%',
-              height: '8%',
-              borderRadius: 7,
-              backgroundColor: '#DFE5F1',
-              position: 'absolute',
-              bottom: 30,
+              width: '90%',
+              height: height * 0.55,
+              backgroundColor: '#37375B',
+              borderRadius: 15,
             },
           ]}>
-          <Text style={[styles.FT16, styles.FW500]}>다음</Text>
-        </TouchableOpacity>
-      </View>
+          {WhiteReportSvg}
+          <TouchableOpacity
+            style={{position: 'absolute', top: 22, right: 13}}
+            onPress={onoffReportModal}>
+            {취소하기Svg}
+          </TouchableOpacity>
+          {WhyReport}
+          {ReturnTo('허위 프로필', 1)}
+          {ReturnTo('욕설 및 비방', 2)}
+          {ReturnTo('불쾌한 대화', 3)}
+          {ReturnTo('나체 또는 성적인 컨텐츠', 4)}
+          <TouchableOpacity
+            onPress={() => {
+              ReportSubmit();
+            }}
+            style={[
+              styles.RowCenter,
+              {
+                width: '63%',
+                height: '8%',
+                borderRadius: 7,
+                backgroundColor: '#DFE5F1',
+                position: 'absolute',
+                bottom: 30,
+              },
+            ]}>
+            <Text style={[styles.FT16, styles.FW500]}>다음</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
     </Modal>
   );
 
@@ -833,7 +857,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
               <View>
                 <Image
                   source={{uri: UserData.ProfileImageUrl}}
-                  style={MapScreenStyles.GirlsMarker}
+                  style={MapScreenStyles.MarkerImage}
                   resizeMode="cover"
                 />
               </View>
@@ -844,7 +868,7 @@ const MeetMapScreen = ({route, navigation}: any, props: any) => {
               <View>
                 <Image
                   source={{uri: otherUserData.ProfileImageUrl}}
-                  style={MapScreenStyles.GirlsMarker}
+                  style={MapScreenStyles.MarkerImage}
                   resizeMode="cover"
                 />
               </View>

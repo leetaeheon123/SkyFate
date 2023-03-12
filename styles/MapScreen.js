@@ -21,6 +21,14 @@ export const MapScreenStyles = StyleSheet.create({
     width: '90%',
     marginLeft: '5%',
   },
+
+  TagFriendModal: [
+    styles.W100H100,
+    styles.FullModal,
+    {
+      // backgroundColor: 'red',
+    },
+  ],
   TopView: {
     position: 'absolute',
     left: '5%',
@@ -165,6 +173,14 @@ export const MapScreenStyles = StyleSheet.create({
     borderStyle: 'solid',
   },
 
+  SecondChangeProfileView: {
+    width: 46,
+    height: 46,
+    position: 'absolute',
+    right: '7%',
+    top: '6%',
+  },
+
   NS: {
     width: '20%',
     height: 46,
@@ -218,7 +234,7 @@ export const MapScreenStyles = StyleSheet.create({
 
   Btn_Match: {
     position: 'absolute',
-    left: '15%',
+    left: '35.5%',
     bottom: '50%',
   },
   Btn_RandomMatch: {
@@ -227,12 +243,20 @@ export const MapScreenStyles = StyleSheet.create({
     bottom: '50%',
   },
 
-  GirlsMarker: {
+  MarkerImage: {
     width: 35,
     height: 35,
     borderRadius: 50,
     borderWidth: 2,
     borderColor: 'white',
+  },
+  SecondMarkerImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: 'white',
+    marginLeft: -10,
   },
   HP_Marker: {
     width: 24,
