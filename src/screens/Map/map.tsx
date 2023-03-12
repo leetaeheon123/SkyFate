@@ -737,10 +737,10 @@ const MapScreen = (props: any) => {
   };
 
   const ChangeShowStateMan = () => {
-    Alert.alert(
-      '남성유저 160명, 여성유저 200명이 가입하기 전까진 사용할 수 없습니다',
-    );
-    return;
+    // Alert.alert(
+    //   '남성유저 160명, 여성유저 200명이 가입하기 전까진 사용할 수 없습니다',
+    // );
+    // return;
 
     // setWaitModalVis(true);
     // navigation.navigate('WaitScreen');
