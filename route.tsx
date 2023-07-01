@@ -25,6 +25,7 @@ import {RootStackParamList} from 'Screens/RootStackParamList';
 import BottomTabScreen from './bottomstack';
 import ChatScreen from './src/page/chat';
 import CsChatScreen from './src/page/CsChat';
+import NoTimeLimitChatScreen from './src/page/NoTimLimitChat';
 
 import MbtiSelectScreen from 'Screens/ProfileInput/MbtiSelect';
 import GenderSelectScreen from 'Screens/ProfileInput/GenderSelect';
@@ -38,6 +39,11 @@ import WebViewScreen from 'Screens/WebViewScreen';
 import SettingScreen from 'Screens/Setting/Setting';
 
 import ProfileImageViewScreen from './src/page/ProfileImageView';
+import VisualMeasureStart1Screen from 'Screens/ProfileInput/VisualMeasureStart1';
+import VisualMeasureStart2Screen from 'Screens/ProfileInput/VisualMeasureStart2';
+import VisualMeasureInProgressScreen from 'Screens/ProfileInput/VisualMeasureInProgress';
+import VisualMeasureNotCheckSuccessScreen from 'Screens/ProfileInput/VisualMeasureNotCheckSuccess';
+import VisualMeasureNotCheckFailedScreen from 'Screens/ProfileInput/VisualMeasureNotCheckFailed';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -119,6 +125,10 @@ const Routes = (props: any) => {
       />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
       <Stack.Screen name="CsChatScreen" component={CsChatScreen} />
+      <Stack.Screen
+        name="NoTimeLimitChatScreen"
+        component={NoTimeLimitChatScreen}
+      />
 
       <Stack.Screen
         name="ProfileImageViewScreen"
@@ -164,10 +174,36 @@ const Routes = (props: any) => {
         options={{headerShown: false}}
       />
       <Stack.Screen
+        name="VisualMeasureStart1Screen"
+        component={VisualMeasureStart1Screen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="VisualMeasureStart2Screen"
+        component={VisualMeasureStart2Screen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="VisualMeasureInProgressScreen"
+        component={VisualMeasureInProgressScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="VisualMeasureNotCheckSuccessScreen"
+        component={VisualMeasureNotCheckSuccessScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="VisualMeasureNotCheckFailedScreen"
+        component={VisualMeasureNotCheckFailedScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
         name="ProfileImageSelectScreen"
         component={ProfileImageSelectScreen}
         options={{headerShown: false}}
       />
+
       <Stack.Screen
         name="SettingScreen"
         component={SettingScreen}

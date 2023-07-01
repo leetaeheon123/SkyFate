@@ -11,6 +11,7 @@ import {RightArrowWhiteSvg} from 'component/General/GeneralSvg';
 import styles from '~/ManToManBoard';
 import {logout} from 'Screens/Map/map';
 import {AppContext} from '^/Appcontext';
+import {openWebView} from 'Screens/AgreementScreen';
 
 const Setting = ({navigation, route}: any) => {
   const [notification, setNotification] = useState(false);

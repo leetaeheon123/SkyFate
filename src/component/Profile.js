@@ -1,11 +1,13 @@
 import React from 'react';
-import {Dimensions, TouchableOpacity, View} from 'react-native';
+import {Dimensions, Text, TouchableOpacity, View} from 'react-native';
 import {LoginAndReigsterStyles} from '~/LoginAndRegiser';
 
 import {
   Btn_ClickableNextSvg,
   Btn_NotClickableNextSvg,
+  MainColorBtn_ClickableSvg,
 } from './Profile/ProfileSvg';
+import styles from '~/ManToManBoard';
 
 const width = Dimensions.get('window').width;
 
@@ -18,6 +20,31 @@ export const Btn_ClickableNext = (props) => {
         onPress();
       }}>
       {Btn_ClickableNextSvg(width * 0.9)}
+    </TouchableOpacity>
+  );
+};
+
+export const MainColorBtn_Clickable = (props) => {
+  const onPress = props.onPress;
+  const style = props.style;
+  const Title = props.Title;
+  return (
+    <TouchableOpacity
+      style={[style, styles.RowCenter]}
+      onPress={() => {
+        onPress();
+      }}>
+      <Text
+        style={{
+          position: 'absolute',
+          zIndex: 1,
+          fontWeight: '800',
+          fontSize: 20,
+          color: 'white',
+        }}>
+        {Title}
+      </Text>
+      {MainColorBtn_ClickableSvg(width * 0.9)}
     </TouchableOpacity>
   );
 };

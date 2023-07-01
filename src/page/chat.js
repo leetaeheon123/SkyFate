@@ -91,15 +91,13 @@ const ChatScreen = (props) => {
 
   const [CanSendL1Invite, setCanSendL1Invite] = useState();
 
-  channel.getMetaData([Key_MetaData], function (response, error) {
+  channel.getMetaData([Key_MetaData], async (response, error) => {
     if (!error) {
-      let value = response[Key_MetaData];
-      console.log('res:', value);
-      setCanSendL1Invite(value);
+      let value = await response[Key_MetaData];
+      const lastChar = value.slice(-1);
+      setCanSendL1Invite(lastChar);
     }
   });
-
-  console.log('channel:', channel);
 
   // members 배열에서 UserEmail 값이 UserData.UserEmail과 동일한 요소를 제거함
 
@@ -623,12 +621,12 @@ const ChatScreen = (props) => {
   };
 
   const SaveSendL1InviteInMetaData = () => {
-    var Metadata = {
-      [Key_MetaData]: '1', // Update an existing item with a new value.
+    const Value = UserData.UserEmail + '1';
+    let Metadata = {
+      [Key_MetaData]: Value, // Update an existing item with a new value.
     };
 
-    setCanSendL1Invite(1);
-
+    setCanSendL1Invite(Value);
     var upsertIfNotExist = true; // If false, the item with `key3` isn't added to the metadata.
 
     channel.updateMetaData(

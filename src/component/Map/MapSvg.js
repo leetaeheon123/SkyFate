@@ -9,6 +9,7 @@ import Enter_Match from 'Assets/Map/Enter_Match.svg';
 import ClickedEnter_Match from 'Assets/Map/ClickedEnter_Match.svg';
 
 import Enter_Chat from 'Assets/Enter_Chat.svg';
+import EventBtn from 'Assets/FirstEvent/EventBtn.svg';
 
 import Setting from 'Assets/Setting.svg';
 import Setting2 from 'Assets/Setting2.svg';
@@ -70,6 +71,11 @@ export const ClickedEnter_MatchSvg = (width) => {
 export const Enter_ChatSvg = (width) => {
   let height = width;
   return <WithLocalSvg asset={Enter_Chat} width={width} height={height} />;
+};
+
+export const EventBtnSvg = (width) => {
+  let height = width;
+  return <WithLocalSvg asset={EventBtn} width={width} height={height} />;
 };
 
 export const Enter_SettingSvg = (width) => {

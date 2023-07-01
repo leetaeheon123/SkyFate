@@ -16,6 +16,7 @@ import {WaitScreen} from 'Screens/Wait';
 
 import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 import AutoComScreen from 'Screens/Map/AutoCom';
+import FirstEventChatListScreen from 'Screens/Map/FirstEventChatList';
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
@@ -118,6 +119,11 @@ const BottomTabScreen = (props: any) => {
       <BottomTab.Screen
         name="ChatListScreen"
         component={ChatListScreen}
+        initialParams={{}}
+      />
+      <BottomTab.Screen
+        name="FirstEventChatListScreen"
+        component={FirstEventChatListScreen}
         initialParams={{}}
       />
       <BottomTab.Screen name="MyProfileScreen" component={MyProfileScreen} />

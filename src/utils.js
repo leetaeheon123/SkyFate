@@ -154,3 +154,4 @@ export const useInterval = (callback, delay) => {
 
   return intervalRef;
 };
+

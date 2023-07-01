@@ -2,7 +2,7 @@ import {WithLocalSvg} from 'react-native-svg';
 import Back from 'Assets/Back.svg';
 import Line from 'Assets/Line.svg';
 import LongLine from 'Assets/LongLine.svg';
-import {Dimensions} from 'react-native';
+import {Dimensions, Text, View} from 'react-native';
 
 import Plus from 'Assets/Plus.svg';
 import Minus from 'Assets/Minus.svg';
@@ -34,6 +34,8 @@ import Security from 'Assets/Security.svg';
 import 완료 from 'Assets/완료.svg';
 import WaitScreen from 'Assets/WaitScreen.svg';
 import {WPer100, WPer15, WPer50, WPer90} from '~/Per';
+
+import DdayBtn from 'Assets/DdayBtn.svg';
 
 const Gwidth = Dimensions.get('window').width;
 export const BackSvg = (width) => {
@@ -197,3 +199,5 @@ export const RightArrowWhiteSvg = (
     asset={RightArrowWhite}
     style={{marginRight: 17}}></WithLocalSvg>
 );
+
+export const DdayBtnSvg = <WithLocalSvg asset={DdayBtn} />;

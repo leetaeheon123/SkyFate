@@ -19,6 +19,10 @@ module.exports = {
             rootPathPrefix: 'component/',
           },
           {
+            rootPathSuffix: './src/Firebase',
+            rootPathPrefix: 'Firebase/',
+          },
+          {
             rootPathSuffix: './src/reducer',
             rootPathPrefix: 'reducer/',
           },

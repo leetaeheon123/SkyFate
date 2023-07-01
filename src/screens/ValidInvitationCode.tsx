@@ -12,6 +12,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Keyboard,
+  Image,
 } from 'react-native';
 import {
   AppleButton,
@@ -36,6 +37,8 @@ import {
 } from 'component/Profile/ProfileSvg';
 import {LineSvg, LongLineSvg} from 'component/General/GeneralSvg';
 import {GetFbFirestore} from '^/Firebase';
+
+import Fire from 'Assets/Gif/Fire.gif';
 
 export type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -235,7 +238,6 @@ const ValidInvitationCodeScreen = () => {
   const [Selected, setSelected] = useState(false);
 
   const {width} = Dimensions.get('window');
-  console.log(width);
   const [TextInputInvitationCode, setTextInputInvitationCode] = useState('');
   const navigation = useNavigation();
 
@@ -306,9 +308,16 @@ const ValidInvitationCodeScreen = () => {
             {InvitationCode()}
           </Pressable>
         </View>
+        {/* <Image
+          style={{width: 100, height: 120}}
+          source={Fire}
+          resizeMode="contain"
+        />
+        <Text>랑데부 행사 7/7일날 함~ </Text>
+        <Text>행사 80명 모으고 20,20자리씩 남음 </Text>
 
         <Text>가입한 남성유저수: 82명</Text>
-        <Text>가입한 여성유저수: 98명</Text>
+        <Text>가입한 여성유저수: 98명</Text> */}
 
         <Btn_ClickableNext
           onPress={() => {

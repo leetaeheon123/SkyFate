@@ -222,47 +222,30 @@ const CsChatScreen = (props) => {
 
   const sendUserMessage = () => {
     if (state.input.length > 0) {
-      const now = GetEpochTime();
+      const params = new SendBird.UserMessageParams();
+      params.message = state.input;
 
-      let milis = now - channel.createdAt;
-      let second = Math.floor(milis / 1000);
-      let minutes = MilisToMinutes(milis);
-
-      if (second <= 600) {
-        const params = new SendBird.UserMessageParams();
-        params.message = state.input;
-
-        const pendingMessage = channel.sendUserMessage(
-          params,
-          (message, err) => {
-            if (!err) {
-              dispatch({type: 'send-message', payload: {message}});
-            } else {
-              console.log('In SendUserMessaging Error:', err);
-              setTimeout(() => {
-                dispatch({
-                  type: 'error',
-                  payload: {error: 'Failed to send a message.'},
-                });
-                dispatch({
-                  type: 'delete-message',
-                  payload: {reqId: pendingMessage.reqId},
-                });
-              }, 500);
-            }
-          },
-        );
-        dispatch({
-          type: 'send-message',
-          payload: {message: pendingMessage, clearInput: true},
-        });
-      } else if (second > 600) {
-        Alert.alert('10분 초과하여서 나가집니다.');
-        navigation.navigate('IndicatorScreen', {
-          action: 'leave',
-          data: {channel},
-        });
-      }
+      const pendingMessage = channel.sendUserMessage(params, (message, err) => {
+        if (!err) {
+          dispatch({type: 'send-message', payload: {message}});
+        } else {
+          console.log('In SendUserMessaging Error:', err);
+          setTimeout(() => {
+            dispatch({
+              type: 'error',
+              payload: {error: 'Failed to send a message.'},
+            });
+            dispatch({
+              type: 'delete-message',
+              payload: {reqId: pendingMessage.reqId},
+            });
+          }, 500);
+        }
+      });
+      dispatch({
+        type: 'send-message',
+        payload: {message: pendingMessage, clearInput: true},
+      });
     }
   };
 

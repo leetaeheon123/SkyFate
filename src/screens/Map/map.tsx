@@ -4,6 +4,7 @@ import React, {
   useRef,
   useContext,
   useReducer,
+  memo,
 } from 'react';
 import {
   SafeAreaView,
@@ -23,10 +24,10 @@ import {
   Switch,
   Pressable,
   KeyboardAvoidingView,
+  ImageBackground,
 } from 'react-native';
 
 import {MapScreenStyles} from '~/MapScreen';
-
 import styles from '~/ManToManBoard';
 
 import {useQuery} from 'react-query';
@@ -34,7 +35,12 @@ import {useQuery} from 'react-query';
 import {firebase} from '@react-native-firebase/database';
 import Geolocation from 'react-native-geolocation-service';
 
-import MapView, {LocalTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import MapView, {
+  Circle,
+  LocalTile,
+  Marker,
+  PROVIDER_GOOGLE,
+} from 'react-native-maps';
 
 import firestore from '@react-native-firebase/firestore';
 
@@ -82,6 +88,7 @@ import {
   OnToggleSvg,
   OffToggleSvg,
   M3Main_TopBarWhiteHeartSvg,
+  EventBtnSvg,
 } from 'component/Map/MapSvg';
 
 import {
@@ -89,6 +96,7 @@ import {
   ClickedCheckSvg,
   ClickedCompleteSvg,
   ColorPeopleSvg,
+  DdayBtnSvg,
   MemoSvg,
   MinusSvg,
   PeopleAddSvg,
@@ -108,9 +116,27 @@ import {
 } from 'react-native-autocomplete-dropdown';
 import {background} from 'native-base/lib/typescript/theme/styled-system';
 import SwiperFlatList from 'react-native-swiper-flatlist';
-import {HPer90, WPer90} from '~/Per';
+import {HPer90, WPer15, WPer30, WPer90} from '~/Per';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {ScrollView} from 'native-base';
+import {Btn_ClickableNext, MainColorBtn_Clickable} from 'component/Profile';
+import {RequestAttendFirstEvent} from '../../Firebase/create';
+import {
+  Get_EventAttendedUserDataList,
+  Get_EventAttendedUserEmailList,
+} from '../../Firebase/get';
+import {FirstEventInviteCopyRight} from 'Assets/Event';
+
+import {
+  AlreadyAttendModal,
+  ChooseModal,
+  CompleteAttendFirstEventModal,
+} from 'component/ReUseModal';
+import {WithLocalSvg} from 'react-native-svg';
+import {MyProfileStyles} from '~/MyProfile';
+import X from 'Assets/X.svg';
+import {Success} from '^/NoMistakeWord';
 export interface ILocation {
   latitude: number;
   longitude: number;
@@ -150,12 +176,53 @@ export interface UserData {
   ProfileImageUrl6: string;
 }
 
+const HypeSeoullatitude = 37.5261485;
+const HypeSeoullongitude = 127.0385686;
+
 export const reference = firebase
   .app()
   .database(
     'https://hunt-d7d89-default-rtdb.asia-southeast1.firebasedatabase.app/',
   );
 
+const GetDistanceBetweenTwoPoint = (
+  StartLongitude: number,
+  StartLatitude: number,
+) => {
+  const options = {
+    headers: {
+      accept: 'application/json',
+      appKey: 'l7xxc0de921a2f044ca9b5a4902ed4b9bcdb',
+    },
+  };
+
+  return axios
+    .get(
+      `https://apis.openapi.sk.com/tmap/routes/distance?version=1&startX=${StartLongitude}&startY=${StartLatitude}&endX=${HypeSeoullongitude}&endY=${HypeSeoullatitude}&reqCoordType=WGS84GEO`,
+      options,
+    )
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.log('error ' + error);
+    });
+};
+
+const CheckIn1km = async (StartLongitude: number, StartLatitude: number) => {
+  const Distance = await GetDistanceBetweenTwoPoint(
+    StartLongitude,
+    StartLatitude,
+  );
+
+  const DistanceValue = Distance.distanceInfo.distance;
+
+  if (DistanceValue <= 100000) {
+    return true;
+  } else if (DistanceValue > 100000) {
+    return false;
+  }
+};
 // 여성유저가 위치 공유시 남성 유저분들에게 알람을 보내는 기능
 const SendPushToMans = () => {
   axios
@@ -511,9 +578,15 @@ const MapScreen = (props: any) => {
     longitudeDelta: 0.0421,
   };
 
+  let date = new Date();
+  let ToDay = date.getDate();
+  let FirstEventLastDay = 7 - ToDay;
+
+  const PosterPreload = require('../../Assets/FirstEvent/FirstEventPoster.svg');
+
   const UserData = props.route.params.CurrentUser;
 
-  console.log('UserData [MapScreen.tsx]:', UserData);
+  console.log('UserData [MapScreen.tsx]:', UserData.VisualMeasureStatus);
   const navigation = useNavigation();
 
   const Context = useContext(AppContext);
@@ -622,8 +695,14 @@ const MapScreen = (props: any) => {
     setLocation({latitude, longitude});
   };
 
+  const [FirstEventAttendedUserList, setFirstEventAttendedUserList] = useState(
+    [],
+  );
+
+  const [IsAttendedFirstEvent, setIsAttendedFirstEvent] = useState(false);
+
   useEffect(() => {
-    async function SaveInDevice() {
+    const SaveInDevice = async () => {
       // 로케이션 위치 가져오는 권한설정
       await GetLocationPermission();
       await GetMyCoords(
@@ -648,7 +727,7 @@ const MapScreen = (props: any) => {
       UpdateMyLocationWatch(locationdispatch);
       await GetInvitationToFriendCode();
       await GetAsyncStorageEmail();
-    }
+    };
 
     let Result = SaveInDevice();
 
@@ -709,6 +788,30 @@ const MapScreen = (props: any) => {
     };
   }, []);
 
+  const [
+    FirstEventAttendCongratulateModalVis,
+    setFirstEventAttendCongratulateModalVis,
+  ] = useState(false);
+
+  useEffect(() => {
+    Get_EventAttendedUserDataList(UserData.Gender).then(
+      (AttendedUserDataList) => {
+        const gridData = [];
+
+        while (AttendedUserDataList.length) {
+          gridData.push(AttendedUserDataList.splice(0, 3));
+        }
+        setFirstEventAttendedUserList(gridData);
+      },
+    );
+
+    Get_EventAttendedUserEmailList().then((AttendedUserEmailList) => {
+      if (AttendedUserEmailList.includes(UserData.UserEmail)) {
+        setIsAttendedFirstEvent(true);
+      }
+    });
+  }, [FirstEventAttendCongratulateModalVis]);
+
   /// on connection event
 
   const handleStateChange = (newState: any) => {
@@ -755,8 +858,17 @@ const MapScreen = (props: any) => {
 
   const [ProfileModalVisiable, setProfileModalVisiable] = useState(false);
   const [WaitModalVis, setWaitModalVis] = useState(false);
+  const [FirstEventModalVis, setFirstEventModalVis] = useState(false);
+  const [FirstEventAttendedUserModalVis, setFirstEventAttendedUserModalVis] =
+    useState(false);
+
+  const [FirstEventAttendModalVis, setFirstEventAttendModalVis] =
+    useState(false);
+
+  const [AlreadyAttendModalVis, setAlreadyAttendModalVis] = useState(false);
 
   const [ShowUserModal, setShowUserModal] = useState(false);
+  const [ShowFirstEventUserModal, setShowFirstEventUserModal] = useState(false);
 
   const [ProfileForGtoM, setProfileForGtoM] = useState<Object>({});
 
@@ -895,6 +1007,10 @@ const MapScreen = (props: any) => {
     setShowUserModal(!ShowUserModal);
   };
 
+  const SwitchFirstEventShowUserModal = () => {
+    setShowFirstEventUserModal(!ShowFirstEventUserModal);
+  };
+
   const [ShowMbti, setShowMbti] = useState('');
   const [ShowNickName, setShowNickName] = useState('');
 
@@ -906,9 +1022,17 @@ const MapScreen = (props: any) => {
     // console.log('stateize');
   };
 
-  const GirlMarkerOnPress = async (Obj: ProfileForGtoM) => {
+  const GirlMarkerOnPress = async (
+    Obj: ProfileForGtoM,
+    IsFirstEvent: boolean,
+  ) => {
     await Stateize(Obj);
-    SwitchShowUserModal();
+
+    if (IsFirstEvent == true) {
+      SwitchFirstEventShowUserModal();
+    } else {
+      SwitchShowUserModal();
+    }
   };
 
   const DeleteChannelAfter10Minutes = (Channel: Object) => {
@@ -936,8 +1060,7 @@ const MapScreen = (props: any) => {
     // }, 600000);
   };
 
-  const CreateChating = () => {
-    // console.log('StartChatingBetweenGirls In TwoMapScreen');
+  const CreateChating = async () => {
     const ProfileCheck = ProfileNullCheck(UserData.ProfileImageUrl);
     if (ProfileCheck == false) {
       WarnProfileNull();
@@ -965,53 +1088,98 @@ const MapScreen = (props: any) => {
 
       SendBird.GroupChannel.createChannel(
         params,
-        function (groupChannel: any, error: Error) {
+        async function (groupChannel: any, error: Error) {
           if (error) {
             // console.log(error.message);
             // Handle error.
           } else if (!error) {
             SwitchShowUserModal();
-            CreateCanSendMetaData(
+            await CreateCanSendMetaData(
               groupChannel,
               OtherMetadDataKey,
+              ProfileForGtoM.UserEmail,
               MyMetadDataKey,
+              UserData.UserEmail,
             );
             chat(groupChannel);
-            // 10분 경과시 채팅방을 삭제하기 위한 코드 추가
-
-            // 1/11) DeleteChannelAfter10Minutes 이외 다른 방식으로 구현함
-
-            // DeleteChannelAfter10Minutes(groupChannel);
-
-            // console.log(
-            // 'groupChannel In CreateChating Function In MapScreen:',
-            // groupChannel,
-            // );
           }
         },
       );
     }
   };
 
-  const CreateCanSendMetaData = (
+  const FirstEventCreateChating = async () => {
+    const ProfileCheck = ProfileNullCheck(UserData.ProfileImageUrl);
+    if (ProfileCheck == false) {
+      WarnProfileNull();
+      return;
+    }
+
+    let params = new SendBird.GroupChannelParams();
+
+    // 추가로 고려할거 : 이미 채팅하기를 눌러 채팅방이 생성된 상태와 처음 채팅하기를 눌러서 채팅방이 생성되는 상황을 분기처리 하기
+    if (isEmptyObj(ProfileForGtoM) == false) {
+      let Member = [ProfileForGtoM.UserEmail, UserData.UserEmail];
+      let NickNames = [ProfileForGtoM.NickName, UserData.NickName];
+
+      params.addUserIds(Member);
+      params.coverUrl = ProfileForGtoM.ProfileImageUrl;
+      params.name = NickNames[0];
+      params.operatorUserIds = Member;
+      (params.isDistinct = true), (params.isPublic = false);
+
+      SendBird.GroupChannel.createChannel(
+        params,
+        function (groupChannel: any, error: Error) {
+          if (error) {
+            // console.log(error.message);
+            // Handle error.
+          } else if (!error) {
+            SwitchFirstEventShowUserModal();
+            FirstEventGochatScreen(groupChannel);
+          }
+        },
+      );
+    }
+  };
+
+  const CreateCanSendMetaData = async (
     channel: any,
     OtherMetadDataKey: string,
+    OtherUserEmail: string,
     MyMetaDataKey: string,
+    MyEmail: string,
   ) => {
-    let Metadata = {
-      [OtherMetadDataKey]: '0',
-      [MyMetaDataKey]: '0',
-    };
+    const GetMetaDataResult = await channel.getMetaData([MyMetaDataKey]);
 
-    channel.createMetaData(Metadata, function (response: any, error: Error) {
-      if (error) {
-        // Handle error.
-      }
-    });
+    if (Object.getOwnPropertyNames(GetMetaDataResult).length === 0) {
+      let Metadata = {
+        [OtherMetadDataKey]: '0',
+        [MyMetaDataKey]: '0',
+      };
+      await channel.createMetaData(Metadata);
+      return;
+    } else {
+      return;
+    }
+
+    // channel.createMetaData(Metadata, function (response: any, error: Error) {
+    //   if (error) {
+    //     // Handle error.
+    //   } else {
+    //     console.log('createMetaData res:', response);
+    //   }
+    // });
   };
 
   const chat = (channel: any) => {
     navigation.navigate('ChatScreen', {
+      channel,
+      UserData,
+    });
+  };
+  const FirstEventGochatScreen = (channel: any) => {
+    navigation.navigate('NoTimeLimitChatScreen', {
       channel,
       UserData,
     });
@@ -1316,6 +1484,14 @@ const MapScreen = (props: any) => {
     </View>
   );
 
+  const FirstEventChatView = (
+    <View style={MapScreenStyles.ChatView}>
+      <TouchableOpacity onPress={() => FirstEventCreateChating()}>
+        {M5ChatSvg(width * 0.17)}
+      </TouchableOpacity>
+    </View>
+  );
+
   const ImageBar = (
     <View style={MapScreenStyles.ImageBar}>
       {/* <View style={MapScreenStyles.ImageBarBox}>
@@ -1385,6 +1561,52 @@ const MapScreen = (props: any) => {
 
           {ChatView}
           {/* {ProfileForGtoM.Memo != '' ? Desc : null} */}
+        </View>
+      </Modal>
+    );
+  };
+
+  const FirstEventClickedUserDataModal = () => {
+    return (
+      <Modal
+        animationIn="slideInUp"
+        isVisible={ShowFirstEventUserModal}
+        coverScreen={false}
+        onBackdropPress={() => SwitchFirstEventShowUserModal()}>
+        <View
+          style={[
+            {height: '65%', backgroundColor: '#313A5B', borderRadius: 26},
+          ]}>
+          {ProfileForGtoM.ProfileImageUrl != undefined ? MainImageFlat : null}
+
+          <View
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '20%',
+              bottom: '24%',
+            }}>
+            <View
+              style={{
+                marginLeft: 24,
+                width: '50%',
+              }}>
+              <Text style={{color: 'white', fontWeight: '700', fontSize: 17}}>
+                {ProfileForGtoM.NickName}
+              </Text>
+              <Text style={{color: 'white', marginTop: 5, fontWeight: '400'}}>
+                {/* {ShowMbti} */}
+                {ProfileForGtoM?.Mbti}
+              </Text>
+              <Text
+                style={{color: 'white', marginTop: 5, fontWeight: '400'}}
+                numberOfLines={2}>
+                {ProfileForGtoM.Age}
+                {ProfileForGtoM.Memo}
+              </Text>
+            </View>
+          </View>
+          {FirstEventChatView}
         </View>
       </Modal>
     );
@@ -2458,11 +2680,39 @@ const MapScreen = (props: any) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('ChatListScreen', {
-            UserData,
-          });
+          if (IsAttendedFirstEvent) {
+            navigation.navigate('FirstEventChatListScreen', {
+              UserData,
+            });
+          } else {
+            navigation.navigate('ChatListScreen', {
+              UserData,
+            });
+          }
         }}>
         {Enter_ChatSvg(80)}
+      </TouchableOpacity>
+    );
+  };
+
+  const Btn_ViewEventAttendedUser = () => {
+    if (!IsAttendedFirstEvent) {
+      return null;
+    }
+
+    return (
+      <TouchableOpacity
+        style={
+          {
+            // position: 'absolute',
+            // bottom: '12%',
+            // right: '5%',
+          }
+        }
+        onPress={() => {
+          setFirstEventAttendedUserModalVis(true);
+        }}>
+        {EventBtnSvg(80)}
       </TouchableOpacity>
     );
   };
@@ -2541,6 +2791,8 @@ const MapScreen = (props: any) => {
         {ManFriendData.NickName != '' ? ManFriendImage : null}
         {Btn_EnterChat()}
         {TouchableBtn_EnterMatch()}
+        {Btn_ViewEventAttendedUser()}
+
         {/* {Btn_EnterFriendMap()} */}
       </View>
     );
@@ -2557,6 +2809,8 @@ const MapScreen = (props: any) => {
         {ManFriendData.NickName != '' ? ManFriendImage : null}
         {Btn_EnterTagFriend()}
         {Btn_EnterChat()}
+        {Btn_ViewEventAttendedUser()}
+
         {/* {Btn_EnterFriendMap()} */}
       </View>
     );
@@ -2596,6 +2850,10 @@ const MapScreen = (props: any) => {
         {RandomMatchSvg(120)}
       </TouchableOpacity>
     );
+  };
+
+  const Click_FirstEventMarker = () => {
+    console.log('Click_FirstEventMarker');
   };
 
   // const Btn_MatchStart = () => {
@@ -2687,14 +2945,289 @@ const MapScreen = (props: any) => {
     </Modal>
   );
 
+  const CloseFirstEventModal = () => {
+    setFirstEventModalVis(false);
+  };
+
+  const CloseFirstEventAttendedUserModal = () => {
+    setFirstEventAttendedUserModalVis(false);
+  };
+
+  const ClickableImage_ForFirstEvent = ({ClickedUserData, setVis}: any) => (
+    <TouchableOpacity
+      onPress={() => {
+        if (FirstEventLastDay <= 3) {
+          setVis(false);
+          GirlMarkerOnPress(ClickedUserData, true);
+        }
+      }}>
+      <LinearGradient
+        start={{x: 0.5, y: 0}}
+        end={{x: 0.5, y: 1}}
+        colors={['#5B5AF3', '#5B59F3', '#835CF0', '#B567DB']}
+        style={MyProfileStyles.linearGradient}>
+        <ImageBackground
+          source={{
+            uri: ClickedUserData.ProfileImageUrl,
+          }}
+          style={MyProfileStyles.SubImage}
+          blurRadius={10}
+          resizeMode="cover"
+          imageStyle={{borderRadius: WPer15}}
+        />
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+
+  const FirstEventAttendedUserGrid = ({setVis}: any) =>
+    FirstEventAttendedUserList.map((data: any, rowIndex) => (
+      <View
+        style={[
+          styles.Row_OnlyFlex,
+          {width: '100%', justifyContent: 'space-around', marginBottom: 10},
+        ]}
+        key={rowIndex}>
+        {data.map((item: any, columnIndex: number) => (
+          <ClickableImage_ForFirstEvent
+            ClickedUserData={item}
+            setVis={setVis}
+            key={item.UserEmail}
+          />
+        ))}
+      </View>
+    ));
+
+  const Btn_FirstEventModalClose = ({setVis, MarginTop = '2.5%'}) => (
+    <TouchableOpacity
+      onPress={() => {
+        setVis(false);
+      }}
+      style={{
+        position: 'absolute',
+        top: MarginTop,
+        right: '5%',
+        zIndex: 10,
+      }}>
+      <WithLocalSvg asset={X} />
+    </TouchableOpacity>
+  );
+
+  const FirstEventModal = () => (
+    <Modal
+      animationIn={'slideInUp'}
+      isVisible={FirstEventModalVis}
+      onBackdropPress={() => CloseFirstEventModal()}
+      style={[
+        styles.FullModal,
+        {
+          width: '100%',
+        },
+      ]}>
+      <SafeAreaView
+        style={[
+          {
+            width: '100%',
+            height: '90%',
+          },
+        ]}>
+        <Btn_FirstEventModalClose setVis={setFirstEventModalVis} />
+
+        <ScrollView
+          contentContainerStyle={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+          style={{
+            backgroundColor: '#734FDA',
+          }}>
+          <WithLocalSvg
+            asset={PosterPreload}
+            width={width * 1.1}
+            style={{
+              marginLeft: -2,
+              marginTop: -10,
+            }}
+          />
+          {/* {FirstEventSvg} */}
+
+          {/* <Text>Fliter Location</Text> */}
+          <View
+            style={[
+              styles.Row_OnlyColumnCenter,
+              {
+                marginTop: '20%',
+                marginBottom: 16,
+                justifyContent: 'flex-end',
+                width: '90%',
+              },
+            ]}>
+            <View style={[styles.RowCenter]}>
+              <Text
+                style={{
+                  position: 'absolute',
+                  color: 'white',
+                  zIndex: 1,
+                  fontWeight: '600',
+                  fontSize: 14,
+                }}>
+                {`D-${7 - ToDay}`}
+              </Text>
+              {DdayBtnSvg}
+            </View>
+            {/* <Text>7/4 일부터 모든 참가자들의 프로필 확인가능</Text> */}
+          </View>
+
+          {FirstEventAttendedUserList.length != 0 ? (
+            <FirstEventAttendedUserGrid setVis={setFirstEventModalVis} />
+          ) : null}
+
+          {UserData.VisualMeasureStatus == Success ? (
+            IsAttendedFirstEvent ? (
+              <MainColorBtn_Clickable
+                style={{marginTop: 20}}
+                onPress={() => {
+                  setFirstEventModalVis(false);
+                  setTimeout(() => {
+                    setAlreadyAttendModalVis(true);
+                  }, 500);
+                }}
+                Title="참석 완료되었어요!"
+              />
+            ) : (
+              <MainColorBtn_Clickable
+                style={{marginTop: 20}}
+                onPress={() => {
+                  setFirstEventModalVis(false);
+                  setTimeout(() => {
+                    setFirstEventAttendModalVis(true);
+                  }, 500);
+                }}
+                Title="참석 신청하기"
+              />
+            )
+          ) : (
+            <MainColorBtn_Clickable
+              style={{marginTop: 20}}
+              onPress={() => {}}
+              Title="Ai 측정 전이에요!"
+            />
+          )}
+        </ScrollView>
+      </SafeAreaView>
+
+      <TouchableOpacity
+        onPress={() => CloseFirstEventModal()}></TouchableOpacity>
+    </Modal>
+  );
+
+  const FirstEventAttendedUserModal = (
+    <Modal
+      animationIn={'slideInUp'}
+      isVisible={FirstEventAttendedUserModalVis}
+      onBackdropPress={() => CloseFirstEventAttendedUserModal()}
+      style={[
+        styles.FullModal,
+        {
+          width: '100%',
+          right: '5%',
+        },
+      ]}>
+      <SafeAreaView
+        style={[
+          {
+            backgroundColor: '#734FDA',
+            width: '100%',
+            height: '90%',
+            borderRadius: 10,
+          },
+        ]}>
+        <ScrollView
+          contentContainerStyle={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}>
+          <Btn_FirstEventModalClose
+            MarginTop="6%"
+            setVis={setFirstEventAttendedUserModalVis}
+          />
+
+          <View
+            style={[
+              styles.Row_OnlyColumnCenter,
+              {
+                marginTop: '20%',
+                marginBottom: 16,
+                justifyContent: 'flex-end',
+                width: '90%',
+              },
+            ]}>
+            <View style={[styles.RowCenter]}>
+              <Text
+                style={{
+                  position: 'absolute',
+                  color: 'white',
+                  zIndex: 1,
+                  fontWeight: '600',
+                  fontSize: 14,
+                }}>
+                {`D-${7 - ToDay}`}
+              </Text>
+              {DdayBtnSvg}
+            </View>
+            {/* <Text>7/4 일부터 모든 참가자들의 프로필 확인가능</Text> */}
+          </View>
+          {FirstEventAttendedUserList.length != 0 ? (
+            <FirstEventAttendedUserGrid
+              setVis={setFirstEventAttendedUserModalVis}
+            />
+          ) : null}
+        </ScrollView>
+      </SafeAreaView>
+
+      <TouchableOpacity
+        onPress={() => CloseFirstEventModal()}></TouchableOpacity>
+    </Modal>
+  );
+
   return (
     <View style={{width: '100%', height: '100%'}}>
       {/* 1. 내 프로필 정보를 보여주는 (GM3) 2. 클릭된 유저 정보를 보여주는(GM4) 3. 시작하기 클릭시 나오는 모달 */}
       {GirlInputStateModal()}
       {ShowClickedUserDataModal()}
+      {FirstEventClickedUserDataModal()}
       {Enter_MatchModal()}
       {Enter_TagFriendModal}
       {WaitScreenModal}
+      <FirstEventModal />
+      {FirstEventAttendedUserModal}
+
+      <ChooseModal
+        Vis={FirstEventAttendModalVis}
+        setVis={setFirstEventAttendModalVis}
+        YesPressFun={() => {
+          setFirstEventAttendModalVis(false);
+          setTimeout(() => {
+            setFirstEventAttendCongratulateModalVis(true);
+          }, 500);
+          RequestAttendFirstEvent(UserData);
+          setIsAttendedFirstEvent(true);
+        }}
+        NoPressFun={() => {
+          setFirstEventAttendModalVis(false);
+        }}
+        Title="파티에 참가하시겠습니까?"
+      />
+      <CompleteAttendFirstEventModal
+        Vis={FirstEventAttendCongratulateModalVis}
+        setVis={setFirstEventAttendCongratulateModalVis}
+      />
+      <AlreadyAttendModal
+        Vis={AlreadyAttendModalVis}
+        setVis={setAlreadyAttendModalVis}
+      />
+
       {location && (
         <MapView
           style={{width: '100%', height: '100%'}}
@@ -2715,7 +3248,8 @@ const MapScreen = (props: any) => {
           userInterfaceStyle="dark"
           minZoomLevel={10}
           // minZoomLevel={14}
-          maxZoomLevel={17}>
+          maxZoomLevel={17}
+          mapType="mutedStandard">
           {GpsOn == true ? AnimationMarker() : null}
           {isLoading == false && UserData.Gender == 1 && GpsOn == true
             ? data?.map((data: any, index) => {
@@ -2728,26 +3262,7 @@ const MapScreen = (props: any) => {
                     }}
                     tracksViewChanges={false}
                     onPress={() => {
-                      GirlMarkerOnPress({
-                        ProfileImageUrl: data?.ProfileImageUrl,
-                        ProfileImageUrl2: data?.ProfileImageUrl2,
-                        ProfileImageUrl3: data?.ProfileImageUrl3,
-                        ProfileImageUrl4: data?.ProfileImageUrl4,
-                        ProfileImageUrl5: data?.ProfileImageUrl5,
-                        ProfileImageUrl6: data?.ProfileImageUrl6,
-                        FriendProfileImageUrl: data?.FriendProfileImageUrl,
-                        FriendProfileImageUrl2: data?.FriendProfileImageUrl2,
-                        FriendMbti: data?.FriendMbti,
-                        FriendNickName: data?.FriendNickName,
-                        UserEmail: data?.UserEmail,
-                        Memo: data.Memo,
-                        PeopleNum: data.PeopleNum,
-                        CanPayit: data.CanPayit,
-                        NickName: data.NickName,
-                        latitude: data.latitude,
-                        longitude: data.longitude,
-                        Mbti: data.Mbti,
-                      });
+                      GirlMarkerOnPress(data, false);
                     }}>
                     <View style={[MarkerAnimationStyles.dot, styles.RowCenter]}>
                       {Platform.OS == 'ios'
@@ -2785,27 +3300,7 @@ const MapScreen = (props: any) => {
                     }}
                     tracksViewChanges={false}
                     onPress={() => {
-                      GirlMarkerOnPress({
-                        ProfileImageUrl: MansData?.ProfileImageUrl,
-                        ProfileImageUrl2: MansData?.ProfileImageUrl2,
-                        ProfileImageUrl3: MansData?.ProfileImageUrl3,
-                        ProfileImageUrl4: MansData?.ProfileImageUrl4,
-                        ProfileImageUrl5: MansData?.ProfileImageUrl5,
-                        ProfileImageUrl6: MansData?.ProfileImageUrl6,
-                        FriendProfileImageUrl: MansData?.FriendProfileImageUrl,
-                        FriendProfileImageUrl2:
-                          MansData?.FriendProfileImageUrl2,
-                        FriendMbti: MansData?.FriendMbti,
-                        FriendNickName: MansData?.FriendNickName,
-                        UserEmail: MansData?.UserEmail,
-                        Memo: '',
-                        PeopleNum: MansData?.PeopleNum,
-                        CanPayit: '',
-                        NickName: MansData.NickName,
-                        latitude: MansData.latitude,
-                        longitude: MansData.longitude,
-                        Mbti: MansData.Mbti,
-                      });
+                      GirlMarkerOnPress(MansData, false);
                     }}>
                     <View>
                       <Image
@@ -2838,6 +3333,34 @@ const MapScreen = (props: any) => {
           {Sinsa_HotPlaceListisLoading == false
             ? HPMarker(Sinsa_HotPlaceList)
             : null} */}
+          <Marker
+            key={'HypeSeoul'}
+            coordinate={{
+              latitude: 37.5261485,
+              longitude: 127.0385686,
+            }}
+            tracksViewChanges={false}
+            onPress={() => {
+              setFirstEventModalVis(true);
+              console.log('setFirstEventModalVis Marker Click');
+            }}>
+            <View>
+              <Image
+                source={require('../../Assets/Logo/Logo.png')}
+                style={MapScreenStyles.SpeicalHp_Marker}
+                resizeMode="cover"
+              />
+            </View>
+          </Marker>
+          <Circle
+            center={{
+              latitude: 37.5261485,
+              longitude: 127.0385686,
+            }}
+            strokeWidth={1}
+            strokeColor={'black'}
+            radius={1000}
+            fillColor={'#d3d3d320'}></Circle>
         </MapView>
       )}
 
@@ -2846,7 +3369,7 @@ const MapScreen = (props: any) => {
       {ManFriendData.NickName != '' ? ProfileImageWithFriend : ProfileImageBox}
 
       {UserData.Gender == 2 ? BottomBar_Girl() : BottomBar_Man()}
-
+      {/* {Btn_ViewEventAttendedUser()} */}
       <View>
         <TouchableOpacity
           style={[MapScreenStyles.MyLocationBtsn, styles.NoFlexDirectionCenter]}

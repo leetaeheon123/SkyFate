@@ -90,6 +90,7 @@ const SignUpFirestore = async (
     ProfileImageUrl4: '',
     ProfileImageUrl5: '',
     ProfileImageUrl6: '',
+    VisualMeasureStatus: 'Start',
     Type: 'User',
     UserUid: UserUid,
   });

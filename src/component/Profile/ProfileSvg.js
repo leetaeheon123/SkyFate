@@ -53,11 +53,12 @@ import ProfileImageUpload87 from 'Assets/Profile/ProfileImage/ProfileImageUpload
 import Btn_Clickable from 'Assets/Profile/All/Btn_Clickable.svg';
 import Btn_NotClickable from 'Assets/Profile/All/Btn_NotClickable.svg';
 
+import MainColorBtn_Clickable from 'Assets/MainColorBtn_Clickable.svg';
 import InvitationText_Main from 'Assets/Invitation/Invitation_Main.svg';
 import InvitationText_Sub from 'Assets/Invitation/Invitation_Sub.svg';
 
 import ChangeProfile from 'Assets/ChangeProfile.svg';
-import {Dimensions} from 'react-native';
+import {Dimensions, Text} from 'react-native';
 
 const excuteObj = {
   Mbti: MbtiText,
@@ -163,6 +164,17 @@ export const Btn_ClickableNextSvg = (width) => {
       width={width}
       height={height}
       asset={Btn_Clickable}></WithLocalSvg>
+  );
+};
+
+export const MainColorBtn_ClickableSvg = (width) => {
+  let height = width * 0.22;
+
+  return (
+    <WithLocalSvg
+      width={width}
+      height={height}
+      asset={MainColorBtn_Clickable}></WithLocalSvg>
   );
 };
 

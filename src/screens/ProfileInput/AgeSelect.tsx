@@ -41,7 +41,7 @@ const AgeSelectScreen = ({navigation, route}: any) => {
       Age: Age,
     });
 
-    navigation.navigate('ProfileImageSelectScreen', {
+    navigation.navigate('VisualMeasureStart1Screen', {
       UserEmail: UserEmail,
       Gender: Gender,
       NickName: NickName,

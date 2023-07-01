@@ -13,6 +13,7 @@ import {
 } from '../UsefulFunctions/SaveUserDataInDevice';
 import {WaitScreen} from './Wait';
 import {ft} from '^/Firebase';
+import {NotCheckFailed, NotCheckSuccess} from '^/NoMistakeWord';
 
 export const SendBirdUpdateUserInfo = (
   SendBird: any,
@@ -136,6 +137,22 @@ const IndicatorScreen = (props: any) => {
     }
   };
 
+  const ValidVisualMeasureNotCheckSuccess = (VisualMeasureStatus: any) => {
+    if (VisualMeasureStatus == 'NotCheckSuccess') {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const ValidVisualMeasureNotCheckFailed = (VisualMeasureStatus: any) => {
+    if (VisualMeasureStatus == 'NotCheckFailed') {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
   useEffect(() => {
     AsyncStorage.getItem('UserEmail')
       .then(async (user) => {
@@ -209,13 +226,45 @@ const IndicatorScreen = (props: any) => {
             return;
           }
 
+          let ValidNotCheckSuccess = ValidVisualMeasureNotCheckSuccess(
+            UserData?.VisualMeasureStatus,
+          );
+
+          if (!ValidNotCheckSuccess) {
+            GotoProfileInputScreen(
+              `VisualMeasure${NotCheckSuccess}Screen`,
+              UserEmail,
+              NickName,
+              Gender,
+              Age,
+            );
+            return;
+          }
+
+          let ValidNotCheckFailed = ValidVisualMeasureNotCheckFailed(
+            UserData?.VisualMeasureStatus,
+          );
+
+          if (!ValidNotCheckFailed) {
+            GotoProfileInputScreen(
+              `VisualMeasure${NotCheckFailed}Screen`,
+              UserEmail,
+              NickName,
+              Gender,
+              Age,
+            );
+            return;
+          }
+
           if (
             ValidAgreement &&
             ValidNickName &&
             ValidMbti &&
             ValidGender &&
             ValidAge &&
-            ValidProfileImageUrl
+            ValidProfileImageUrl &&
+            ValidNotCheckSuccess &&
+            ValidNotCheckFailed
           ) {
             setCurrentUser(UserData);
             SBConnect(

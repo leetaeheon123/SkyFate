@@ -14,9 +14,14 @@ import {useInterval} from '../utils';
 
 const LAST_MESSAGE_ELLIPSIS = 45;
 
-const Channel = (props) => {
-  const {sendbird, channel, onPress, viewtime, UserData} = props;
-
+const Channel = ({
+  sendbird,
+  channel,
+  onPress,
+  viewtime,
+  UserData,
+  IsFirstEvent = false,
+}) => {
   const {width} = Dimensions.get('window');
   const [name, setName] = useState('');
   const [lastMessage, setLastMessage] = useState('');
@@ -157,7 +162,7 @@ const Channel = (props) => {
           </View>
         ) : null}
       </View>
-      {BombIconView(width * 0.15, CreatedAt)}
+      {IsFirstEvent == false ? BombIconView(width * 0.15, CreatedAt) : null}
     </TouchableOpacity>
   );
 };

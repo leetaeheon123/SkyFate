@@ -21,6 +21,7 @@ import {Btn_NotClickableNextSvg} from 'component/Profile/ProfileSvg';
 
 import {AppContext} from '^/Appcontext';
 import {ProfileImageStyles} from '~/ProfileInput';
+import VisualMeasureInProgressScreen from './VisualMeasureInProgress';
 
 const ProfileImageUploadComponentGen = (
   index: number,
@@ -49,10 +50,6 @@ const ProfileImageUploadComponentGen = (
 };
 
 const ProfileImageSelectScreen = ({navigation, route}: any) => {
-  console.log(route.params.UserEmail);
-  const Context = useContext(AppContext);
-  const SendBird = Context.sendbird;
-
   const {UserEmail, Gender, NickName} = route.params;
 
   const [Url, setUrl] = useState('');
@@ -63,9 +60,7 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
   const {width, height} = Dimensions.get('window');
 
   const goToNext = () => {
-    navigation.navigate('IndicatorScreen', {
-      From: 'LoginAndRegister',
-    });
+    navigation.navigate('VisualMeasureInProgressScreen');
   };
 
   const check = () => {
