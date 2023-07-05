@@ -109,7 +109,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import {Type2가로, Type2세로} from 'component/LinearGradient/LinearType';
 import Swiper from 'react-native-swiper';
 import GradientText from 'component/GradientText';
-import {GetFriendProfileImage, GetUserNickNameList} from '^/Firebase';
+import {
+  GetBlurNum,
+  GetFriendProfileImage,
+  GetUserNickNameList,
+} from '^/Firebase';
 import {
   AutocompleteDropdown,
   TAutocompleteDropdownItem,
@@ -699,6 +703,9 @@ const MapScreen = (props: any) => {
     [],
   );
 
+  const [FirstEventBlurNum, setFirstEventBlurNum] = useState(50);
+  const [FirstEventBlurDday, setFirstEventBlurDday] = useState(3);
+
   const [IsAttendedFirstEvent, setIsAttendedFirstEvent] = useState(false);
 
   useEffect(() => {
@@ -730,6 +737,14 @@ const MapScreen = (props: any) => {
     };
 
     let Result = SaveInDevice();
+
+    GetBlurNum().then((BlurObj) => {
+      const BlurNum = BlurObj?.BlurNumber;
+      const BlurDday = BlurObj?.ProfileViewDday;
+
+      setFirstEventBlurNum(BlurNum);
+      setFirstEventBlurDday(BlurDday);
+    });
 
     fcmService.register(onRegister, onNotification, onOpenNotification);
     localNotificationService.configure(onOpenNotification);
@@ -2956,7 +2971,7 @@ const MapScreen = (props: any) => {
   const ClickableImage_ForFirstEvent = ({ClickedUserData, setVis}: any) => (
     <TouchableOpacity
       onPress={() => {
-        if (FirstEventLastDay <= 3) {
+        if (FirstEventLastDay <= FirstEventBlurDday) {
           setVis(false);
           GirlMarkerOnPress(ClickedUserData, true);
         }
@@ -2971,7 +2986,7 @@ const MapScreen = (props: any) => {
             uri: ClickedUserData.ProfileImageUrl,
           }}
           style={MyProfileStyles.SubImage}
-          blurRadius={10}
+          blurRadius={FirstEventBlurNum >= 0 ? FirstEventBlurNum : 20}
           resizeMode="cover"
           imageStyle={{borderRadius: WPer15}}
         />
@@ -3041,13 +3056,16 @@ const MapScreen = (props: any) => {
           style={{
             backgroundColor: '#734FDA',
           }}>
-          <WithLocalSvg
+          {/* <WithLocalSvg
             asset={PosterPreload}
             width={width * 1.1}
             style={{
               marginLeft: -2,
               marginTop: -10,
             }}
+          /> */}
+          <Image
+            source={require('../../Assets/FirstEvent/FirstEventPoster.png')}
           />
           {/* {FirstEventSvg} */}
 
@@ -3249,7 +3267,8 @@ const MapScreen = (props: any) => {
           minZoomLevel={10}
           // minZoomLevel={14}
           maxZoomLevel={17}
-          mapType="mutedStandard">
+          // mapType="mutedStandard"
+        >
           {GpsOn == true ? AnimationMarker() : null}
           {isLoading == false && UserData.Gender == 1 && GpsOn == true
             ? data?.map((data: any, index) => {
@@ -3336,23 +3355,29 @@ const MapScreen = (props: any) => {
           <Marker
             key={'HypeSeoul'}
             coordinate={{
-              latitude: 37.5261485,
-              longitude: 127.0385686,
+              // latitude: 37.5261485,
+              // longitude: 127.0385686,
+
+              latitude: 37.5249301,
+              longitude: 127.0385537,
             }}
             tracksViewChanges={false}
             onPress={() => {
               setFirstEventModalVis(true);
-              console.log('setFirstEventModalVis Marker Click');
-            }}>
-            <View>
+            }}
+            image={require('../../Assets/Logo/LogoRound192.png')}>
+            {/* <View style={{}}>
               <Image
-                source={require('../../Assets/Logo/Logo.png')}
+                source={{
+                  uri: 'https://firebasestorage.googleapis.com/v0/b/hunt-d7d89.appspot.com/o/Assets%2Fplaystore.png?alt=media&token=d3dfecbd-0d40-4f2c-9b6a-4e83070848fa',
+                }}
                 style={MapScreenStyles.SpeicalHp_Marker}
                 resizeMode="cover"
               />
-            </View>
+            </View> */}
           </Marker>
-          <Circle
+
+          {/* <Circle
             center={{
               latitude: 37.5261485,
               longitude: 127.0385686,
@@ -3360,7 +3385,7 @@ const MapScreen = (props: any) => {
             strokeWidth={1}
             strokeColor={'black'}
             radius={1000}
-            fillColor={'#d3d3d320'}></Circle>
+            fillColor={'#d3d3d320'}></Circle> */}
         </MapView>
       )}
 

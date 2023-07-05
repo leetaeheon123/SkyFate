@@ -211,9 +211,9 @@ const IndicatorScreen = (props: any) => {
             UserData?.ProfileImageUrl,
           );
 
-          if (UserData.Gender == 2) {
-            ValidProfileImageUrl = true;
-          }
+          // if (UserData.Gender == 2) {
+            // ValidProfileImageUrl = true;
+          // }
 
           if (!ValidProfileImageUrl) {
             GotoProfileInputScreen(

@@ -61,14 +61,19 @@ const ImagePickerLaunch = (callback: Function) => {
   // );
 
   ImagePicker.openPicker({
-    width: 400,
-    height: 533,
+    width: 1200,
+    height: 1599,
     cropping: true,
-  }).then(async (res) => {
-    // if (res?.didCancel) return;
-    let LocalImagePath = res.path;
-    callback(LocalImagePath);
-  });
+  })
+    .then(async (res) => {
+      if (res?.didCancel) return;
+      let LocalImagePath = res.path;
+      callback(LocalImagePath);
+    })
+    .catch((error) => {
+      // 사진 선택 취소 이벤트 처리
+      console.log(error);
+    });
 };
 
 const PutInStorage = async (

@@ -157,15 +157,19 @@ const ValidateInvitationCode = async (
 
 const CheckUsed = (querySnapshot: any): number => {
   let length = querySnapshot.size;
+  let Valid = 0;
+
   querySnapshot.forEach((doc: any) => {
+    console.log('CheckUsed data:', doc.data().Used);
+
     if (length == 1 && doc.data().Used == false) {
-      return 1;
+      Valid = 1;
     } else if (length == 1 && doc.data().Used == true) {
-      return 2;
+      Valid = 2;
     }
   });
 
-  return 0;
+  return Valid;
 };
 
 const GenearlInvitation = async (InvitationCode: string, navigation: any) => {
@@ -177,6 +181,8 @@ const GenearlInvitation = async (InvitationCode: string, navigation: any) => {
     .then((querySnapshot) => {
       // 사용되었는지 안되었는지 판단하는 로직
       let Valid = CheckUsed(querySnapshot);
+
+      console.log('Valid:', Valid);
 
       let Obj = {
         Valid: Valid,

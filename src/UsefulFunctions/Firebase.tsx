@@ -105,3 +105,11 @@ export const GetFriendProfileImage = async (FriendEmail: string = '') => {
     console.log('Error');
   }
 };
+
+export const GetBlurNum = async () => {
+  return ft
+    .collection(`Event`)
+    .doc(`First`)
+    .get()
+    .then((doc) => doc.data());
+};

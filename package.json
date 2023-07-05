@@ -18,7 +18,8 @@
     "appcenter-ios-key": "appcenter codepush deployment list -a zerohch0/food-delivery-app-ios -k",
     "bump-patch": "npm version patch --no-git-tag-version && cd ios && bundle exec fastlane bump",
     "bump-minor": "npm version minor --no-git-tag-version && cd ios && bundle exec fastlane bump",
-    "bump-major": "npm version major --no-git-tag-version && cd ios && bundle exec fastlane bump"
+    "bump-major": "npm version major --no-git-tag-version && cd ios && bundle exec fastlane bump",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "2.1.5",
@@ -46,6 +47,8 @@
     "iamport-react-native": "2.0.2",
     "moment": "2.29.4",
     "native-base": "3.4.22",
+    "patch-package": "7.0.0",
+    "postinstall-postinstall": "2.1.0",
     "qs": "6.11.0",
     "react": "17.0.2",
     "react-native": "0.68.2",

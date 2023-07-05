@@ -196,6 +196,18 @@ const Setting = ({navigation, route}: any) => {
         </TouchableOpacity>
       </View>
 
+      {UserData.UserEmail == '8269apk@naver.com' ? (
+        <TouchableOpacity
+          style={{
+            marginTop: 30,
+          }}
+          onPress={() => {
+            navigation.navigate('AdminDashBoardScreen');
+          }}>
+          <Text>GoToDashBoard</Text>
+        </TouchableOpacity>
+      ) : null}
+
       <TouchableOpacity
         onPress={() => {
           logout(navigation, SendBird);

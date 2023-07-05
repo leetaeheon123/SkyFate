@@ -44,6 +44,7 @@ import VisualMeasureStart2Screen from 'Screens/ProfileInput/VisualMeasureStart2'
 import VisualMeasureInProgressScreen from 'Screens/ProfileInput/VisualMeasureInProgress';
 import VisualMeasureNotCheckSuccessScreen from 'Screens/ProfileInput/VisualMeasureNotCheckSuccess';
 import VisualMeasureNotCheckFailedScreen from 'Screens/ProfileInput/VisualMeasureNotCheckFailed';
+import AdminDashBoardScreen from 'Screens/Setting/AdminDashBoard';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -145,6 +146,12 @@ const Routes = (props: any) => {
       <Stack.Screen
         name="AnimationTestScreen2"
         component={AnimationTestScreen2}
+        // options={{title: ''}}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="AdminDashBoardScreen"
+        component={AdminDashBoardScreen}
         // options={{title: ''}}
         options={{headerShown: false}}
       />

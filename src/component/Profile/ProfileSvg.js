@@ -82,7 +82,6 @@ const SubTextObj = {
   Age: AgeInputText,
   ProfileImage: SubTextProfileImage,
   ProfileImageGirl: SubTextGirlProfileImage,
-
   AccountExistText: AccountExistText,
 };
 

@@ -1,10 +1,12 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import {
   View,
   SafeAreaView,
   TouchableOpacity,
   Image,
   Dimensions,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
 
 import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
@@ -57,6 +59,29 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
   const [Url3, setUrl3] = useState('');
   const [Url4, setUrl4] = useState('');
 
+  const hasAndroidPermission = async () => {
+    //외부 스토리지를 읽고 쓰는 권한 가져오기
+    const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+
+    const hasPermission = await PermissionsAndroid.check(permission);
+    if (hasPermission) {
+      return true;
+    }
+
+    const status = await PermissionsAndroid.request(permission);
+    return status === 'granted';
+  };
+
+  const getPhotoWithPermission = async () => {
+    if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
+      return;
+    }
+  };
+
+  useEffect(() => {
+    getPhotoWithPermission();
+  }, []);
+
   const {width, height} = Dimensions.get('window');
 
   const goToNext = () => {
@@ -78,8 +103,8 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
     if (Url4 != '') {
       checkvalue++;
     }
-    console.log(checkvalue);
-    if (checkvalue >= 2 || Gender == 2) {
+    // console.log(checkvalue);
+    if (checkvalue >= 2) {
       return (
         <TouchableOpacity
           style={LoginAndReigsterStyles.Btn_Clickable}
@@ -106,10 +131,10 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
         </View>
         <View
           style={[LoginAndReigsterStyles.Center, styles.Column_OnlyRowCenter]}>
-          {Gender == 2
+          {/* {Gender == 2
             ? SubTextComponent('ProfileImageGirl', {marginTop: 20})
-            : SubTextComponent('ProfileImage', {marginTop: 20})}
-
+            : SubTextComponent('ProfileImage', {marginTop: 20})} */}
+          {SubTextComponent('ProfileImage', {marginTop: 20})}
           <View style={ProfileImageStyles.ImageSelectView}>
             {Url == '' ? (
               ProfileImageUploadComponentGen(
