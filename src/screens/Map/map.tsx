@@ -5,6 +5,7 @@ import React, {
   useContext,
   useReducer,
   memo,
+  useCallback,
 } from 'react';
 import {
   SafeAreaView,
@@ -141,6 +142,7 @@ import {WithLocalSvg} from 'react-native-svg';
 import {MyProfileStyles} from '~/MyProfile';
 import X from 'Assets/X.svg';
 import {Success} from '^/NoMistakeWord';
+import {SpecificLatLng} from 'Screens/utils';
 export interface ILocation {
   latitude: number;
   longitude: number;
@@ -863,6 +865,10 @@ const MapScreen = (props: any) => {
     // setWaitModalVis(true);
     // navigation.navigate('WaitScreen');
     // return;
+    if (IsAttendedFirstEvent) {
+      Alert.alert('이벤트 참가 중에는 해당 기능을 사용할수 없어요!');
+      return;
+    }
 
     setGpsOn((previousState) => !previousState);
   };
@@ -935,10 +941,17 @@ const MapScreen = (props: any) => {
     }
   }, [GpsOn, ManFriendData]);
 
+  const DecreaseSecond = useCallback(() => {
+    setSecond(second - 1);
+  }, []);
+
   Counter(
     () => {
       if (GpsOn == true) {
-        setSecond(second - 1);
+        // useCallback(() => {
+        //   setSecond(second - 1);
+        // }, []);
+        DecreaseSecond();
       }
     },
     second >= 1 ? 1000 : null,
@@ -965,6 +978,10 @@ const MapScreen = (props: any) => {
     //   '남성유저 160명, 여성유저 200명이 가입하기 전까진 사용할 수 없습니다',
     // );
     // return;
+    if (IsAttendedFirstEvent) {
+      Alert.alert('이벤트 참가 중에는 해당 기능을 사용할수 없어요!');
+      return;
+    }
 
     const ProfileCheck = ProfileNullCheck(UserData.ProfileImageUrl);
     if (ProfileCheck == false) {
@@ -3027,36 +3044,37 @@ const MapScreen = (props: any) => {
     </TouchableOpacity>
   );
 
-  const FirstEventModal = () => (
-    <Modal
-      animationIn={'slideInUp'}
-      isVisible={FirstEventModalVis}
-      onBackdropPress={() => CloseFirstEventModal()}
-      style={[
-        styles.FullModal,
-        {
-          width: '100%',
-        },
-      ]}>
-      <SafeAreaView
+  const FirstEventModal = React.memo(({FirstEventModalVis}: any) => {
+    return (
+      <Modal
+        animationIn={'slideInUp'}
+        isVisible={FirstEventModalVis}
+        onBackdropPress={() => CloseFirstEventModal()}
         style={[
+          styles.FullModal,
           {
             width: '100%',
-            height: '90%',
           },
         ]}>
-        <Btn_FirstEventModalClose setVis={setFirstEventModalVis} />
+        <SafeAreaView
+          style={[
+            {
+              width: '100%',
+              height: '90%',
+            },
+          ]}>
+          <Btn_FirstEventModalClose setVis={setFirstEventModalVis} />
 
-        <ScrollView
-          contentContainerStyle={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-          style={{
-            backgroundColor: '#734FDA',
-          }}>
-          {/* <WithLocalSvg
+          <ScrollView
+            contentContainerStyle={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+            style={{
+              backgroundColor: '#734FDA',
+            }}>
+            {/* <WithLocalSvg
             asset={PosterPreload}
             width={width * 1.1}
             style={{
@@ -3064,80 +3082,81 @@ const MapScreen = (props: any) => {
               marginTop: -10,
             }}
           /> */}
-          <Image
-            source={require('../../Assets/FirstEvent/FirstEventPoster.png')}
-          />
-          {/* {FirstEventSvg} */}
+            <Image
+              source={require('../../Assets/FirstEvent/FirstEventPoster.png')}
+            />
+            {/* {FirstEventSvg} */}
 
-          {/* <Text>Fliter Location</Text> */}
-          <View
-            style={[
-              styles.Row_OnlyColumnCenter,
-              {
-                marginTop: '20%',
-                marginBottom: 16,
-                justifyContent: 'flex-end',
-                width: '90%',
-              },
-            ]}>
-            <View style={[styles.RowCenter]}>
-              <Text
-                style={{
-                  position: 'absolute',
-                  color: 'white',
-                  zIndex: 1,
-                  fontWeight: '600',
-                  fontSize: 14,
-                }}>
-                {`D-${7 - ToDay}`}
-              </Text>
-              {DdayBtnSvg}
+            {/* <Text>Fliter Location</Text> */}
+            <View
+              style={[
+                styles.Row_OnlyColumnCenter,
+                {
+                  marginTop: '20%',
+                  marginBottom: 16,
+                  justifyContent: 'flex-end',
+                  width: '90%',
+                },
+              ]}>
+              <View style={[styles.RowCenter]}>
+                <Text
+                  style={{
+                    position: 'absolute',
+                    color: 'white',
+                    zIndex: 1,
+                    fontWeight: '600',
+                    fontSize: 14,
+                  }}>
+                  {`D-${7 - ToDay}`}
+                </Text>
+                {DdayBtnSvg}
+              </View>
+              {/* <Text>7/4 일부터 모든 참가자들의 프로필 확인가능</Text> */}
             </View>
-            {/* <Text>7/4 일부터 모든 참가자들의 프로필 확인가능</Text> */}
-          </View>
 
-          {FirstEventAttendedUserList.length != 0 ? (
-            <FirstEventAttendedUserGrid setVis={setFirstEventModalVis} />
-          ) : null}
+            {FirstEventAttendedUserList.length != 0 ? (
+              <FirstEventAttendedUserGrid setVis={setFirstEventModalVis} />
+            ) : null}
 
-          {UserData.VisualMeasureStatus == Success ? (
-            IsAttendedFirstEvent ? (
-              <MainColorBtn_Clickable
-                style={{marginTop: 20}}
-                onPress={() => {
-                  setFirstEventModalVis(false);
-                  setTimeout(() => {
-                    setAlreadyAttendModalVis(true);
-                  }, 500);
-                }}
-                Title="참석 완료되었어요!"
-              />
+            {UserData.VisualMeasureStatus == Success ? (
+              IsAttendedFirstEvent ? (
+                <MainColorBtn_Clickable
+                  style={{marginTop: 20}}
+                  onPress={() => {
+                    setFirstEventModalVis(false);
+                    setTimeout(() => {
+                      setAlreadyAttendModalVis(true);
+                    }, 500);
+                  }}
+                  Title="참석 완료되었어요!"
+                />
+              ) : (
+                <MainColorBtn_Clickable
+                  style={{marginTop: 20}}
+                  onPress={() => {
+                    setFirstEventModalVis(false);
+                    setTimeout(() => {
+                      setFirstEventAttendModalVis(true);
+                    }, 500);
+                  }}
+                  Title="참석 신청하기"
+                />
+              )
             ) : (
               <MainColorBtn_Clickable
                 style={{marginTop: 20}}
-                onPress={() => {
-                  setFirstEventModalVis(false);
-                  setTimeout(() => {
-                    setFirstEventAttendModalVis(true);
-                  }, 500);
-                }}
-                Title="참석 신청하기"
+                onPress={() => {}}
+                Title="Ai 측정 전이에요!"
               />
-            )
-          ) : (
-            <MainColorBtn_Clickable
-              style={{marginTop: 20}}
-              onPress={() => {}}
-              Title="Ai 측정 전이에요!"
-            />
-          )}
-        </ScrollView>
-      </SafeAreaView>
+            )}
+          </ScrollView>
+        </SafeAreaView>
 
-      <TouchableOpacity
-        onPress={() => CloseFirstEventModal()}></TouchableOpacity>
-    </Modal>
-  );
+        <TouchableOpacity
+          onPress={() => CloseFirstEventModal()}></TouchableOpacity>
+      </Modal>
+    );
+  });
 
   const FirstEventAttendedUserModal = (
     <Modal
@@ -3218,7 +3237,7 @@ const MapScreen = (props: any) => {
       {Enter_MatchModal()}
       {Enter_TagFriendModal}
       {WaitScreenModal}
-      <FirstEventModal />
+      <FirstEventModal FirstEventModalVis={FirstEventModalVis} />
       {FirstEventAttendedUserModal}
 
       <ChooseModal
@@ -3250,8 +3269,10 @@ const MapScreen = (props: any) => {
         <MapView
           style={{width: '100%', height: '100%'}}
           initialRegion={{
-            latitude: location.latitude,
-            longitude: location.longitude,
+            // latitude: location.latitude,
+            // longitude: location.longitude,
+            latitude: HypeSeoullatitude,
+            longitude: HypeSeoullongitude,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
@@ -3353,14 +3374,8 @@ const MapScreen = (props: any) => {
             ? HPMarker(Sinsa_HotPlaceList)
             : null} */}
           <Marker
-            key={'HypeSeoul'}
-            coordinate={{
-              // latitude: 37.5261485,
-              // longitude: 127.0385686,
-
-              latitude: 37.5249301,
-              longitude: 127.0385537,
-            }}
+            key={'Dcruise'}
+            coordinate={SpecificLatLng['Dcruise']}
             tracksViewChanges={false}
             onPress={() => {
               setFirstEventModalVis(true);
@@ -3377,15 +3392,12 @@ const MapScreen = (props: any) => {
             </View> */}
           </Marker>
 
-          {/* <Circle
-            center={{
-              latitude: 37.5261485,
-              longitude: 127.0385686,
-            }}
+          <Circle
+            center={SpecificLatLng['Dcruise']}
             strokeWidth={1}
             strokeColor={'black'}
-            radius={1000}
-            fillColor={'#d3d3d320'}></Circle> */}
+            radius={1500}
+            fillColor={'#d3d3d320'}></Circle>
         </MapView>
       )}
 
@@ -3395,7 +3407,7 @@ const MapScreen = (props: any) => {
 
       {UserData.Gender == 2 ? BottomBar_Girl() : BottomBar_Man()}
       {/* {Btn_ViewEventAttendedUser()} */}
-      <View>
+      {/* <View>
         <TouchableOpacity
           style={[MapScreenStyles.MyLocationBtsn, styles.NoFlexDirectionCenter]}
           onPress={() => {
@@ -3403,7 +3415,15 @@ const MapScreen = (props: any) => {
           }}>
           <MaterialIcons name="my-location" size={27} color="#6713D2" />
         </TouchableOpacity>
-      </View>
+      </View> */}
+
+      <TouchableOpacity
+        style={[MapScreenStyles.MyLocationBtn, styles.NoFlexDirectionCenter]}
+        onPress={() => {
+          moveToMyLocation();
+        }}>
+        <MaterialIcons name="my-location" size={27} color="#6713D2" />
+      </TouchableOpacity>
 
       {/* {location && (
         <TouchableOpacity style={[MapScreenStyles.StartView, styles.NoFlexDirectionCenter,]}>

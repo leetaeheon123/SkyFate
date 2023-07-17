@@ -189,12 +189,13 @@ export const MapScreenStyles = StyleSheet.create({
     right: '7%',
     top: '6%',
   },
-
   MyLocationBtn: {
+    position: 'absolute',
+    bottom: 130,
+    right: '3%',
     width: 50,
     height: 50,
     borderRadius: 25,
-    position: 'absolute',
     shadowColor: '#000',
     shadowOpacity: 0.25,
     shadowOffset: {
@@ -203,8 +204,6 @@ export const MapScreenStyles = StyleSheet.create({
     },
     shadowRadius: 3.84,
     elevation: 3,
-    right: '3%',
-    bottom: 130,
     backgroundColor: 'white',
   },
 
@@ -291,8 +290,8 @@ export const MapScreenStyles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 3,
     right: '3%',
-    bottom: 80,
-    // backgroundColor: 'white',
+    bottom: 130,
+    backgroundColor: 'white',
   },
 
   MatchModal: [styles.W100H100, {backgroundColor: 'black'}],

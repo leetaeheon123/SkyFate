@@ -32,7 +32,6 @@ const AGREEMENT_SERVICE_URL =
   'https://zealous-jumpsuit-7f6.notion.site/e746adc75467454f9a5364be8b90c93d';
 const AGREEMENT_PRIVACY_URL =
   'https://zealous-jumpsuit-7f6.notion.site/b0d186174c2f4db7adbc97b3c7f2b0ae';
-
 export const openWebView = (type: string, navigation: any) => {
   let uri = '';
   switch (type) {

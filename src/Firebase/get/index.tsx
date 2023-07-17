@@ -147,6 +147,31 @@ const Get_NotCheckSuccessUserListByAdmin = async () => {
   return AttendedUserList;
 };
 
+const Get_UserListAiByACDGKU = async () => {
+  const AttendedUserList: any = [];
+  try {
+    // Firestore 컬렉션 참조
+    const collectionRef = await firestore()
+      .collection('UserList')
+      .where('InvitationCode', '==', 'ACDGKU')
+      .get();
+
+    // 컬렉션의 모든 문서 가져오기
+
+    // 문서 데이터 처리
+    collectionRef.forEach((doc) => {
+      const data = doc.data();
+      AttendedUserList.push(data);
+    });
+  } catch (error) {
+    console.error('Get_EventAttendedUserList:', error);
+  }
+
+  return AttendedUserList.length;
+};
+
+
+
 export {
   Get_EventAttendedUserDataList,
   Get_EventAttendedUserEmailList,
@@ -154,4 +179,5 @@ export {
   Get_WaitAiUserListAiByAdmin,
   Get_AiSuccessUserListByAdmin,
   Get_NotCheckSuccessUserListByAdmin,
+  Get_UserListAiByACDGKU,
 };
