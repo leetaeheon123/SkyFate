@@ -594,7 +594,7 @@
 				DEVELOPMENT_TEAM = 64KPDNZ9Q8;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = hunt/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "랑데부";
+				INFOPLIST_KEY_CFBundleDisplayName = SensualFinder;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -606,7 +606,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.hunting;
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.superrookie.sensualfinder;
 				PRODUCT_NAME = hunt;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -632,7 +632,7 @@
 				CURRENT_PROJECT_VERSION = 2023070516;
 				DEVELOPMENT_TEAM = 64KPDNZ9Q8;
 				INFOPLIST_FILE = hunt/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "랑데부";
+				INFOPLIST_KEY_CFBundleDisplayName = SensualFinder;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -644,7 +644,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.hunting;
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.superrookie.sensualfinder;
 				PRODUCT_NAME = hunt;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -735,7 +735,7 @@
 				CURRENT_PROJECT_VERSION = 2023070516;
 				DEVELOPMENT_TEAM = 64KPDNZ9Q8;
 				INFOPLIST_FILE = hunt/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "랑데부";
+				INFOPLIST_KEY_CFBundleDisplayName = SensualFinder;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -747,7 +747,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.hunting;
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.superrookie.sensualfinder;
 				PRODUCT_NAME = hunt;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

@@ -120,6 +120,13 @@ async function onAppleButtonPress(navigation: any) {
   }
 }
 
+const GetPkNumber = async () => {
+  const Result = await firestore().collection('UserList').get();
+  const Size = Result.size;
+  console.log(Size);
+  return Size;
+};
+
 const ValidInvitationCodeLength = (InvitationCode: string) => {
   if (InvitationCode.length == 6) {
     return true;
@@ -153,6 +160,23 @@ const ValidateInvitationCode = async (
   } else {
     GenearlInvitation(InvitationCode, navigation);
   }
+};
+
+const Jump = async (InvitationCode: string = '', navigation: any) => {
+  const PkNumber = await GetPkNumber();
+  let Valid = 1;
+  let Obj = {
+    Valid: Valid,
+    PkNumber: PkNumber,
+    CodeType: 'General',
+  };
+  LastPassage(Obj, InvitationCode, navigation);
+
+  navigation.navigate('RegisterScreen', {
+    InvitationCode: InvitationCode,
+    PkNumber: Obj.PkNumber,
+    CodeType: Obj.CodeType,
+  });
 };
 
 const CheckUsed = (querySnapshot: any): number => {
@@ -204,7 +228,7 @@ interface ValidObj {
 
 const LastPassage = (
   Obj: ValidObj,
-  InvitationCode: string,
+  InvitationCode: string | undefined,
   navigation: any,
 ) => {
   if (Obj.Valid == 1) {
@@ -231,13 +255,6 @@ const SpecialInvitation = async (InvitationCode: string, navigation: any) => {
     CodeType: 'Special',
   };
   LastPassage(Obj, InvitationCode, navigation);
-};
-
-const GetPkNumber = async () => {
-  const Result = await firestore().collection('UserList').get();
-  const Size = Result.size;
-  console.log(Size);
-  return Size;
 };
 
 const ValidInvitationCodeScreen = () => {
@@ -273,7 +290,7 @@ const ValidInvitationCodeScreen = () => {
 
       <TextInput
         style={TextInputStyle.TextInput}
-        placeholder="초대코드를 입력해주세요"
+        placeholder="초대코드가 있으면 입력해주세요"
         placeholderTextColor={'lightgray'}
         onFocus={() => {
           setSelected(true);
@@ -313,18 +330,12 @@ const ValidInvitationCodeScreen = () => {
             }}>
             {InvitationCode()}
           </Pressable>
+          <Button
+            title="건너뛰기"
+            onPress={() => {
+              Jump(undefined, navigation);
+            }}></Button>
         </View>
-        {/* <Image
-          style={{width: 100, height: 120}}
-          source={Fire}
-          resizeMode="contain"
-        />
-        <Text>랑데부 행사 7/7일날 함~ </Text>
-        <Text>행사 80명 모으고 20,20자리씩 남음 </Text>
-
-        <Text>가입한 남성유저수: 82명</Text>
-        <Text>가입한 여성유저수: 98명</Text> */}
-
         <Btn_ClickableNext
           onPress={() => {
             ValidateInvitationCode(TextInputInvitationCode, navigation);

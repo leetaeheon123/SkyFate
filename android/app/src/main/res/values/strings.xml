@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">랑데부</string>
+    <string name="app_name">SensualFinder</string>
     <string name="kakao_app_key">4e341e36931a26631ab2e6de4aa33e3f</string>
     <string moduleConfig="true" name="CodePushDeploymentKey">yxMnJX6POHAaAX79uZzpT-ujWcs-dgm3zZU9l</string>
     <!-- <string name="reactNativeCodePush_androidDeploymentKey">yxMnJX6POHAaAX79uZzpT-ujWcs-dgm3zZU9l</string> -->

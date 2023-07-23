@@ -45,6 +45,7 @@ import VisualMeasureInProgressScreen from 'Screens/ProfileInput/VisualMeasureInP
 import VisualMeasureNotCheckSuccessScreen from 'Screens/ProfileInput/VisualMeasureNotCheckSuccess';
 import VisualMeasureNotCheckFailedScreen from 'Screens/ProfileInput/VisualMeasureNotCheckFailed';
 import AdminDashBoardScreen from 'Screens/Setting/AdminDashBoard';
+import {MigrationScreen} from 'Screens/Setting/Migration';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -52,7 +53,7 @@ const Routes = (props: any) => {
   // 성별 가져오는 코드 필요합니다 - 2022 10 09 오후1시.
 
   return (
-    <Stack.Navigator initialRouteName="IndicatorScreen">
+    <Stack.Navigator initialRouteName="MigrationScreen">
       <Stack.Screen
         name="BottomTabScreen"
         component={BottomTabScreen}
@@ -152,6 +153,12 @@ const Routes = (props: any) => {
       <Stack.Screen
         name="AdminDashBoardScreen"
         component={AdminDashBoardScreen}
+        // options={{title: ''}}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="MigrationScreen"
+        component={MigrationScreen}
         // options={{title: ''}}
         options={{headerShown: false}}
       />

@@ -3,21 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>556116394721-ov2p3teae5ljh32ipibbpl292v6jpk7g.apps.googleusercontent.com</string>
+	<string>978186601627-so1ba73mj8pd3un51p97hc0n0h6fli75.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.556116394721-ov2p3teae5ljh32ipibbpl292v6jpk7g</string>
+	<string>com.googleusercontent.apps.978186601627-so1ba73mj8pd3un51p97hc0n0h6fli75</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>978186601627-6rqathtl6f6qbl4phcivde4gbutknp35.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyANb-6532x50-chC96UOQiB3bo5iDBe-uQ</string>
+	<string>AIzaSyCdX0f5wpLJybuLN2AFvfFRjT7Gr3qeYs8</string>
 	<key>GCM_SENDER_ID</key>
-	<string>556116394721</string>
+	<string>978186601627</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>org.reactjs.native.example.rendezvous</string>
+	<string>org.reactjs.native.example.superrookie.sensualfinder</string>
 	<key>PROJECT_ID</key>
-	<string>hunt-d7d89</string>
+	<string>sensualfinder-ff245</string>
 	<key>STORAGE_BUCKET</key>
-	<string>hunt-d7d89.appspot.com</string>
+	<string>sensualfinder-ff245.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:556116394721:ios:05651a60687fc4a2deada0</string>
-	<key>DATABASE_URL</key>
-	<string>https://hunt-d7d89-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+	<string>1:978186601627:ios:1ec5dc6b68a36597e5f23e</string>
 </dict>
 </plist>

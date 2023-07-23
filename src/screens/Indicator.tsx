@@ -212,7 +212,7 @@ const IndicatorScreen = (props: any) => {
           );
 
           // if (UserData.Gender == 2) {
-            // ValidProfileImageUrl = true;
+          // ValidProfileImageUrl = true;
           // }
 
           if (!ValidProfileImageUrl) {
@@ -370,7 +370,7 @@ const IndicatorScreen = (props: any) => {
 
   return (
     <>
-      {initialized ? (
+      {/* {initialized ? (
         // Best Partice?
         currentUser ? (
           <BottomTabScreen
@@ -385,7 +385,8 @@ const IndicatorScreen = (props: any) => {
         <SafeAreaView>
           <ActivityIndicator />
         </SafeAreaView>
-      )}
+      )} */}
+      <ValidInvitationCodeScreen />
     </>
   );
 };

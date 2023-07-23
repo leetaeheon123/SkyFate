@@ -33,7 +33,7 @@ import Message from '../component/message';
 import {createChannelName} from '../utilsReducer';
 
 import {AppContext} from '../UsefulFunctions/Appcontext';
-import {GetTime} from '../../1108backup/src/UsefulFunctions/GetTime';
+import {GetTime} from '^/GetTime';
 import firestore from '@react-native-firebase/firestore';
 
 import {GetEpochTime, MilisToMinutes} from '^/GetTime';

@@ -1,77 +1,68 @@
 {
   "project_info": {
-    "project_number": "556116394721",
-    "firebase_url": "https://hunt-d7d89-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "hunt-d7d89",
-    "storage_bucket": "hunt-d7d89.appspot.com"
+    "project_number": "978186601627",
+    "project_id": "sensualfinder-ff245",
+    "storage_bucket": "sensualfinder-ff245.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:556116394721:android:47b70737ba6feecbdeada0",
+        "mobilesdk_app_id": "1:978186601627:android:05e7e8d676a7ec21e5f23e",
         "android_client_info": {
-          "package_name": "com.rendezvous"
+          "package_name": "com.abaralabs.sensualfinder"
         }
       },
       "oauth_client": [
         {
-          "client_id": "556116394721-of1iplusp9phq73sqhtm7c9qbamec4ud.apps.googleusercontent.com",
-          "client_type": 3
+          "client_id": "978186601627-6rqathtl6f6qbl4phcivde4gbutknp35.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.abaralabs.sensualfinder",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA3ul2tv13sDTslyGwCX0HpAd2rOMV5sgQ"
+          "current_key": "AIzaSyBcKlcfyuXxo6tQTiKkxokwzhmXpbfDbMg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "556116394721-of1iplusp9phq73sqhtm7c9qbamec4ud.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "556116394721-0q46fbk9fgslsutddife12m9vln0fica.apps.googleusercontent.com",
+              "client_id": "978186601627-e5aau24jsk9h5b92dq9nccctgtmm84q4.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "org.reactjs.native.example.hunting"
+                "bundle_id": "com.abaralabs.sensualfinder"
               }
             }
           ]
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-8343685623630612~6105726156"
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:556116394721:android:9cf3da3858f33f5cdeada0",
+        "mobilesdk_app_id": "1:978186601627:android:60ebd5282b0a5c1fe5f23e",
         "android_client_info": {
-          "package_name": "com.rendezvous.android.taeheon"
+          "package_name": "com.superrookie.sensualfinder"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "556116394721-of1iplusp9phq73sqhtm7c9qbamec4ud.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA3ul2tv13sDTslyGwCX0HpAd2rOMV5sgQ"
+          "current_key": "AIzaSyBcKlcfyuXxo6tQTiKkxokwzhmXpbfDbMg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "556116394721-of1iplusp9phq73sqhtm7c9qbamec4ud.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "556116394721-0q46fbk9fgslsutddife12m9vln0fica.apps.googleusercontent.com",
+              "client_id": "978186601627-e5aau24jsk9h5b92dq9nccctgtmm84q4.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "org.reactjs.native.example.hunting"
+                "bundle_id": "com.abaralabs.sensualfinder"
               }
             }
           ]
