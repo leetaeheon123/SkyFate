@@ -18,7 +18,7 @@ import {
   LoginAndRegisterTextInputStyle,
   LoginAndReigsterStyles,
 } from '../../../styles/LoginAndRegiser';
-import {RegisterUserEmail} from '../../UsefulFunctions/SaveUserDataInDevice';
+import {RegisterUserUid} from '../../UsefulFunctions/SaveUserDataInDevice';
 import {AppContext} from '../../UsefulFunctions/Appcontext';
 import qs from 'qs';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
@@ -52,8 +52,8 @@ const SignUpWithEmail = async (
     let UserEmail: string = result.user.email;
     let UserUid: string = result.user.uid;
     await SignUpFirestore(UserEmail, InvitationCode, PkNumber, UserUid);
-    await UpdateInvitationCodeToFriend(InvitationCode, CodeType, UserEmail);
-    await RegisterUserEmail(UserEmail, navigation, SendBird);
+    // await UpdateInvitationCodeToFriend(InvitationCode, CodeType, UserUid);
+    await RegisterUserUid(UserUid, navigation, SendBird);
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
       Alert.alert('이메일이 이미 사용되었습니다');
@@ -76,7 +76,7 @@ const SignUpFirestore = async (
   PkNumber: number,
   UserUid: string,
 ) => {
-  firestore().collection('UserList').doc(Email).set({
+  firestore().collection('UserList').doc(UserUid).set({
     UserEmail: Email,
     InvitationCode: InvitationCode,
     PkNumber: PkNumber,
@@ -84,22 +84,40 @@ const SignUpFirestore = async (
     TensionGrade: 0,
     MannerGrade: 0,
     SocialGrade: 0,
-    ProfileImageUrl: '',
-    ProfileImageUrl2: '',
-    ProfileImageUrl3: '',
-    ProfileImageUrl4: '',
-    ProfileImageUrl5: '',
-    ProfileImageUrl6: '',
-    VisualMeasureStatus: 'Start',
+    ProfileImageUrl: null,
+    ProfileImageUrl2: null,
+    ProfileImageUrl3: null,
+    ProfileImageUrl4: null,
+    ProfileImageUrl5: null,
+    ProfileImageUrl6: null,
     Type: 'User',
-    UserUid: UserUid,
+    Uid: UserUid,
+
+    // DesiredBdsm:null,
+    // DesiredGender:null,
+    // DetailBdsm:null,
+
+    // Lgbt:null,
+    // Likes:null,
+    // Location:null,
+    // matches:null,
+    // metoo:null,
+
+    // IsPossibleMonoGamy:null,
+    // // 이동 가능여부
+    // MyAvailability: null,
+    // IsPossibleMyOnlinePlay: null,
+    // MyIntro: null,
+    // IsUnder18: null,
+    // MyWantIntro: null,
+    // MyWantType: null,
   });
 };
 
 const UpdateInvitationCodeToFriend = async (
   InvitationCode: string,
   CodeType: string,
-  UserEmail: string,
+  UserUid: string,
 ) => {
   if (CodeType == 'Special') {
     fetch('http:/13.124.209.97/invitation/SpecialInvitationCode', {
@@ -109,7 +127,7 @@ const UpdateInvitationCodeToFriend = async (
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: qs.stringify({
-        UserEmail: `${UserEmail}`,
+        UserEmail: `${UserUid}`,
       }),
     }).then((Result) => {
       console.log('Result In UpdateInvitationCodeToFriend Function:', Result);
@@ -123,7 +141,7 @@ const UpdateInvitationCodeToFriend = async (
       },
       body: qs.stringify({
         InvitationCode: `${InvitationCode}`,
-        UserEmail: `${UserEmail}`,
+        UserEmail: `${UserUid}`,
       }),
     }).then((Result) => {
       console.log('Result In UpdateInvitationCodeToFriend Function:', Result);

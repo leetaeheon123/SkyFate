@@ -8,7 +8,7 @@ export const ChatListStyles = StyleSheet.create({
   Body: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#37375B',
+    backgroundColor: '#F1F4F8',
   },
   Main: {
     width: '90%',

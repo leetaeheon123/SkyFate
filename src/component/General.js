@@ -22,6 +22,7 @@ export const Btn_ClickableBack = (props) => {
         {
           width: 30,
           height: 30,
+          zIndex: 2,
         },
         style,
       ]}

@@ -46,6 +46,13 @@ import VisualMeasureNotCheckSuccessScreen from 'Screens/ProfileInput/VisualMeasu
 import VisualMeasureNotCheckFailedScreen from 'Screens/ProfileInput/VisualMeasureNotCheckFailed';
 import AdminDashBoardScreen from 'Screens/Setting/AdminDashBoard';
 import {MigrationScreen} from 'Screens/Setting/Migration';
+import DetailViewScreen from 'Screens/BottomTab/DetailView';
+import UserListWantTalkMeScreen from 'Screens/Chat/UserListWantTalkMeScreen';
+import WantIntroScreen from 'Screens/ProfileInput/WantIntro';
+import SelfIntroScreen from 'Screens/ProfileInput/SelfIntro';
+import MySelfIntroScreen from 'Screens/ProfileInput/SelfIntro';
+import MyWantIntroScreen from 'Screens/ProfileInput/WantIntro';
+import MyProfileChangeScreen from 'Screens/MyProfile/MyProfileChange';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -53,7 +60,7 @@ const Routes = (props: any) => {
   // 성별 가져오는 코드 필요합니다 - 2022 10 09 오후1시.
 
   return (
-    <Stack.Navigator initialRouteName="MigrationScreen">
+    <Stack.Navigator initialRouteName="IndicatorScreen">
       <Stack.Screen
         name="BottomTabScreen"
         component={BottomTabScreen}
@@ -133,6 +140,14 @@ const Routes = (props: any) => {
       />
 
       <Stack.Screen
+        name="UserListWantTalkMeScreen"
+        component={UserListWantTalkMeScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
         name="ProfileImageViewScreen"
         component={ProfileImageViewScreen}
         options={{headerShown: false}}
@@ -188,6 +203,16 @@ const Routes = (props: any) => {
         options={{headerShown: false}}
       />
       <Stack.Screen
+        name="MySelfIntroScreen"
+        component={MySelfIntroScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="MyWantIntroScreen"
+        component={MyWantIntroScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
         name="VisualMeasureStart1Screen"
         component={VisualMeasureStart1Screen}
         options={{headerShown: false}}
@@ -221,6 +246,18 @@ const Routes = (props: any) => {
       <Stack.Screen
         name="SettingScreen"
         component={SettingScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="MyProfileChangeScreen"
+        component={MyProfileChangeScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="DetailViewScreen"
+        component={DetailViewScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

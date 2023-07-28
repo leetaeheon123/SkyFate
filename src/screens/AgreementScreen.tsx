@@ -22,16 +22,17 @@ import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import {UpdateFbFirestore} from '^/Firebase';
 import {Btn_ClickableBack} from 'component/General';
 
+import styles from '~/ManToManBoard';
 export type AgreementScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'InvitationCodeSet'
 >;
 const AGREEMENT_LOCATION_URL =
-  'https://zealous-jumpsuit-7f6.notion.site/844c74cb6068412a98b5afcc529ec7c2';
+  'https://zealous-jumpsuit-7f6.notion.site/3b9aafa60fbf469292a34e4f484f012b?pvs=4';
 const AGREEMENT_SERVICE_URL =
-  'https://zealous-jumpsuit-7f6.notion.site/e746adc75467454f9a5364be8b90c93d';
+  'https://zealous-jumpsuit-7f6.notion.site/d80d2747b9d2402d93a6a34998cb29b1?pvs=4';
 const AGREEMENT_PRIVACY_URL =
-  'https://zealous-jumpsuit-7f6.notion.site/b0d186174c2f4db7adbc97b3c7f2b0ae';
+  'https://zealous-jumpsuit-7f6.notion.site/ec3e13f513c34ae0b752ecd3080a65c5?pvs=4';
 export const openWebView = (type: string, navigation: any) => {
   let uri = '';
   switch (type) {
@@ -51,7 +52,7 @@ export const openWebView = (type: string, navigation: any) => {
   });
 };
 const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
-  const {UserEmail} = route.params;
+  const {UserUid} = route.params;
 
   const [all, setAll] = useState(false);
   const [service, setService] = useState(false);
@@ -66,22 +67,22 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
   };
 
   const handleBtn = async () => {
-    await UpdateFbFirestore(`UserList`, UserEmail, 'AgreementTermsofUse', true);
+    await UpdateFbFirestore(`UserList`, UserUid, 'AgreementTermsofUse', true);
     await UpdateFbFirestore(
       `UserList`,
-      UserEmail,
+      UserUid,
       'AgreementGiveLocaitionData',
       true,
     );
     await UpdateFbFirestore(
       `UserList`,
-      UserEmail,
+      UserUid,
       'AgreementCollectionofpersonalinformation',
       true,
     );
 
     navigation.navigate('NickNameSelectScreen', {
-      UserEmail: UserEmail,
+      UserUid: UserUid,
       NickName: '',
     });
   };
@@ -89,10 +90,15 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
   const ViewMore = (type: string) => {
     return (
       <Pressable
-        style={{
-          position: 'absolute',
-          right: '5%',
-        }}
+        style={[
+          styles.RowCenter,
+          {
+            position: 'absolute',
+            right: '0%',
+            width: 50,
+            height: 50,
+          },
+        ]}
         onPress={() => {
           openWebView(type, navigation);
         }}>
@@ -108,8 +114,8 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
           {MainHead_AgreementSvg()}
         </View>
         <View style={{marginTop: 80}}>
-          <View style={[styles.Line, {marginTop: 10}]} />
-          <View style={styles.checkboxContainer}>
+          <View style={[AgreementStyles.Line, {marginTop: 10}]} />
+          <View style={AgreementStyles.checkboxContainer}>
             <Pressable
               style={{marginLeft: 20, marginRight: 10}}
               onPress={() => {
@@ -119,11 +125,11 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
             </Pressable>
             {MainText_AgreementSvg()}
           </View>
-          <View style={[styles.Line, {marginBottom: 20}]} />
+          <View style={[AgreementStyles.Line, {marginBottom: 20}]} />
 
-          <View style={styles.checkboxContainer2}>
+          <View style={AgreementStyles.checkboxContainer2}>
             <Pressable
-              style={styles.checkboxBtn}
+              style={AgreementStyles.checkboxBtn}
               onPress={() => {
                 setService(!service);
               }}>
@@ -132,9 +138,9 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
             {MainText2_AgreementSvg()}
             {ViewMore('service')}
           </View>
-          <View style={styles.checkboxContainer2}>
+          <View style={AgreementStyles.checkboxContainer2}>
             <Pressable
-              style={styles.checkboxBtn}
+              style={AgreementStyles.checkboxBtn}
               onPress={() => {
                 setPrivacy(!privacy);
               }}>
@@ -143,9 +149,9 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
             {MainText3_AgreementSvg()}
             {ViewMore('privacy')}
           </View>
-          <View style={styles.checkboxContainer2}>
+          <View style={AgreementStyles.checkboxContainer2}>
             <Pressable
-              style={styles.checkboxBtn}
+              style={AgreementStyles.checkboxBtn}
               onPress={() => {
                 setLocation(!location);
               }}>
@@ -155,7 +161,7 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
             {ViewMore('location')}
           </View>
         </View>
-        <View style={styles.nextBtn}>
+        <View style={AgreementStyles.nextBtn}>
           {service && privacy && location ? (
             <Btn_ClickableNext
               onPress={() => {
@@ -171,7 +177,7 @@ const AgreementScreen = ({navigation, route}: AgreementScreenProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const AgreementStyles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: 'row',
     paddingVertical: 18,

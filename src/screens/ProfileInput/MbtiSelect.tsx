@@ -14,17 +14,15 @@ import {
 
 import {LoginAndReigsterStyles} from '~/LoginAndRegiser';
 import firestore from '@react-native-firebase/firestore';
-import {TextComponent} from 'component/Profile/ProfileSvg';
-import {SubTextComponent} from 'component/Profile/ProfileSvg';
-import {MbtiBtn} from 'component/Profile/ProfileSvg';
+import {TextComponent} from 'component/ProfileInput/ProfileSvg';
+import {SubTextComponent} from 'component/ProfileInput/ProfileSvg';
+import {MbtiBtn} from 'component/ProfileInput/ProfileSvg';
 import styles from '~/ManToManBoard';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import {MbtiStyles} from '~/ProfileInput';
 import {Btn_ClickableBack} from 'component/General';
 const MbtiSelectScreen = ({navigation, route}: any) => {
-  const {UserEmail, Gender, NickName} = route.params;
-
-  console.log(UserEmail, NickName, Gender);
+  const {UserUid, Gender, NickName} = route.params;
 
   const [one, setone] = useState('');
   const [two, settwo] = useState('');
@@ -35,11 +33,11 @@ const MbtiSelectScreen = ({navigation, route}: any) => {
     let MbtiStr = one + two + three + four;
 
     if (one && two && three && four) {
-      await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
+      await firestore().collection(`UserList`).doc(`${UserUid}`).update({
         Mbti: MbtiStr,
       });
       navigation.navigate('AgeSelectScreen', {
-        UserEmail: UserEmail,
+        UserUid: UserUid,
         Gender: Gender,
         NickName: NickName,
       });
@@ -71,7 +69,7 @@ const MbtiSelectScreen = ({navigation, route}: any) => {
           style={{position: 'absolute', top: 12, left: '-2.5%'}}
           onPress={() => {
             navigation.navigate('GenderSelectScreen', {
-              UserEmail: UserEmail,
+              UserUid: UserUid,
               NickName: NickName,
               Gender: Gender,
             });

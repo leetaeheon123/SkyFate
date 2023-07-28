@@ -34,7 +34,7 @@ import {
   MainText_InvitationSvg,
   SubTextComponent,
   SubText_InvitationSvg,
-} from 'component/Profile/ProfileSvg';
+} from 'component/ProfileInput/ProfileSvg';
 import {LineSvg, LongLineSvg} from 'component/General/GeneralSvg';
 import {GetFbFirestore} from '^/Firebase';
 
@@ -170,7 +170,6 @@ const Jump = async (InvitationCode: string = '', navigation: any) => {
     PkNumber: PkNumber,
     CodeType: 'General',
   };
-  LastPassage(Obj, InvitationCode, navigation);
 
   navigation.navigate('RegisterScreen', {
     InvitationCode: InvitationCode,

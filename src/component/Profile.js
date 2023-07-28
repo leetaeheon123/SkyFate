@@ -6,7 +6,7 @@ import {
   Btn_ClickableNextSvg,
   Btn_NotClickableNextSvg,
   MainColorBtn_ClickableSvg,
-} from './Profile/ProfileSvg';
+} from './ProfileInput/ProfileSvg';
 import styles from '~/ManToManBoard';
 
 const width = Dimensions.get('window').width;

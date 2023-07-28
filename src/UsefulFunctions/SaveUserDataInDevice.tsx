@@ -3,10 +3,10 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {Alert, Platform} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 
-export const GetUserData = async (userEmail: string) => {
+export const GetUserData = async (UserUid: string) => {
   return firestore()
     .collection('UserList')
-    .doc(`${userEmail}`)
+    .doc(`${UserUid}`)
     .get()
     .then((doc) => {
       console.log('Success GetUserData');
@@ -15,36 +15,33 @@ export const GetUserData = async (userEmail: string) => {
     });
 };
 
-export const SaveUserEmailInDevice = async (UserEmail: string) => {
-  await AsyncStorage.setItem('UserEmail', UserEmail);
+export const SaveUserUidInDevice = async (UserUid: string) => {
+  await AsyncStorage.setItem('UserUid', UserUid);
 };
 
-export const RegisterUserEmail = async (
-  UserEmail: string,
+export const RegisterUserUid = async (
+  UserUid: string,
   navigation: any,
   SendBird: Object,
 ) => {
   try {
-    await SaveUserEmailInDevice(UserEmail);
-    // await RegisterSendBirdToken(SendBird, UserEmail);
+    await SaveUserUidInDevice(UserUid);
+    // await RegisterSendBirdToken(SendBird, UserUid);
     await navigation.navigate('AgreementScreen', {
-      UserEmail,
+      UserUid,
     });
   } catch (error) {
     Alert.alert(
-      'RegisterUserEmail Function In  SaveUserDataInDevice.js의 UsefulFunctions에서 오류 발생:',
+      'RegisterUserUid Function In  SaveUserDataInDevice.js의 UsefulFunctions에서 오류 발생:',
       error,
     );
   }
 };
 
-export const LoginUserEmail = async (
-  UserEmail: string,
-  navigation: any,
-) => {
+export const LoginUserUid = async (UserUid: string, navigation: any) => {
   try {
-    await SaveUserEmailInDevice(UserEmail);
-    // await RegisterSendBirdToken(SendBird, UserEmail);
+    await SaveUserUidInDevice(UserUid);
+    // await RegisterSendBirdToken(SendBird, UserUid);
     await navigation.navigate('IndicatorScreen', {
       From: 'LoginAndRegister',
     });
@@ -56,10 +53,7 @@ export const LoginUserEmail = async (
   }
 };
 
-export const RegisterSendBirdToken = async (
-  SendBird: any,
-  UserEmail: string,
-) => {
+export const RegisterSendBirdToken = async (SendBird: any, UserUid: string) => {
   try {
     const authorizationStatus = await messaging().requestPermission();
     if (
@@ -71,13 +65,13 @@ export const RegisterSendBirdToken = async (
         console.log('iostoken', Token);
         SendBird.registerAPNSPushTokenForCurrentUser(Token);
 
-        // UpdateFCMToken(UserEmail, Token);
+        // UpdateFCMToken(UserUid, Token);
       } else {
         const Token = await messaging().getToken();
         console.log('aostoken', Token);
 
         SendBird.registerGCMPushTokenForCurrentUser(Token);
-        // UpdateFCMToken(UserEmail, Token);
+        // UpdateFCMToken(UserUid, Token);
       }
     }
   } catch (err) {
@@ -85,11 +79,11 @@ export const RegisterSendBirdToken = async (
   }
 };
 
-const UpdateFCMToken = (UserEmail: string, Token: string) => {
+const UpdateFCMToken = (UserUid: string, Token: string) => {
   if (Platform.OS === 'ios') {
     firestore()
       .collection('UserList')
-      .doc(`${UserEmail}`)
+      .doc(`${UserUid}`)
       .update({
         Token: Token,
         OSType: 'ios',
@@ -100,7 +94,7 @@ const UpdateFCMToken = (UserEmail: string, Token: string) => {
   } else {
     firestore()
       .collection('UserList')
-      .doc(`${UserEmail}`)
+      .doc(`${UserUid}`)
       .update({
         Token: Token,
         OSType: 'android',
@@ -113,7 +107,7 @@ const UpdateFCMToken = (UserEmail: string, Token: string) => {
 
 export const RegisterSendBirdUser = async (
   SendBird: any,
-  UserEmail: string,
+  UserUid: string,
   NickName: string,
   ProfileImageUrl: string,
 ) => {

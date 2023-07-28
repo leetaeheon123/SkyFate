@@ -357,7 +357,7 @@ const NoTimeLimiteChatScreen = (props) => {
       query.reverse = true;
       query.load((fetchedMessages, err) => {
         if (!err) {
-          console.log('Success to get the messages.');
+          // console.log('Success to get the messages.');
           // console.log('fetchedMessages In Chat page:', fetchedMessages);
           dispatch({
             type: 'fetch-messages',
@@ -492,8 +492,6 @@ const NoTimeLimiteChatScreen = (props) => {
         selectionLimit: 1,
       });
 
-      console.log(result.assets[0]);
-
       const params = new SendBird.FileMessageParams();
       params.file = {
         size: result.assets[0].fileSize,
@@ -573,12 +571,6 @@ const NoTimeLimiteChatScreen = (props) => {
 
       <SafeAreaView style={style.container}>
         {ProfileViewModal}
-
-        <View style={style.BombView}>
-          <Text style={style.BombText}>
-            {/* 빠른 매칭을 위해 채팅은 10분으로 제한합니다. */}
-          </Text>
-        </View>
 
         <FlatList
           data={state.messages}

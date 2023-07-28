@@ -7,6 +7,7 @@ import {
   Dimensions,
   PermissionsAndroid,
   Platform,
+  Text,
 } from 'react-native';
 
 import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
@@ -14,12 +15,12 @@ import {
   ProfileImageUploadComponent,
   SubTextComponent,
   TextComponent,
-} from 'component/Profile/ProfileSvg';
+} from 'component/ProfileInput/ProfileSvg';
 
 import {ChangeMyProfileImage} from '^/ImageUpload';
 import styles from '~/ManToManBoard';
-import {Btn_ClickableNextSvg} from 'component/Profile/ProfileSvg';
-import {Btn_NotClickableNextSvg} from 'component/Profile/ProfileSvg';
+import {Btn_ClickableNextSvg} from 'component/ProfileInput/ProfileSvg';
+import {Btn_NotClickableNextSvg} from 'component/ProfileInput/ProfileSvg';
 
 import {AppContext} from '^/Appcontext';
 import {ProfileImageStyles} from '~/ProfileInput';
@@ -28,7 +29,7 @@ import VisualMeasureInProgressScreen from './VisualMeasureInProgress';
 const ProfileImageUploadComponentGen = (
   index: number,
   setState: Function,
-  UserEmail: string,
+  UserUid: string,
   Gender: number,
   navigation: any,
   NickName: string,
@@ -37,7 +38,7 @@ const ProfileImageUploadComponentGen = (
     <TouchableOpacity
       onPress={() => {
         ChangeMyProfileImage(
-          UserEmail,
+          UserUid,
           Gender,
           navigation,
           index,
@@ -52,7 +53,7 @@ const ProfileImageUploadComponentGen = (
 };
 
 const ProfileImageSelectScreen = ({navigation, route}: any) => {
-  const {UserEmail, Gender, NickName} = route.params;
+  const {UserUid, Gender, NickName} = route.params;
 
   const [Url, setUrl] = useState('');
   const [Url2, setUrl2] = useState('');
@@ -85,7 +86,7 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
   const {width, height} = Dimensions.get('window');
 
   const goToNext = () => {
-    navigation.navigate('VisualMeasureInProgressScreen');
+    navigation.navigate('IndicatorScreen');
   };
 
   const check = () => {
@@ -104,7 +105,7 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
       checkvalue++;
     }
     // console.log(checkvalue);
-    if (checkvalue >= 2) {
+    if (checkvalue >= 1) {
       return (
         <TouchableOpacity
           style={LoginAndReigsterStyles.Btn_Clickable}
@@ -134,14 +135,20 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
           {/* {Gender == 2
             ? SubTextComponent('ProfileImageGirl', {marginTop: 20})
             : SubTextComponent('ProfileImage', {marginTop: 20})} */}
-          {SubTextComponent('ProfileImage', {marginTop: 20})}
+          {/* {SubTextComponent('ProfileImage', {marginTop: 20})} */}
+
+          <Text style={{marginTop: 20}}>
+            이웃팅을 방지하기 위해 얼굴이 드러나지
+          </Text>
+          <Text>않는 사진(전신사진)을 권장해요.</Text>
+
           <View style={ProfileImageStyles.ImageSelectView}>
             {Url == '' ? (
               ProfileImageUploadComponentGen(
                 1,
                 setUrl,
 
-                UserEmail,
+                UserUid,
                 Gender,
                 navigation,
                 NickName,
@@ -151,12 +158,12 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
                 source={{uri: Url}}
                 style={ProfileImageStyles.Image}></Image>
             )}
-            {Url2 == '' ? (
+            {/* {Url2 == '' ? (
               ProfileImageUploadComponentGen(
                 2,
                 setUrl2,
 
-                UserEmail,
+                UserUid,
                 Gender,
                 navigation,
                 NickName,
@@ -165,14 +172,14 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
               <Image
                 source={{uri: Url2}}
                 style={ProfileImageStyles.Image}></Image>
-            )}
+            )} */}
           </View>
-          <View style={ProfileImageStyles.ImageSelectView}>
+          {/* <View style={ProfileImageStyles.ImageSelectView}>
             {Url3 == '' ? (
               ProfileImageUploadComponentGen(
                 3,
                 setUrl3,
-                UserEmail,
+                UserUid,
                 Gender,
                 navigation,
                 NickName,
@@ -187,7 +194,7 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
               ProfileImageUploadComponentGen(
                 4,
                 setUrl4,
-                UserEmail,
+                UserUid,
                 Gender,
                 navigation,
                 NickName,
@@ -197,7 +204,7 @@ const ProfileImageSelectScreen = ({navigation, route}: any) => {
                 source={{uri: Url4}}
                 style={ProfileImageStyles.Image}></Image>
             )}
-          </View>
+          </View> */}
         </View>
         {check()}
       </View>

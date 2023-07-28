@@ -5,7 +5,7 @@ import {createMaterialBottomTabNavigator} from '@react-navigation/material-botto
 import {withAppContext} from './src/contextReducer';
 
 import MeetMapScreen from './src/screens/Map/meetmap';
-import ChatListScreen from 'Screens/Map/ChatList';
+import ChatListScreen from 'Screens/BottomTab/ChatList';
 
 import MyProfileScreen from 'Screens/MyProfile/MyProfile';
 import MyProfileChange from 'Screens/MyProfile/MyProfileChange';
@@ -17,6 +17,14 @@ import {WaitScreen} from 'Screens/Wait';
 import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 import AutoComScreen from 'Screens/Map/AutoCom';
 import FirstEventChatListScreen from 'Screens/Map/FirstEventChatList';
+import SearchScrollScreen from 'Screens/BottomTab/SearchScrollScreen';
+import {HPer10, HPer5, HPer8} from '~/Per';
+import Feather from 'react-native-vector-icons/Feather';
+import MeterialIcons from 'react-native-vector-icons/MaterialIcons';
+import DetailViewScreen from 'Screens/BottomTab/DetailView';
+import NewMyProfileScreen from 'Screens/MyProfile/NewMyProfile';
+import Feed_SearchScrollScreen from 'Screens/Feed/Feed_SearchScrollScreen';
+
 const BottomTab = createMaterialBottomTabNavigator();
 
 const BottomTabScreen = (props: any) => {
@@ -61,79 +69,129 @@ const BottomTabScreen = (props: any) => {
     }
   }, [route.params]);
 
-  const ValidL1 = () => {
-    if (currentUser.L1CreatedAt) {
-      console.log('L1CreatedAt:', currentUser.L1CreatedAt);
-      let now = GetEpochTime();
-      let milis = now - currentUser.L1CreatedAt;
-      let Minutes = MilisToMinutes(milis);
+  const getTabBarVisible = (route) => {
+    const routeName = route.state
+      ? route.state.routes[route.state.index].name // Nesting 된 Navigator의 경우
+      : '';
 
-      if (Minutes < 15) {
-        navigation.navigate('MeetMapScreen', {
-          UserData: currentUser,
-          otherUserData: currentUser.otherUserData,
-          channel: currentUser.channel,
-        });
-      }
+    // 'Hidden' Screen에서는 하단 바텀 탭을 표시하지 않음
+    if (routeName === 'MapScreen') {
+      return false;
     }
-  };
 
-  useEffect(() => {
-    ValidL1();
-  }, []);
+    return true; // 나머지 Screen들은 하단 바텀 탭을 표시
+  };
 
   return (
     <BottomTab.Navigator
-      initialRouteName="MapScreen"
+      initialRouteName="SearchScrollScreen"
       barStyle={{
         backgroundColor: 'white',
         justifyContent: 'flex-start',
         flexDirection: 'column',
         // Platform.OS === 'ios' ? marginBottom:10 : marginBottom:0,
         // marginBottom: Platform.OS === 'ios' ? 10 : 0,
-        height: 0,
+        height: HPer8,
       }}
-      // screenOptions={() => ({
-      //   tabbarVisiable: false,
+      shifting={true}
+      // screenOptions={({route}) => ({
+      //   tabBarVisible: getTabBarVisible(route), // 특정 Screen에서만 하단 바텀 탭 표시 여부 설정
       // })}
     >
       {/* <BottomTab.Screen name="Rending" component={Rending} /> */}
       <BottomTab.Screen
+        name="SearchScrollScreen"
+        component={SearchScrollScreen}
+        initialParams={{
+          UserData: currentUser,
+        }}
+        options={{
+          tabBarIcon: ({color}) => (
+            <MeterialIcons name="search" color={color} size={26} />
+          ),
+          tabBarLabel: '',
+        }}
+      />
+      <BottomTab.Screen
+        name="Feed_SearchScrollScreen"
+        component={Feed_SearchScrollScreen}
+        initialParams={{
+          UserData: currentUser,
+        }}
+        options={{
+          tabBarIcon: ({color}) => (
+            <MeterialIcons name="note" color={color} size={26} />
+          ),
+          tabBarLabel: '',
+        }}
+      />
+
+      {/* <BottomTab.Screen
         name="MapScreen"
         component={MapScreen}
         initialParams={{
-          CurrentUser: currentUser,
+          UserData: currentUser,
         }}
-      />
-      {/* {props.currentUser.Gender == 2 ? (
-        <BottomTab.Screen
-          name="FriendMapScreen"
-          component={FriendMapScreen}
-          initialParams={{
-            CurrentUser: currentUser,
-          }}
-        />
-      ) : null} */}
+        options={{
+          tabBarIcon: ({color}) => (
+            <MeterialIcons name="note" color={color} size={26} />
+          ),
+          tabBarLabel: '',
+        }}
+      /> */}
 
-      <BottomTab.Screen name="MeetMapScreen" component={MeetMapScreen} />
+      {/* <BottomTab.Screen name="MeetMapScreen" component={MeetMapScreen} /> */}
       <BottomTab.Screen
         name="ChatListScreen"
         component={ChatListScreen}
-        initialParams={{}}
+        initialParams={{
+          UserData: currentUser,
+        }}
+        options={{
+          tabBarIcon: ({color}) => (
+            <MeterialIcons name="message" color={color} size={26} />
+          ),
+          tabBarLabel: '',
+        }}
       />
-      <BottomTab.Screen
+      {/* <BottomTab.Screen
         name="FirstEventChatListScreen"
         component={FirstEventChatListScreen}
         initialParams={{}}
-      />
-      <BottomTab.Screen name="MyProfileScreen" component={MyProfileScreen} />
+      /> */}
       <BottomTab.Screen
+        name="MyProfileScreen"
+        component={MyProfileScreen}
+        initialParams={{
+          UserData: currentUser,
+        }}
+        options={{
+          tabBarIcon: ({color}) => (
+            <MeterialIcons name="person" color={color} size={26} />
+          ),
+          tabBarLabel: '',
+        }}
+      />
+      {/* <BottomTab.Screen
+        name="NewMyProfileScreen"
+        component={NewMyProfileScreen}
+        initialParams={{
+          UserData: currentUser,
+        }}
+        options={{
+          tabBarIcon: ({color}) => (
+            <MeterialIcons name="person" color={color} size={26} />
+          ),
+          tabBarLabel: '',
+        }}
+      /> */}
+      {/* <BottomTab.Screen
         name="MyProfileChangeScreen"
         component={MyProfileChangeScreen}
-      />
+      /> */}
 
-      <BottomTab.Screen name="AutoComScreen" component={AutoComScreen} />
-      <BottomTab.Screen name="WaitScreen" component={WaitScreen} />
+      {/* <BottomTab.Screen name="AutoComScreen" component={AutoComScreen} /> */}
+      {/* <BottomTab.Screen name="WaitScreen" component={WaitScreen} /> */}
     </BottomTab.Navigator>
   );
 };

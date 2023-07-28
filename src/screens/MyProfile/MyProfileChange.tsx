@@ -7,6 +7,7 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import {MyProfileChangeStyles, MyProfileStyles} from '~/MyProfile';
 import {Type2} from 'component/LinearGradient/LinearType';
@@ -19,13 +20,16 @@ import styles from '~/ManToManBoard';
 import {
   ProfileImageUploadComponent,
   ProfileImageUploadComponentReact,
-} from 'component/Profile/ProfileSvg';
+} from 'component/ProfileInput/ProfileSvg';
 
 import {ChangeMyProfileImage} from '^/ImageUpload';
 import {완료Svg} from 'component/General/GeneralSvg';
 import {UpdateFbFirestore} from '^/Firebase';
 import {Btn_ClickableBack} from 'component/General';
 import {FSStyles, FWStyles} from '~/FontWeights';
+import {ValidFalsy} from '^/ValidFalsy';
+import {MainColor} from '~/Color/OneColor';
+import {HPer1, WPer10, WPer15, WPer5} from '~/Per';
 const ProfileImageUploadComponentGen = (
   index: number,
   setState: Function,
@@ -73,7 +77,7 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
     setState: Function,
     ImageUrl: string,
   ) => {
-    if (ImageUrl == '') {
+    if (!ValidFalsy(ImageUrl)) {
       return ProfileImageUploadComponentGen(
         index,
         setState,
@@ -86,6 +90,7 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
     } else {
       return (
         <TouchableOpacity
+          style={{}}
           onPress={() => {
             ChangeMyProfileImage(
               UserData.UserEmail,
@@ -143,34 +148,22 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
         },
       ]}
       onPress={() => {
-        // console.log('Hello');
-        // ChangeUserData();
-        // navigation.goBack();
-
-        navigation.navigate('MapScreen', {
-          CurrentUser: ChangedUserData,
+        navigation.navigate('SearchScrollScreen', {
+          UserData: ChangedUserData,
         });
       }}>
       {완료Svg}
     </TouchableOpacity>
   );
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <LinearGradient
-        colors={Type2}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}
-        style={{
-          width: '100%',
-        }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: 'black'}}>
+      <ScrollView>
         <View style={MyProfileChangeStyles.Headers}>
           <View
             style={
               (styles.W90ML5,
               {
                 height: 50,
-                width: '90%',
-                marginLeft: '5%',
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -181,6 +174,7 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
               width={14}
               onPress={() => navigation.navigate('MyProfileScreen', {UserData})}
             />
+            {/* <Text>프로필 변경</Text> */}
             {Btn_완료}
           </View>
 
@@ -201,11 +195,15 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
             <View
               style={{
                 position: 'absolute',
-                top: '-13%',
+                top: -WPer10,
               }}>
               {Type2ProfileImageCircle(Per20, Per20, UserData.ProfileImageUrl)}
             </View>
-            <Text style={[MyProfileStyles.NickName, {marginTop: 21}]}>
+            <Text
+              style={[
+                MyProfileStyles.NickName,
+                {marginTop: WPer15, marginBottom: 10},
+              ]}>
               {UserData.NickName}
             </Text>
             <Text style={MyProfileChangeStyles.SubText}>
@@ -250,7 +248,7 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
               <View style={MyProfileChangeStyles.InforBoxColumnSection}>
                 <Text
                   style={{fontSize: 10, fontWeight: '500', color: '#C5C5C5'}}>
-                  5글자로 나를 표현해보세요
+                  20글자로 나를 표현해보세요
                 </Text>
                 <TextInput
                   style={MyProfileChangeStyles.TI}
@@ -264,7 +262,7 @@ const MyProfileChangeScreen = ({route, navigation}: any) => {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </LinearGradient>
+      </ScrollView>
     </SafeAreaView>
   );
 };

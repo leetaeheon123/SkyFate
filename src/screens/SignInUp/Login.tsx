@@ -21,7 +21,7 @@ import {RootStackParamList} from '../RootStackParamList';
 import {AppContext} from '../../UsefulFunctions/Appcontext';
 
 import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
-import {LoginUserEmail} from '../../UsefulFunctions/SaveUserDataInDevice';
+import {LoginUserUid} from '../../UsefulFunctions/SaveUserDataInDevice';
 
 import {LoginAndRegisterTextInputStyle} from '../../../styles/LoginAndRegiser';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
@@ -48,8 +48,8 @@ const LoginWithEmail = async (
   try {
     const result = await signIn({email: Email, password: Password});
     let UserEmail = result.user.email;
-    let UserUid = result.user.uid
-    LoginUserEmail(UserEmail, navigation);
+    let UserUid = result.user.uid;
+    LoginUserUid(UserUid, navigation);
   } catch (error) {
     if (error.code === 'auth/wrong-password') {
       Alert.alert('이메일은 존재하나 비밀번호가 다릅니다.');

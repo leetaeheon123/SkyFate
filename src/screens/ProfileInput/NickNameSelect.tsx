@@ -15,25 +15,25 @@ import {
 import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
 import {LoginAndRegisterTextInputStyle} from '../../../styles/LoginAndRegiser';
 import firestore from '@react-native-firebase/firestore';
-import {NickNameLine, TextComponent} from 'component/Profile/ProfileSvg';
-import {NickNameInput} from 'component/Profile/ProfileSvg';
+import {NickNameLine, TextComponent} from 'component/ProfileInput/ProfileSvg';
+import {NickNameInput} from 'component/ProfileInput/ProfileSvg';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import {LongLineFixSvg} from 'component/General/GeneralSvg';
 import styles from '~/ManToManBoard';
 import {RemoveIdentityToken} from 'Screens/Map/map';
 const NickNameSelectScreen = ({navigation, route}: any) => {
-  console.log(route.params.UserEmail);
-  const {UserEmail, NickName} = route.params;
+  const {UserUid, NickName} = route.params;
 
   const [NickNameValue, setNickName] = useState(NickName);
   const [Selected, setSelected] = useState(false);
   const UpdateNickName = async () => {
-    await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
+    await firestore().collection(`UserList`).doc(`${UserUid}`).update({
       NickName: NickNameValue,
     });
 
+    // navigation.navigate('GenderSelectScreen', {
     navigation.navigate('GenderSelectScreen', {
-      UserEmail: UserEmail,
+      UserUid: UserUid,
       NickName: NickNameValue,
       Gender: 0,
     });

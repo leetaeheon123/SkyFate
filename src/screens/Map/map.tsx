@@ -590,9 +590,8 @@ const MapScreen = (props: any) => {
 
   const PosterPreload = require('../../Assets/FirstEvent/FirstEventPoster.svg');
 
-  const UserData = props.route.params.CurrentUser;
+  const UserData = props.route.params.UserData;
 
-  console.log('UserData [MapScreen.tsx]:', UserData.VisualMeasureStatus);
   const navigation = useNavigation();
 
   const Context = useContext(AppContext);

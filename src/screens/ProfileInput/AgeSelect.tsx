@@ -20,13 +20,13 @@ import {
   AgeLine,
   SubTextComponent,
   TextComponent,
-} from 'component/Profile/ProfileSvg';
+} from 'component/ProfileInput/ProfileSvg';
 import {AgeStyles} from '~/ProfileInput';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import styles from '~/ManToManBoard';
 
 const AgeSelectScreen = ({navigation, route}: any) => {
-  const {UserEmail, Gender, NickName} = route.params;
+  const {UserUid, Gender, NickName} = route.params;
 
   const ValidNum = (value: any) => {
     return !isNaN(parseFloat(value));
@@ -37,12 +37,12 @@ const AgeSelectScreen = ({navigation, route}: any) => {
     let YearOfBirth = Number(YearOfBirthStr);
 
     let Age = 2023 - YearOfBirth + 1;
-    await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
+    await firestore().collection(`UserList`).doc(`${UserUid}`).update({
       Age: Age,
     });
 
-    navigation.navigate('VisualMeasureStart1Screen', {
-      UserEmail: UserEmail,
+    navigation.navigate('ProfileImageSelectScreen', {
+      UserUid: UserUid,
       Gender: Gender,
       NickName: NickName,
     });

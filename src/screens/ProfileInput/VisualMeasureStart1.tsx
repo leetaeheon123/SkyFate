@@ -21,7 +21,7 @@ import {
   MainColorBtn_ClickableSvg,
   SubTextComponent,
   TextComponent,
-} from 'component/Profile/ProfileSvg';
+} from 'component/ProfileInput/ProfileSvg';
 import {AgeStyles} from '~/ProfileInput';
 import {
   Btn_ClickableNext,

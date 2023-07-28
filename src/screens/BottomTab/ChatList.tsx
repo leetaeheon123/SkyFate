@@ -13,20 +13,24 @@ import Channel from 'component/channel';
 import {AppContext} from '^/Appcontext';
 import {channelsReducer} from 'reducer/channels';
 import {GetEpochTime} from '^/GetTime';
-import {BombIconView, Btn_ClickableBack, EmptyBox} from 'component/General';
-import {
-  BombIconSvg,
-  ExplainLimit_BombSvg,
-  Text_ExplainLimit_Main,
-  Text_ExplainLimit_Sub,
-  Text_Message,
-} from 'component/Chat/ChatSvg';
+import {Btn_ClickableBack, EmptyBox} from 'component/General';
+import {Text_Message} from 'component/Chat/ChatSvg';
 import styles from '~/ManToManBoard';
+import {MainColor} from '~/Color/OneColor';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import {Get_UserListWantTalkMe} from 'Firebase/get';
+import {useQuery} from 'react-query';
+import {Create_RequestChating} from 'Firebase/create';
+import {GotoChatScreen} from '^/SendBird';
+
 const ChatListScreen = ({navigation, route}: any) => {
   const Context = useContext(AppContext);
   const SendBird = Context.sendbird;
 
-  const {UserData} = route.params;
+  let {UserData} = route.params;
+  // UserData = {...UserData, Uid: '44'};
+  // console.log('UserData ChatList.tsx:', UserData);
   useEffect(() => {
     SendBird.addConnectionHandler('channels', connectionHandler);
     SendBird.addChannelHandler('channels', channelHandler);
@@ -55,6 +59,13 @@ const ChatListScreen = ({navigation, route}: any) => {
     };
   }, []);
 
+  // 나한테 채팅 요청 보낸 사람들을 가져오는
+
+  const {data: UserListWantTalkMe, isLoading: UserListWantTalkMeisLoading} =
+    useQuery('UserListWantTalkMekey', () =>
+      Get_UserListWantTalkMe(UserData.Uid),
+    );
+
   const [state, dispatch] = useReducer(channelsReducer, {
     SendBird,
     UserData,
@@ -69,23 +80,19 @@ const ChatListScreen = ({navigation, route}: any) => {
 
   const next = () => {
     // query.hasNext가 존재할 때
-    console.log('query.hasNext', query.hasNext);
     if (query.hasNext) {
       query.limit = 20;
       query.next((fetchedChannels: any, err: Error) => {
-        console.log('fetchedChannels Type:', typeof fetchedChannels);
-        console.log('fetchedChannels Length:', fetchedChannels.length);
+        // const distinctChannels = fetchedChannels.filter((data: any) => {
+        //   let now = GetEpochTime();
+        //   let milis = now - data?.createdAt;
+        //   let second = Math.floor(milis / 1000);
 
-        const distinctChannels = fetchedChannels.filter((data: any) => {
-          let now = GetEpochTime();
-          let milis = now - data?.createdAt;
-          let second = Math.floor(milis / 1000);
+        //   console.log('second In distn:', second);
+        //   return second < 600 && data.name != '상담원';
+        // });
 
-          console.log('second In distn:', second);
-          return second < 600 && data.name != '상담원';
-        });
-
-        console.log('distinctChannels:', distinctChannels);
+        // console.log('distinctChannels:', distinctChannels);
 
         // console.log(
         //   "In Next Function query.next's callbackFunction's Return Value fectedChannels:,",
@@ -94,8 +101,8 @@ const ChatListScreen = ({navigation, route}: any) => {
         if (!err) {
           dispatch({
             type: 'fetch-channels',
-            payload: {channels: distinctChannels},
-            // payload: {channels: fetchedChannels},
+            // payload: {channels: distinctChannels},
+            payload: {channels: fetchedChannels},
           });
         } else {
           dispatch({
@@ -111,10 +118,6 @@ const ChatListScreen = ({navigation, route}: any) => {
 
   const refresh = () => {
     // state값에 sendbird.groupchannel. 그룹채널리스트 만들기 쿼리를 실행한 뒤 리턴값을 state에 저장
-    console.log(
-      'createMyGroupChannelListQuery:',
-      SendBird.GroupChannel.createMyGroupChannelListQuery(),
-    );
     setQuery(SendBird.GroupChannel.createMyGroupChannelListQuery());
     dispatch({type: 'refresh'});
   };
@@ -125,12 +128,7 @@ const ChatListScreen = ({navigation, route}: any) => {
     }
   }, [query]);
 
-  const chat = (channel: any) => {
-    navigation.navigate('ChatScreen', {
-      channel,
-      UserData,
-    });
-  };
+  const chat = (channel: any) => {};
 
   const connectionHandler = new SendBird.ConnectionHandler();
 
@@ -192,11 +190,11 @@ const ChatListScreen = ({navigation, route}: any) => {
     totalCount: any,
     countByCustomTypes: any,
   ) => {
-    console.log(
-      'totalCount And countByCustomTypes:',
-      totalCount,
-      countByCustomTypes,
-    );
+    // console.log(
+    //   'totalCount And countByCustomTypes:',
+    //   totalCount,
+    //   countByCustomTypes,
+    // );
   };
 
   const Header = (
@@ -211,24 +209,58 @@ const ChatListScreen = ({navigation, route}: any) => {
     </View>
   );
 
+  const WantMeUserList = (
+    <TouchableOpacity
+      onPress={() => {
+        if (UserListWantTalkMeisLoading == false) {
+          navigation.navigate('UserListWantTalkMeScreen', {
+            UserData,
+            UserListWantTalkMe,
+          });
+        }
+      }}
+      style={[
+        styles.RowCenter,
+        styles.DefaultBorder,
+        {
+          height: '10%',
+          justifyContent: 'space-around',
+          backgroundColor: '#E7F5F3',
+          borderRadius: 8,
+          borderColor: MainColor,
+        },
+      ]}>
+      <Text
+        style={{
+          fontSize: 22,
+          fontWeight: '800',
+          color: MainColor,
+        }}>
+        나와 대화하고 싶어하는 회원들
+      </Text>
+      <MaterialIcons
+        name="arrow-forward-ios"
+        color={MainColor}
+        size={25}></MaterialIcons>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={ChatListStyles.Body}>
       <View style={ChatListStyles.Main}>
         {Header}
-        <View style={ChatListStyles.Explain}>
-          {ExplainLimit_BombSvg(90)}
-          <Text style={{fontSize: 15, fontWeight: '400', color: 'white'}}>
-            빠른매칭을 위해 채팅은 10분으로 제한합니다
-          </Text>
-          <View>
-            <Text style={{fontSize: 12, fontWeight: '400', color: 'white'}}>
-              채팅을 시작하는 순간 폭탄의 시간이 줄어듭니다
-            </Text>
-            <Text style={{fontSize: 12, fontWeight: '400', color: 'white'}}>
-              총 10분이며, 1분씩 줄어드는 시스템입니다.
-            </Text>
-          </View>
-        </View>
+        {WantMeUserList}
+
+        <TouchableOpacity
+          style={{
+            width: 50,
+            height: 50,
+          }}
+          onPress={() => {
+            Create_RequestChating('DQfy02wCAdOG4yRRLheoW9DLHOw2', UserData);
+          }}>
+          <Text>샘플데이터 넣기</Text>
+        </TouchableOpacity>
 
         <FlatList
           data={state.channels}
@@ -237,9 +269,12 @@ const ChatListScreen = ({navigation, route}: any) => {
               key={item.url}
               channel={item}
               sendbird={SendBird}
-              onPress={(channel) => chat(channel)}
-              viewtime={(channel) =>
-                console.log('channelcreateAt:', channel.createdAt)
+              onPress={(channel: any) => {
+                GotoChatScreen(navigation, channel, UserData);
+              }}
+              viewtime={
+                (channel: any) => {}
+                // console.log('channelcreateAt:', channel.createdAt)
               }
               UserData={UserData}
             />
@@ -263,7 +298,10 @@ const ChatListScreen = ({navigation, route}: any) => {
           }
           ListEmptyComponent={
             <View style={ChatListStyles.emptyContainer}>
-              <Text style={ChatListStyles.empty}>{state.empty}</Text>
+              <Text style={ChatListStyles.empty}>
+                {/* {state.empty} */}
+                대화를 시작해보세요!
+              </Text>
             </View>
           }
           onEndReached={() => next()}

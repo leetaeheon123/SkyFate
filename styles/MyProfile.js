@@ -1,21 +1,41 @@
 import {StyleSheet, Dimensions} from 'react-native';
 import styles from './ManToManBoard';
+import {
+  HPer1,
+  HPer10,
+  HPer15,
+  HPer20,
+  HPer3,
+  HPer30,
+  HPer5,
+  HPer50,
+  HPer60,
+  HPer90,
+  WPer100,
+  WPer80,
+  WPer90,
+} from './Per';
+import {MainColor} from './Color/OneColor';
 
 const {width, height} = Dimensions.get('window');
 const W20 = width * 0.2;
 export const MyProfileStyles = StyleSheet.create({
   Body: {
     flex: 1,
+    backgroundColor: '#37375B',
+  },
+  ScrollView: {
+    flex: 1,
   },
 
   ImageView: {
     width: '100%',
-    height: '60%',
+    height: HPer60,
   },
 
   FullImage: {
     width: '100%',
-    height: '100%',
+    height: HPer60,
   },
   SubImage: {
     width: 90,
@@ -27,11 +47,13 @@ export const MyProfileStyles = StyleSheet.create({
     styles.Column_OnlyRowCenter,
     {
       width: '100%',
-      height: '50%',
+      height: HPer90,
+      // backgroundColor: '#37375B',
       backgroundColor: '#37375B',
       borderTopEndRadius: 48,
       borderTopStartRadius: 48,
       marginTop: -width * 0.1,
+      zIndex: 3,
     },
   ],
   footer: {
@@ -42,7 +64,7 @@ export const MyProfileStyles = StyleSheet.create({
   Title: [
     styles.Column_OnlyRowCenter,
     {
-      height: '35%',
+      height: HPer15,
       justifyContent: 'space-evenly',
       // backgroundColor: 'orange',
     },
@@ -51,7 +73,7 @@ export const MyProfileStyles = StyleSheet.create({
     styles.Column_OnlyRowCenter,
     {
       width: '45%',
-      height: '65%',
+      height: HPer20,
       // backgroundColor: 'gray',
       justifyContent: 'space-evenly',
     },
@@ -86,7 +108,9 @@ export const MyProfileStyles = StyleSheet.create({
     fontWeight: '600',
   },
   DescBottomLine: {
+    // width: 160,
     width: 160,
+
     height: 1,
   },
   Mbti: {
@@ -103,23 +127,22 @@ export const MyProfileChangeStyles = StyleSheet.create({
     styles.Column_OnlyFlex,
     {
       width: '100%',
-      height: '44%',
-      backgroundColor: 'white',
     },
   ],
   HeadersGrid: [
     styles.Row_OnlyColumnCenter,
+    styles.DefaultBorder,
     {
       width: '100%',
       // height: height * 0.22,
       height: height * 0.18,
       justifyContent: 'space-evenly',
       // backgroundColor: 'skyblue',
+      // borderColor: MainColor,
     },
   ],
   Body: {
     width: '100%',
-    height: '66%',
     // backgroundColor: 'purple',
   },
 
@@ -130,10 +153,10 @@ export const MyProfileChangeStyles = StyleSheet.create({
   },
 
   InforView: [
-    styles.W90ML5,
     styles.Column_OnlyRowCenter,
     {
-      height: '84%',
+      width: WPer100,
+      height: HPer90,
       backgroundColor: '#37375B',
       borderTopStartRadius: 55,
       borderTopEndRadius: 55,
@@ -147,25 +170,23 @@ export const MyProfileChangeStyles = StyleSheet.create({
   },
   InforBox: [
     {
-      height: '56%',
-      width: '80%',
+      width: WPer80,
       marginTop: '2%',
     },
   ],
   InforBoxSection: [
-    // styles.Row_OnlyFlex,
     styles.Row_OnlyColumnCenter,
 
     {
       width: '100%',
-      height: `${per * 0.7}%`,
+      height: HPer5,
     },
   ],
   InforBoxColumnSection: [
     styles.Column_OnlyFlex,
     {
       width: '100%',
-      height: `${per * 1.3}%`,
+      height: HPer5,
       marginLeft: 17,
     },
   ],
@@ -177,9 +198,8 @@ export const MyProfileChangeStyles = StyleSheet.create({
   },
   TextBox: [],
   TI: {
-    width: '100%',
-    // height: '90%',
-    // height: 46,
+    width: WPer80,
+    height: 46,
     color: 'white',
   },
 });

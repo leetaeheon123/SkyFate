@@ -29,38 +29,35 @@ const Channel = ({
   const [updatedAt, setUpdatedAt] = useState('');
   const [CreatedAt, setCreatedAt] = useState('');
 
-  const intervalRef = useInterval(() => {
-    const minutes = getTimePassed();
-    setCreatedAt(minutes);
-    console.log('[channel.js] ChatRoom time passed:', minutes);
-    if (minutes >= 10) {
-      clearInterval(intervalRef.current);
-    }
-  }, 10000);
+  // const intervalRef = useInterval(() => {
+  //   const minutes = getTimePassed();
+  //   setCreatedAt(minutes);
+  //   if (minutes >= 10) {
+  //     clearInterval(intervalRef.current);
+  //   }
+  // }, 10000);
 
-  useEffect(() => {
-    const minutes = getTimePassed();
+  // useEffect(() => {
+  //   const minutes = getTimePassed();
 
-    // setCreatedAt(moment(channel.createdAt).fromNow());
-    setCreatedAt(minutes);
+  //   // setCreatedAt(moment(channel.createdAt).fromNow());
+  //   setCreatedAt(minutes);
 
-    return () => clearInterval(intervalRef);
-  }, []);
+  //   return () => clearInterval(intervalRef);
+  // }, []);
 
-  const getTimePassed = () => {
-    const now = GetEpochTime();
-    const milis = now - channel?.createdAt;
-    const second = Math.floor(milis / 1000);
-    const minutes = Math.floor(second / 60);
+  // const getTimePassed = () => {
+  //   const now = GetEpochTime();
+  //   const milis = now - channel?.createdAt;
+  //   const second = Math.floor(milis / 1000);
+  //   const minutes = Math.floor(second / 60);
 
-    return minutes;
-  };
+  //   return minutes;
+  // };
 
   const otherUserData = channel.members.filter(
     (data) => data.userId != UserData.UserEmail,
   );
-
-  console.log('otherUserData In Channel.js :', otherUserData);
 
   const channelHandler = new sendbird.ChannelHandler();
   channelHandler.onChannelChanged = (updatedChannel) => {
@@ -107,7 +104,6 @@ const Channel = ({
   };
 
   const DecrementUnreadMessageCount = (channel) => {
-    console.log('DecrementUnreadMessageCount');
     // channel.unreadMessageCount = 0;
     channel.markAsRead();
   };
@@ -162,7 +158,6 @@ const Channel = ({
           </View>
         ) : null}
       </View>
-      {IsFirstEvent == false ? BombIconView(width * 0.15, CreatedAt) : null}
     </TouchableOpacity>
   );
 };

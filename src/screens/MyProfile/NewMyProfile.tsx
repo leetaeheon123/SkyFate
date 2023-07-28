@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react';
-import {Alert, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
+import {SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
 import {SettingStyles} from '~/SettingStyles';
 import {
   Btn_ClickableBack,
@@ -12,8 +12,10 @@ import styles from '~/ManToManBoard';
 import {logout} from 'Screens/Map/map';
 import {AppContext} from '^/Appcontext';
 import {openWebView} from 'Screens/AgreementScreen';
+import {MainColor} from '~/Color/OneColor';
+import {HPer30, WPer10, WPer100} from '~/Per';
 
-const Setting = ({navigation, route}: any) => {
+const NewMyProfileScreen = ({navigation, route}: any) => {
   const [notification, setNotification] = useState(false);
   const {UserData} = route.params;
   const Context = useContext(AppContext);
@@ -66,25 +68,16 @@ const Setting = ({navigation, route}: any) => {
   return (
     <SafeAreaView style={SettingStyles.Body}>
       <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginTop: 10,
-          marginHorizontal: 15,
-        }}>
-        <View>
-          <Btn_ClickableBack width={14} onPress={() => navigation.goBack()} />
+        style={[
+          styles.ColumnCenter,
+          {
+            backgroundColor: MainColor,
+            width: WPer100,
+            height: HPer30,
+          },
+        ]}>
+          
         </View>
-        <View>{HeaderText_Setting()}</View>
-        <View>
-          <Btn_Complete
-            width={30}
-            onPress={() => {
-              navigation.goBack();
-            }}
-          />
-        </View>
-      </View>
 
       {/* <View>
         <Text style={SettingStyles.MainText}>푸시 알림</Text>
@@ -155,8 +148,6 @@ const Setting = ({navigation, route}: any) => {
       </View>
       {line}
 
-      {/* 개발자와 실시간 소통, 개발자의 편지 */}
-
       <View>
         <Text style={SettingStyles.MainText}>회원 관리</Text>
         <TouchableOpacity
@@ -178,30 +169,10 @@ const Setting = ({navigation, route}: any) => {
           </Text>
           {RightArrowWhiteSvg}
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert('아직 준비중이에요');
-            // navigation.navigate('WithdrawalScreen', {
-            //   logout: logout,
-            //   UserEmail: UserData.UserEmail,
-            // });
-          }}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: 18,
-            width: '100%',
-          }}>
-          <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
-            비밀번호 바꾸기
-          </Text>
-          {RightArrowWhiteSvg}
-        </TouchableOpacity>
       </View>
 
       <View>
-        <Text style={SettingStyles.MainText}>센슈얼 파인더 학습시키기</Text>
+        <Text style={SettingStyles.MainText}>랑데부 학습시키기</Text>
         <TouchableOpacity
           onPress={() => HelpOurs()}
           style={{
@@ -212,23 +183,7 @@ const Setting = ({navigation, route}: any) => {
             width: '100%',
           }}>
           <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
-            센슈얼 파인더를 도와주세요
-          </Text>
-          {RightArrowWhiteSvg}
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert('아직 준비중이에요');
-          }}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: 18,
-            width: '100%',
-          }}>
-          <Text style={[SettingStyles.H2Text, {marginLeft: 23}]}>
-            개발자의 편지
+            랑데부를 도와주세요
           </Text>
           {RightArrowWhiteSvg}
         </TouchableOpacity>
@@ -277,4 +232,4 @@ const Setting = ({navigation, route}: any) => {
   );
 };
 
-export default Setting;
+export default NewMyProfileScreen;

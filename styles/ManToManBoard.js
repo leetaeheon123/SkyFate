@@ -167,6 +167,10 @@ styles = StyleSheet.create({
   WhiteColor: {
     color: 'white',
   },
+  DefaultBorder: {
+    borderWidth: 1,
+    borderStyle: 'solid',
+  },
   W100H100: {
     width: '100%',
     height: '100%',

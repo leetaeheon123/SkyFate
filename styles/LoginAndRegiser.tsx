@@ -1,5 +1,6 @@
 import {StyleSheet} from 'react-native';
 import styles from './ManToManBoard';
+import {HPer15} from './Per';
 export const LoginAndReigsterStyles = StyleSheet.create({
   Body: {
     width: '100%',
@@ -47,6 +48,14 @@ export const LoginAndReigsterStyles = StyleSheet.create({
       alignItems: 'flex-end',
     },
   ],
+  Description_OnlyFlex: [
+    {
+      height: HPer15,
+      width: '100%',
+      justifyContent: 'flex-end',
+      // backgroundColor: 'skyblue',
+    },
+  ],
 
   Center: {
     height: '50%',
@@ -63,6 +72,14 @@ export const LoginAndRegisterTextInputStyle = () =>
       fontSize: 18,
       fontWeight: '600',
       color: 'black',
+    },
+    SelfIntroTextInput: {
+      width: '100%',
+      height: '100%',
+      fontSize: 18,
+      fontWeight: '700',
+      color: 'black',
+      padding: 10,
     },
     ViewStyle: {
       width: '100%',

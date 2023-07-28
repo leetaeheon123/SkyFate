@@ -14,6 +14,7 @@ import {
 import {WaitScreen} from './Wait';
 import {ft} from '^/Firebase';
 import {NotCheckFailed, NotCheckSuccess} from '^/NoMistakeWord';
+import {ValidFalsy} from '^/ValidFalsy';
 
 export const SendBirdUpdateUserInfo = (
   SendBird: any,
@@ -26,7 +27,7 @@ export const SendBirdUpdateUserInfo = (
     async (user: any, err: any) => {
       console.log('In sendbird.updateCurrentUserInfo User:', user);
       if (!err) {
-        RegisterSendBirdToken(SendBird, user.email);
+        RegisterSendBirdToken(SendBird, user.uid);
 
         console.log(
           'Succes updateCurrentUserInfo SendBird In SBconnect Function In Indicator Screen',
@@ -50,11 +51,11 @@ const IndicatorScreen = (props: any) => {
 
   const SBConnect = async (
     SendBird: any,
-    UserEmail: string,
+    UserUid: string,
     NickName: string,
     ProfileImageUrl: string,
   ) => {
-    SendBird.connect(UserEmail, (user: any, err: any) => {
+    SendBird.connect(UserUid, (user: any, err: any) => {
       console.log('In Sendbird.connect CallbackFunction User:', user);
       // 에러가 존재하지 않으면
       if (!err) {
@@ -137,31 +138,18 @@ const IndicatorScreen = (props: any) => {
     }
   };
 
-  const ValidVisualMeasureNotCheckSuccess = (VisualMeasureStatus: any) => {
-    if (VisualMeasureStatus == 'NotCheckSuccess') {
-      return false;
-    } else {
-      return true;
-    }
-  };
-
-  const ValidVisualMeasureNotCheckFailed = (VisualMeasureStatus: any) => {
-    if (VisualMeasureStatus == 'NotCheckFailed') {
-      return false;
-    } else {
-      return true;
-    }
-  };
-
   useEffect(() => {
-    AsyncStorage.getItem('UserEmail')
+    AsyncStorage.getItem('UserUid')
       .then(async (user) => {
         if (user) {
-          const UserEmail = user;
+          const UserUid = user;
           const UserData = await GetUserData(user);
+          const Uid = UserData?.Uid;
           const NickName = UserData?.NickName;
           const Gender = UserData?.Gender;
           const Age = UserData?.Age;
+          const MySelfIntro = UserData?.MySelfIntro;
+          const MyWantIntro = UserData?.MyWantIntro;
 
           // console.log("UserData In Indicator", UserData)
 
@@ -169,19 +157,19 @@ const IndicatorScreen = (props: any) => {
             'AgreementTermsofUse',
           );
           if (!ValidAgreement) {
-            GotoProfileInputScreen('AgreementScreen', UserEmail);
+            GotoProfileInputScreen('AgreementScreen', UserUid);
             return;
           }
 
           const ValidNickName = UserData?.hasOwnProperty('NickName');
           if (!ValidNickName) {
-            GotoProfileInputScreen('NickNameSelectScreen', UserEmail);
+            GotoProfileInputScreen('NickNameSelectScreen', UserUid);
             return;
           }
 
           const ValidGender = UserData?.hasOwnProperty('Gender');
           if (!ValidGender) {
-            GotoProfileInputScreen('GenderSelectScreen', UserEmail, NickName);
+            GotoProfileInputScreen('GenderSelectScreen', UserUid, NickName);
             return;
           }
 
@@ -189,7 +177,7 @@ const IndicatorScreen = (props: any) => {
           if (!ValidMbti) {
             GotoProfileInputScreen(
               'MbtiSelectScreen',
-              UserEmail,
+              UserUid,
               NickName,
               Gender,
             );
@@ -200,58 +188,51 @@ const IndicatorScreen = (props: any) => {
           if (!ValidAge) {
             GotoProfileInputScreen(
               'AgeSelectScreen',
-              UserEmail,
+              UserUid,
               NickName,
               Gender,
             );
             return;
           }
 
-          let ValidProfileImageUrl = ValidProfileImageUrlFun(
-            UserData?.ProfileImageUrl,
-          );
+          const ValidMyWantIntro = UserData?.hasOwnProperty('MyWantIntro');
 
-          // if (UserData.Gender == 2) {
-          // ValidProfileImageUrl = true;
-          // }
+          if (!ValidMyWantIntro) {
+            GotoProfileInputScreen(
+              'MyWantIntroScreen',
+              UserUid,
+              NickName,
+              Gender,
+              Age,
+            );
+            return;
+          }
+
+          const ValidMySelfIntro = UserData?.hasOwnProperty('MySelfIntro');
+
+          if (!ValidMySelfIntro) {
+            GotoProfileInputScreen(
+              'MySelfIntroScreen',
+              UserUid,
+              NickName,
+              Gender,
+              Age,
+              MyWantIntro,
+            );
+            return;
+          }
+
+          let ValidProfileImageUrl = ValidFalsy(UserData?.ProfileImageUrl);
 
           if (!ValidProfileImageUrl) {
             GotoProfileInputScreen(
               'ProfileImageSelectScreen',
-              UserEmail,
+              UserUid,
               NickName,
               Gender,
               Age,
-            );
-            return;
-          }
-
-          let ValidNotCheckSuccess = ValidVisualMeasureNotCheckSuccess(
-            UserData?.VisualMeasureStatus,
-          );
-
-          if (!ValidNotCheckSuccess) {
-            GotoProfileInputScreen(
-              `VisualMeasure${NotCheckSuccess}Screen`,
-              UserEmail,
-              NickName,
-              Gender,
-              Age,
-            );
-            return;
-          }
-
-          let ValidNotCheckFailed = ValidVisualMeasureNotCheckFailed(
-            UserData?.VisualMeasureStatus,
-          );
-
-          if (!ValidNotCheckFailed) {
-            GotoProfileInputScreen(
-              `VisualMeasure${NotCheckFailed}Screen`,
-              UserEmail,
-              NickName,
-              Gender,
-              Age,
+              MyWantIntro,
+              MySelfIntro,
             );
             return;
           }
@@ -262,19 +243,17 @@ const IndicatorScreen = (props: any) => {
             ValidMbti &&
             ValidGender &&
             ValidAge &&
-            ValidProfileImageUrl &&
-            ValidNotCheckSuccess &&
-            ValidNotCheckFailed
+            ValidMyWantIntro &&
+            ValidMySelfIntro &&
+            ValidProfileImageUrl
           ) {
             setCurrentUser(UserData);
             SBConnect(
               SendBird,
-              UserEmail,
+              UserUid,
               UserData?.NickName,
               UserData?.ProfileImageUrl,
             );
-            CheckDaysofuse(UserData?.Type);
-            CheckHoursofuse(UserData?.Type);
           }
         }
         setInitialized(true);
@@ -286,14 +265,16 @@ const IndicatorScreen = (props: any) => {
 
   const GotoProfileInputScreen = (
     ScreenName: string,
-    UserEmail: string,
+    UserUid: string,
     NickName: string = '',
     Gender: number = 0,
     Age: number = 0,
+    MyWantIntro: string | null = null,
+    MySelfIntro: string | null = null,
   ) => {
     if (NickName == '') {
       navigation.navigate(`${ScreenName}`, {
-        UserEmail,
+        UserUid,
         NickName: '',
       });
       return;
@@ -301,7 +282,7 @@ const IndicatorScreen = (props: any) => {
 
     if (Gender == 0) {
       navigation.navigate(`${ScreenName}`, {
-        UserEmail,
+        UserUid,
         NickName,
       });
 
@@ -310,7 +291,7 @@ const IndicatorScreen = (props: any) => {
 
     if (Age == 0) {
       navigation.navigate(`${ScreenName}`, {
-        UserEmail,
+        UserUid,
         NickName,
         Gender,
       });
@@ -318,11 +299,36 @@ const IndicatorScreen = (props: any) => {
       return;
     }
 
+    if (MyWantIntro == null) {
+      navigation.navigate(`${ScreenName}`, {
+        UserUid,
+        NickName,
+        Gender,
+        Age,
+      });
+
+      return;
+    }
+
+    if (MySelfIntro == null) {
+      navigation.navigate(`${ScreenName}`, {
+        UserUid,
+        NickName,
+        Gender,
+        Age,
+        MyWantIntro,
+      });
+
+      return;
+    }
+
     navigation.navigate(`${ScreenName}`, {
-      UserEmail,
+      UserUid,
       NickName,
       Gender,
       Age,
+      MyWantIntro,
+      MySelfIntro,
     });
 
     return;
@@ -336,7 +342,7 @@ const IndicatorScreen = (props: any) => {
       return;
     }
 
-    AsyncStorage.getItem('UserEmail')
+    AsyncStorage.getItem('UserUid')
       .then(async (user) => {
         const UserData = await GetUserData(user);
 
@@ -349,14 +355,12 @@ const IndicatorScreen = (props: any) => {
           setCurrentUser(UserData);
           SBConnect(
             SendBird,
-            UserData?.UserEmail,
+            UserData?.UserUid,
             UserData?.NickName,
             UserData?.ProfileImageUrl,
           );
         }
 
-        CheckDaysofuse(UserData?.Type);
-        CheckHoursofuse(UserData?.Type);
         setInitialized(true);
 
         // return handleNotificationAction(
@@ -370,7 +374,7 @@ const IndicatorScreen = (props: any) => {
 
   return (
     <>
-      {/* {initialized ? (
+      {initialized ? (
         // Best Partice?
         currentUser ? (
           <BottomTabScreen
@@ -385,8 +389,7 @@ const IndicatorScreen = (props: any) => {
         <SafeAreaView>
           <ActivityIndicator />
         </SafeAreaView>
-      )} */}
-      <ValidInvitationCodeScreen />
+      )}
     </>
   );
 };

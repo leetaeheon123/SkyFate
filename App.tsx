@@ -31,9 +31,7 @@ if (__DEV__) {
 }
 const queryClient = new QueryClient();
 
-// apk8269@gmail -> rendevous 계정
-// const appId = '68EBE580-772D-4BF6-AB5E-0C2AF43EC263';
-const appId = 'B0BDC2B5-FF59-4D00-98C2-BADBAA9215E7';
+const appId = '5EED9ED6-955C-4E5C-BFC9-B6C913726869';
 
 const sendbird = new SendBird({appId});
 

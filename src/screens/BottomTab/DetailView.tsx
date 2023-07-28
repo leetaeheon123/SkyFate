@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -29,10 +29,13 @@ import {Btn_ClickableBack, Btn_ClickableEnter_Setting} from 'component/General';
 import {ProfileTopLine} from 'component/Profile';
 import Swiper from 'react-native-swiper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {MainColor} from '~/Color/OneColor';
-import {HPer10, HPer5, WPer10, WPer20, WPer40, WPer60} from '~/Per';
-import styles from '~/ManToManBoard';
-import {Enter_ChatSvg} from 'component/Map/MapSvg';
+import {ValidFalsy} from '^/ValidFalsy';
+import {Create_RequestChating} from 'Firebase/create';
+import {Update_IsAcceptRequestChating} from 'Firebase/update';
+
+import {Legacy_Get_AllUser} from 'Firebase/FbForMigration';
+import {AppContext} from '^/Appcontext';
+import {GotoChatScreen} from '^/SendBird';
 
 export const DescCricle = (
   <LinearGradient
@@ -59,20 +62,27 @@ export const DescBottomlineCustom = (style) => {
       style={style}></LinearGradient>
   );
 };
-const MyProfileScreen = ({route, navigation}: any) => {
-  const {UserData} = route.params;
+const DetailViewScreen = ({route, navigation}: any) => {
+  const {UserData, OtherUserData, Type} = route.params;
+
+  const Context = useContext(AppContext);
+  const SendBird = Context.sendbird;
 
   const ImageArray = [
-    UserData.ProfileImageUrl,
-    UserData.ProfileImageUrl2,
-    UserData.ProfileImageUrl3,
-    UserData.ProfileImageUrl4,
-    UserData.ProfileImageUrl5,
-    UserData.ProfileImageUrl6,
+    OtherUserData.ProfileImageUrl,
+    // UserData.ProfileImageUrl2,
+    // UserData.ProfileImageUrl3,
+    // UserData.ProfileImageUrl4,
+    // UserData.ProfileImageUrl5,
+    // UserData.ProfileImageUrl6,
   ];
 
+  useEffect(() => {
+    Legacy_Get_AllUser();
+  }, []);
+
   const [FiliterImageArray, setImageArray] = useState(
-    ImageArray.filter((data) => data != '' && data != undefined),
+    ImageArray.filter((data) => ValidFalsy(data) != false),
   );
 
   const SubImage = (
@@ -82,39 +92,12 @@ const MyProfileScreen = ({route, navigation}: any) => {
         end={{x: 0.5, y: 1}}
         colors={['#5B5AF3', '#5B59F3', '#835CF0', '#B567DB']}
         style={MyProfileStyles.linearGradient}>
-        {UserData.ProfileImageUrl == '' ? (
-          <Ionicons name="person" size={80} />
-        ) : (
-          <Image
-            resizeMode="cover"
-            style={MyProfileStyles.SubImage}
-            source={{uri: ImageArray[0]}}></Image>
-        )}
+        <Image
+          resizeMode="cover"
+          style={MyProfileStyles.SubImage}
+          source={{uri: ImageArray[0]}}></Image>
       </LinearGradient>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate('MyProfileChangeScreen', {
-            UserData,
-          });
-        }}
-        style={{
-          width: 27,
-          height: 27,
-          position: 'absolute',
-          right: -3,
-          top: -0,
-        }}>
-        {ChangeProfileSvg}
-      </TouchableOpacity>
     </View>
-  );
-
-  const ChangeProfile = (
-    <LinearGradient
-      start={{x: 0.5, y: 0}}
-      end={{x: 0.5, y: 1}}
-      colors={['#5B5AF3', '#5B59F3', '#835CF0', '#B567DB']}
-      style={MyProfileStyles.linearGradient}></LinearGradient>
   );
 
   const DescScetion = (Description: string = '') => {
@@ -129,11 +112,76 @@ const MyProfileScreen = ({route, navigation}: any) => {
     );
   };
 
+  const RequestChating = () => {
+    Create_RequestChating(OtherUserData.Uid, UserData);
+  };
+
+  const CreateChating = async () => {
+    let params = new SendBird.GroupChannelParams();
+
+    // 추가로 고려할거 : 이미 채팅하기를 눌러 채팅방이 생성된 상태와 처음 채팅하기를 눌러서 채팅방이 생성되는 상황을 분기처리 하기
+    let Member = [OtherUserData.RequestorUid, UserData.Uid];
+    let NickNames = [OtherUserData.NickName, UserData.NickName];
+
+    // const Latlng = {
+    //   latitude: OtherUserData.latitude,
+    //   longitude: OtherUserData.longitude,
+    // };
+
+    params.addUserIds(Member);
+    params.coverUrl = OtherUserData.ProfileImageUrl;
+    params.name = NickNames[0];
+    params.operatorUserIds = Member;
+    (params.isDistinct = true), (params.isPublic = false);
+    const OtherMetadDataKey = 'CanSendL1Invite_' + Member[0];
+    const MyMetadDataKey = 'CanSendL1Invite_' + Member[1];
+
+    SendBird.GroupChannel.createChannel(
+      params,
+      async function (groupChannel: any, error: Error) {
+        if (error) {
+          // console.log(error.message);
+          // Handle error.
+        } else if (!error) {
+          // SwitchShowUserModal();
+          // await CreateCanSendMetaData(
+          //   groupChannel,
+          //   OtherMetadDataKey,
+          //   OtherUserData.UserEmail,
+          //   MyMetadDataKey,
+          //   UserData.UserEmail,
+          // );
+          await Update_IsAcceptRequestChating(
+            OtherUserData.RequestedUid,
+            OtherUserData.RequestorUid,
+          );
+          GotoChatScreen(navigation, groupChannel, UserData);
+        }
+      },
+    );
+  };
+
+  const ReqResBtn = () => {
+    if (Type === 'Request') {
+      return (
+        <Button title="채팅 걸기" onPress={() => RequestChating()}></Button>
+      );
+    } else if (Type == 'Requested') {
+      return (
+        <Button
+          title="채팅 수락하기"
+          onPress={() => {
+            CreateChating();
+          }}
+        />
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={MyProfileStyles.Body}>
       <ScrollView style={MyProfileStyles.ScrollView}>
         <View style={MyProfileStyles.ImageView}>
-          {/* <ProfileTopLine /> */}
           <Swiper
             paginationStyle={{
               width: '70%',
@@ -179,55 +227,29 @@ const MyProfileScreen = ({route, navigation}: any) => {
             })}
           </Swiper>
 
-          <Btn_ClickableEnter_Setting
-            width={30}
-            onPress={() =>
-              navigation.navigate('SettingScreen', {
-                UserData,
-              })
-            }
-            style={{position: 'absolute', right: 12, top: 12}}
+          <Btn_ClickableBack
+            width={17}
+            onPress={() => navigation.goBack()}
+            style={{position: 'absolute', left: 12, top: 12}}
           />
         </View>
-        <View style={[MyProfileStyles.Main]}>
+        <View style={MyProfileStyles.Main}>
           <View style={MyProfileStyles.Title}>
             {SubImage}
-            <Text style={MyProfileStyles.NickName}>{UserData.NickName}</Text>
+            <Text style={MyProfileStyles.NickName}>
+              {OtherUserData.NickName}
+            </Text>
           </View>
           <View style={MyProfileStyles.Desc}>
-            {DescScetion(UserData.Mbti)}
-            {DescScetion(UserData.Age)}
-            {DescScetion(UserData.MySelfIntro)}
+            {DescScetion(OtherUserData.Mbti)}
+            {DescScetion(OtherUserData.Age)}
+            {DescScetion(OtherUserData.IntroduceText)}
           </View>
+          {ReqResBtn()}
         </View>
       </ScrollView>
-
-      <TouchableOpacity
-        style={[
-          styles.RowCenter,
-          {
-            position: 'absolute',
-            zIndex: 3,
-            bottom: 10,
-            right: 10,
-            // width: WPer60,
-            // height: HPer5,
-            borderRadius: 20,
-            backgroundColor: MainColor,
-          },
-        ]}>
-        {Enter_ChatSvg(40)}
-        {/* <Text
-          style={{
-            color: 'black',
-            fontSize: 22,
-            fontWeight: '600',
-          }}>
-          개발자와 실시간 소통하기
-        </Text> */}
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
-export default MyProfileScreen;
+export default DetailViewScreen;

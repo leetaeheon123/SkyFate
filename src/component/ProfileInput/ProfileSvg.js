@@ -68,6 +68,7 @@ const excuteObj = {
   Invalidation: InvalidationText,
   Register: RegisterText,
   ProfileImage: ProfileImageText,
+  MySelfIntro: <Text>MySelfIntro</Text>,
 };
 
 const GenderBtnObj = {

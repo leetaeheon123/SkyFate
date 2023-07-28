@@ -14,23 +14,21 @@ import {
 
 import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
 import firestore from '@react-native-firebase/firestore';
-import {TextComponent} from 'component/Profile/ProfileSvg';
-import {GenderBtnComponent} from 'component/Profile/ProfileSvg';
+import {TextComponent} from 'component/ProfileInput/ProfileSvg';
+import {GenderBtnComponent} from 'component/ProfileInput/ProfileSvg';
 import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
 import styles from '~/ManToManBoard';
 import {Btn_ClickableBack} from 'component/General';
 const GenderSelectScreen = ({navigation, route}: any) => {
-  const {UserEmail, NickName, Gender} = route.params;
-
-  console.log(UserEmail, NickName, Gender);
+  const {UserUid, NickName, Gender} = route.params;
 
   const UpdateGender = async () => {
-    await firestore().collection(`UserList`).doc(`${UserEmail}`).update({
+    await firestore().collection(`UserList`).doc(`${UserUid}`).update({
       Gender: GenderValue,
     });
 
     navigation.navigate('MbtiSelectScreen', {
-      UserEmail: UserEmail,
+      UserUid: UserUid,
       Gender: GenderValue,
       NickName: NickName,
     });
@@ -45,7 +43,7 @@ const GenderSelectScreen = ({navigation, route}: any) => {
           style={{position: 'absolute', top: 12, left: '-2.5%'}}
           onPress={() => {
             navigation.navigate('NickNameSelectScreen', {
-              UserEmail: UserEmail,
+              UserUid: UserUid,
               NickName: NickName,
             });
           }}
