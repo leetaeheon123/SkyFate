@@ -12,6 +12,7 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		430B890B2A7A6B0700E917C1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 430B890A2A7A6B0700E917C1 /* StoreKit.framework */; };
 		436C6D5728E2DC8700093869 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 436C6D5628E2DC8700093869 /* GoogleService-Info.plist */; };
 		43DC5DDB28E4671600F9D89C /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 436C6D3E28E29A4000093869 /* FontAwesome.ttf */; };
 		43DC5DDC28E4671600F9D89C /* FontAwesome5_Brands.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 436C6D3828E29A4000093869 /* FontAwesome5_Brands.ttf */; };
@@ -56,6 +57,7 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = hunt/main.m; sourceTree = "<group>"; };
 		19F6CBCC0A4E27FBF8BF4A61 /* libPods-hunt-huntTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-hunt-huntTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B4392A12AC88292D35C810B /* Pods-hunt.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-hunt.debug.xcconfig"; path = "Target Support Files/Pods-hunt/Pods-hunt.debug.xcconfig"; sourceTree = "<group>"; };
+		430B890A2A7A6B0700E917C1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		436BD4F928DF6F6800C0FD3F /* hunt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = hunt.entitlements; path = hunt/hunt.entitlements; sourceTree = "<group>"; };
 		436C6D3628E29A4000093869 /* FontAwesome5_Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome5_Regular.ttf; path = "../../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf"; sourceTree = "<group>"; };
 		436C6D3728E29A4000093869 /* Zocial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Zocial.ttf; path = "../../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C80B921A6F3F58F76C31292 /* libPods-hunt.a in Frameworks */,
+				430B890B2A7A6B0700E917C1 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +146,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				430B890A2A7A6B0700E917C1 /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-hunt.a */,
 				19F6CBCC0A4E27FBF8BF4A61 /* libPods-hunt-huntTests.a */,

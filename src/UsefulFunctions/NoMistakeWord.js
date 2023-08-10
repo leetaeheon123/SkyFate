@@ -4,7 +4,12 @@ const Failed = 'Failed';
 const NotCheckSuccess = 'NotCheckSuccess';
 const NotCheckFailed = 'NotCheckFailed';
 const NMFilter = 'Filter';
+
 const UserListRequestChating = 'UserListRequestChating';
+const UserListSendMe = 'UserListSendMe';
+
+const NMSubscription = 'Subscription';
+
 export {
   InProgress,
   Success,
@@ -13,4 +18,6 @@ export {
   NotCheckFailed,
   NMFilter,
   UserListRequestChating,
+  NMSubscription,
+  UserListSendMe,
 };

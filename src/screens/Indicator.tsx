@@ -15,6 +15,7 @@ import {WaitScreen} from './Wait';
 import {ft} from '^/Firebase';
 import {NotCheckFailed, NotCheckSuccess} from '^/NoMistakeWord';
 import {ValidFalsy} from '^/ValidFalsy';
+import {Update_LastAccessTime} from 'Firebase/update/User';
 
 export const SendBirdUpdateUserInfo = (
   SendBird: any,
@@ -254,6 +255,7 @@ const IndicatorScreen = (props: any) => {
               UserData?.NickName,
               UserData?.ProfileImageUrl,
             );
+            Update_LastAccessTime(UserUid);
           }
         }
         setInitialized(true);

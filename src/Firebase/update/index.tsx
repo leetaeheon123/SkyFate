@@ -37,4 +37,29 @@ const Update_IsAcceptRequestChating = async (
   }
 };
 
-export {UpdateUserAttendFirstEvent, Update_IsAcceptRequestChating};
+const Update_IsAcceptSendHandToMe = async (
+  // 채팅 요청을 받은 사람의 Uid = RequestedUid
+  RequestedUid: any,
+  // 채팅 요청한 사람의 UserData = RequestorUserData
+  RequestorUid: any,
+) => {
+  try {
+    // Firestore 컬렉션 참조
+    const collectionRef = firestore().collection(
+      `UserList/${RequestedUid}/UserListSendMe`,
+    );
+
+    // Firestore에 문서 추가
+    await collectionRef.doc(`${RequestorUid}`).update({
+      IsAccept: true,
+    });
+  } catch (error) {
+    console.error('Update_IsAcceptRequestChating중 에러:', error);
+  }
+};
+
+export {
+  UpdateUserAttendFirstEvent,
+  Update_IsAcceptRequestChating,
+  Update_IsAcceptSendHandToMe,
+};

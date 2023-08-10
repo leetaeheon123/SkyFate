@@ -142,7 +142,7 @@ import {WithLocalSvg} from 'react-native-svg';
 import {MyProfileStyles} from '~/MyProfile';
 import X from 'Assets/X.svg';
 import {Success} from '^/NoMistakeWord';
-import {SpecificLatLng} from 'Screens/utils';
+import {SpecificLatLng} from '^/utils';
 export interface ILocation {
   latitude: number;
   longitude: number;

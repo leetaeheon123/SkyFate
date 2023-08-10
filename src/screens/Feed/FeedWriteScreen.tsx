@@ -16,28 +16,27 @@ import {LoginAndReigsterStyles} from '../../../styles/LoginAndRegiser';
 import {LoginAndRegisterTextInputStyle} from '../../../styles/LoginAndRegiser';
 import firestore from '@react-native-firebase/firestore';
 import {TextComponent} from 'component/ProfileInput/ProfileSvg';
-import {Btn_ClickableNext, Btn_NotClickableNext} from 'component/Profile';
+import {
+  Btn_ClickableNext,
+  Btn_NotClickableNext,
+  MainColorBtn_Clickable,
+} from 'component/Profile';
 import styles from '~/ManToManBoard';
 import {PI_C_Desc, PI_C_Title} from 'component/ProfileInput';
 import {Gray_94A1AC, MainColor} from '~/Color/OneColor';
+import {Create_Feed} from 'Firebase/create';
+import {HPer5} from '~/Per';
 const FeedWriteScreen = ({navigation, route}: any) => {
-  const {UserUid, NickName, Gender, Age, MyWantIntro} = route.params;
+  const {UserData} = route.params;
 
-  const [MySelfIntro, setMySelfIntro] = useState('');
   const [Selected, setSelected] = useState(false);
-  const Update_MySelfIntro = async () => {
+  const [FeedDesc, setFeedDesc] = useState('');
 
-    navigation.navigate('ProfileImageSelectScreen', {
-      UserUid: UserUid,
-      Gender: Gender,
-      NickName: NickName,
-      Age: Age,
-      MyWantIntro: MyWantIntro,
-      MySelfIntro: MySelfIntro,
-    });
+  const Update_FeedDesc = async () => {
+    navigation.goBack();
   };
 
-  const MySelfIntroTextInput = () => (
+  const FeedDescTextInput = () => (
     <View style={LoginAndRegisterTextInputStyle().ViewStyle}>
       {/* {NickNameInput()} */}
       <TextInput
@@ -48,7 +47,7 @@ const FeedWriteScreen = ({navigation, route}: any) => {
             borderStyle: 'solid',
             borderRadius: 8,
             borderColor:
-              Selected == true || MySelfIntro.length >= 1
+              Selected == true || FeedDesc.length >= 1
                 ? MainColor
                 : 'lightgray',
           },
@@ -63,9 +62,9 @@ const FeedWriteScreen = ({navigation, route}: any) => {
         onEndEditing={() => {
           setSelected(false);
         }}
-        value={MySelfIntro}
+        value={FeedDesc}
         onChangeText={(value) => {
-          setMySelfIntro(value);
+          setFeedDesc(value);
         }}
       />
     </View>
@@ -89,10 +88,9 @@ const FeedWriteScreen = ({navigation, route}: any) => {
     <SafeAreaView style={LoginAndReigsterStyles.Body}>
       <View style={LoginAndReigsterStyles.Main}>
         <View style={[LoginAndReigsterStyles.Description_OnlyFlex]}>
-          {TextComponent('MySelfIntro')}
+          {TextComponent('FeedDesc')}
           {/* 700, 24 black => 700 ,22 */}
-          <PI_C_Title Title={'자기소개를 적어주세요'} />
-          <PI_C_Desc Desc={'언제든지 수정할 수 있어요'} />
+          <PI_C_Title Title={'이런 거 하고싶어요'} />
           {/*500, 20,  #94A1AC => 700, 18*/}
           {/* <Text>언제든지 수정할 수 있어요</Text> */}
           {/*500, 20,  #94A1AC */}
@@ -106,13 +104,15 @@ const FeedWriteScreen = ({navigation, route}: any) => {
         </View>
         <View style={LoginAndReigsterStyles.Center}>
           <Pressable style={styles.W100H100} onPress={() => Keyboard.dismiss()}>
-            {MySelfIntroTextInput()}
+            {FeedDescTextInput()}
           </Pressable>
         </View>
-        {MySelfIntro.length >= 20 ? (
-          <Btn_ClickableNext
+        {FeedDesc.length >= 20 ? (
+          <MainColorBtn_Clickable
+            Title="올리기"
+            style={{position: 'absolute', bottom: HPer5}}
             onPress={() => {
-              Update_MySelfIntro();
+              Create_Feed(FeedDesc, UserData);
             }}
           />
         ) : (

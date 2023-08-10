@@ -16,18 +16,17 @@ import {
   Button,
 } from 'react-native';
 
-import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
-import DocumentPicker from 'react-native-document-picker';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-
 import {withAppContext} from '../../contextReducer';
-import {GetEpochTime, MilisToMinutes} from '^/GetTime';
 import styles from '~/ManToManBoard';
 
 import {useQuery} from 'react-query';
-import {Get_AllUser} from 'Firebase/get';
+import {Get_AllFeed} from 'Firebase/get';
 import {WPer45, WPer5, WPer80, WPer90} from '~/Per';
 import {MP_C_Image} from 'component/MyProfile';
+import {Gray_94A1AC} from '~/Color/OneColor';
+import {Create_SendMe} from 'Firebase/create';
+import {ChangeProfileSvg} from 'component/ProfileInput/ProfileSvg';
+import {Get_UserListSendHandToMe} from 'Firebase/get';
 
 export const WhyReport = (
   <View
@@ -54,26 +53,31 @@ const Feed_SearchScrollScreen = (props) => {
   const {route, navigation} = props;
 
   const {channel, UserData} = route.params;
-
   const {width} = Dimensions.get('window');
 
-  const {data: UserList, isLoading: UserListisLoading} = useQuery(
-    'UserListkey',
-    () => Get_AllUser(1),
+  const {data: FeedList, isLoading: FeedListisLoading} = useQuery(
+    'FeedListKey',
+    () => Get_AllFeed(UserData.Gender),
   );
+
+  const {data: UserListSendHandToMe, isLoading: UserListSendHandToMeisLoading} =
+    useQuery('UserListSendHandToMekey', () =>
+      Get_UserListSendHandToMe(UserData.Uid),
+    );
 
   const renderItem = ({item}: any) => {
     return (
       <View
         key={item.ProfileImageurl}
         style={[style.ImageBox, {marginLeft: '5%'}]}
-        onPress={() => {
-          navigation.navigate('DetailViewScreen', {
-            UserData: UserData,
-            OtherUserData: item,
-            Type: 'Request',
-          });
-        }}>
+        // onPress={() => {
+        //   navigation.navigate('DetailViewScreen', {
+        //     UserData: UserData,
+        //     OtherUserData: item,
+        //     Type: 'Request',
+        //   });
+        // }}
+      >
         <View
           style={{
             position: 'absolute',
@@ -109,9 +113,26 @@ const Feed_SearchScrollScreen = (props) => {
             </Text>
           </View>
         </View>
-
-        <Text>Feed</Text>
+        <View
+          style={[
+            styles.RowCenter,
+            {
+              width: '100%',
+              marginTop: '48%',
+            },
+          ]}>
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: '600',
+            }}>
+            Feed
+          </Text>
+        </View>
         <TouchableOpacity
+          onPress={() => {
+            Create_SendMe(item.Uid, UserData);
+          }}
           style={[
             styles.RowCenter,
             {
@@ -153,9 +174,36 @@ const Feed_SearchScrollScreen = (props) => {
         </Text>
       </View>
 
-      {UserListisLoading == false ? (
+      <TouchableOpacity
+        style={[
+          styles.W90ML5,
+          styles.RowCenter,
+          {
+            backgroundColor: 'white',
+            borderRadius: 16,
+            height: 50,
+            marginBottom: '5%',
+          },
+        ]}
+        onPress={() => {
+          navigation.navigate('FeedWriteScreen', {
+            UserData: UserData,
+          });
+        }}>
+        {/* <Icon name="note" size={26}></Icon> */}
+        <Text
+          style={{
+            fontSize: 17,
+            fontWeight: '400',
+            color: Gray_94A1AC,
+          }}>
+          하고 싶은 플레이가 무엇인가요?
+        </Text>
+      </TouchableOpacity>
+
+      {FeedListisLoading == false ? (
         <FlatList
-          data={UserList} //렌더할 데이터
+          data={FeedList} //렌더할 데이터
           renderItem={renderItem} //실제로 렌더될 컴포넌트
           keyExtractor={(item) => item.Uid}
           //없어도 작동은 되지만 미연의 에러방지를 위해 정의하는 것이 좋다.
@@ -169,6 +217,27 @@ const Feed_SearchScrollScreen = (props) => {
           // ListEmptyComponent={<ActivityIndicator size={"small"}/>}
         />
       ) : null}
+      <TouchableOpacity
+        onPress={() => {
+          if (UserListSendHandToMeisLoading == false) {
+            navigation.navigate('UserListSendHandToMeScreen', {
+              UserData,
+              UserListSendHandToMe,
+            });
+          }
+        }}
+        style={{
+          width: 27,
+          height: 27,
+          position: 'absolute',
+          right: 30,
+          bottom: 30,
+          zIndex: 2,
+          backgroundColor: 'white',
+          // bottom: 30,
+        }}>
+        <Text>저요</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

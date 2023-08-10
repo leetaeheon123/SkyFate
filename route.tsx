@@ -53,6 +53,9 @@ import SelfIntroScreen from 'Screens/ProfileInput/SelfIntro';
 import MySelfIntroScreen from 'Screens/ProfileInput/SelfIntro';
 import MyWantIntroScreen from 'Screens/ProfileInput/WantIntro';
 import MyProfileChangeScreen from 'Screens/MyProfile/MyProfileChange';
+import SubscriptionScreen from 'Screens/Subscription/Subscription';
+import FeedWriteScreen from 'Screens/Feed/FeedWriteScreen';
+import UserListSendHandToMeScreen from 'Screens/Feed/UserListSendHandToMe';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -258,6 +261,24 @@ const Routes = (props: any) => {
       <Stack.Screen
         name="DetailViewScreen"
         component={DetailViewScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="SubscriptionScreen"
+        component={SubscriptionScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="FeedWriteScreen"
+        component={FeedWriteScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="UserListSendHandToMeScreen"
+        component={UserListSendHandToMeScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

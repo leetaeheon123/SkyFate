@@ -9,7 +9,7 @@ import {
   METHODS_FOR_MOBILIANS,
   METHODS_FOR_UPLUS,
   QUOTAS,
-} from './constants';
+} from '../screens/constants';
 
 function getQuotas(pg: string) {
   switch (pg) {

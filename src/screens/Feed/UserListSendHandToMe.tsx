@@ -49,24 +49,15 @@ import {useInterval} from '../../utils';
 import {useKeyboard} from '@react-native-community/hooks';
 import Modal from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
-import {Type2가로} from 'component/LinearGradient/LinearType';
-import {
-  ChatLeaveSvg,
-  ChatReportSvg,
-  CongratulateSvg,
-  ExplainLimit_BombSvg,
-  L1InviteSvg,
-  Text_Message,
-} from 'component/Chat/ChatSvg';
-import {UpdateFbFirestore} from '^/Firebase';
-import {WhiteReportSvg, 취소하기Svg} from 'component/Report/Report';
-import {GetUserData} from '^/SaveUserDataInDevice';
-import Swiper from 'react-native-swiper';
+
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useQuery} from 'react-query';
 import {Get_AllUser} from 'Firebase/get';
-import {WPer40, WPer42dot5, WPer45, WPer5} from '~/Per';
+import {WPer40, WPer42dot5, WPer45, WPer5, WPer90} from '~/Per';
 import {isEmptyArray} from '^/isEmptyObj';
+import {CreateChating} from '^/SendBird';
+import {Update_IsAcceptRequestChating} from 'Firebase/update';
+import {Update_IsAcceptSendHandToMe} from 'Firebase/update';
 
 export const WhyReport = (
   <View
@@ -89,14 +80,16 @@ export const WhyReport = (
   </View>
 );
 
-const UserListWantTalkMeScreen = (props) => {
-  const {route, navigation} = props;
-  const {UserData, UserListWantTalkMe} = route.params;
+const UserListSendHandToMeScreen = ({route, navigation}: any) => {
+  const {UserData, UserListSendHandToMe} = route.params;
+  const Context = useContext(AppContext);
+  const SendBird = Context.sendbird;
+
   const renderItem = ({item}: any) => {
     return (
-      <TouchableOpacity
+      <View
         key={item.ProfileImageurl}
-        style={UserListWantTalkMeScreenStyle.ImageBox}
+        style={UserListSendHandToMeScreenStyle.ImageBox}
         onPress={() => {
           navigation.navigate('DetailViewScreen', {
             UserData,
@@ -105,7 +98,7 @@ const UserListWantTalkMeScreen = (props) => {
           });
         }}>
         <Image
-          style={UserListWantTalkMeScreenStyle.ImageBox}
+          style={UserListSendHandToMeScreenStyle.ImageBox}
           source={{
             uri: item.ProfileImageUrl,
           }}></Image>
@@ -116,7 +109,32 @@ const UserListWantTalkMeScreen = (props) => {
           style={{position: 'absolute', color: 'white', bottom: 0, left: 0}}>
           {item?.Age}
         </Text>
-      </TouchableOpacity>
+        <Text
+          style={{
+            position: 'absolute',
+            color: 'red',
+            bottom: 0,
+            right: 0,
+          }}>
+          {item?.location}
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            CreateChating(SendBird, item, UserData, navigation, async () => {
+              Update_IsAcceptSendHandToMe(item.RequestedUid, item.RequestorUid);
+            });
+          }}
+          style={{
+            position: 'absolute',
+            width: 100,
+            height: 40,
+            backgroundColor: 'blue',
+            bottom: 30,
+            right: 30,
+          }}>
+          <Text>채팅만들기</Text>
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -133,11 +151,11 @@ const UserListWantTalkMeScreen = (props) => {
   );
 
   return (
-    <SafeAreaView style={UserListWantTalkMeScreenStyle.container}>
-      <View style={UserListWantTalkMeScreenStyle.Main}>
+    <SafeAreaView style={UserListSendHandToMeScreenStyle.container}>
+      <View style={UserListSendHandToMeScreenStyle.Main}>
         {Header}
 
-        <View style={UserListWantTalkMeScreenStyle.Explain}>
+        <View style={UserListSendHandToMeScreenStyle.Explain}>
           <Text>Sensual Plus</Text>
           <MaterialCommunityIcons
             name="cards-heart"
@@ -145,27 +163,26 @@ const UserListWantTalkMeScreen = (props) => {
             size={45}
           />
           <Text style={{fontSize: 30, fontWeight: '800', color: 'black'}}>
-            나와 대화하고 싶은 회원
+            나에게 저요를 보낸 회원
           </Text>
           <View style={styles.ColumnCenter}>
             <Text style={{fontSize: 18, fontWeight: '500', color: '#9DA7B1'}}>
-              누군가가 회원님에게 채팅 요청을 보내면
+              누군가가 회원님이 작성한 경험/로망플에
             </Text>
             <Text style={{fontSize: 18, fontWeight: '500', color: '#9DA7B1'}}>
-              이곳에서 확인할 수 있어요
+              저요를 보내면 알려드려요
             </Text>
           </View>
         </View>
-        {isEmptyArray(UserListWantTalkMe) == true ? (
+        {isEmptyArray(UserListSendHandToMe) == true ? (
           <FlatList
-            data={UserListWantTalkMe} //렌더할 데이터
+            data={UserListSendHandToMe} //렌더할 데이터
             renderItem={renderItem} //실제로 렌더될 컴포넌트
             keyExtractor={(item) => item.Uid}
             //없어도 작동은 되지만 미연의 에러방지를 위해 정의하는 것이 좋다.
             //keyExtractor는 반드시 String type이어야 한다.
             horizontal={false}
             bounces={true}
-            numColumns={2}
             //   onEndReached={onEndReached}
             onEndReachedThreshold={0.6}
 
@@ -180,7 +197,7 @@ const UserListWantTalkMeScreen = (props) => {
   );
 };
 
-const UserListWantTalkMeScreenStyle = StyleSheet.create({
+const UserListSendHandToMeScreenStyle = StyleSheet.create({
   container: [
     {
       height: '100%',
@@ -198,11 +215,11 @@ const UserListWantTalkMeScreenStyle = StyleSheet.create({
     // backgroundColor: 'red',
   },
   ImageBox: {
-    width: WPer42dot5,
-    height: WPer42dot5,
+    width: WPer90,
+    height: WPer90,
     borderRadius: 10,
     marginRight: '5%',
-    marginBottom: '3.3%',
+    marginBottom: '5%',
   },
   Body: {
     width: '100%',
@@ -238,4 +255,4 @@ const UserListWantTalkMeScreenStyle = StyleSheet.create({
   },
 });
 
-export default withAppContext(UserListWantTalkMeScreen);
+export default withAppContext(UserListSendHandToMeScreen);

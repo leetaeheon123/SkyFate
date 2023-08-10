@@ -43,8 +43,8 @@ const Get_AllUser = async (Gender: number | null) => {
 };
 
 const Get_UserListWantTalkMe = async (Uid: string) => {
-  const UserListRequestChating: any = [];
-  const Path = `UserList/${Uid}/UserListRequestChating`;
+  const UserListSendHandToMe: any = [];
+  const Path = `UserList/${Uid}/UserListSendHandToMe`;
   try {
     const collectionRef = await firestore()
       .collection(Path)
@@ -53,13 +53,32 @@ const Get_UserListWantTalkMe = async (Uid: string) => {
 
     for (const doc of collectionRef.docs) {
       const data = doc.data();
-      UserListRequestChating.push(data);
+      UserListSendHandToMe.push(data);
     }
   } catch (error) {
     console.error('Get_UserListWantTalkMe:', error);
   }
 
-  return UserListRequestChating;
+  return UserListSendHandToMe;
+};
+const Get_UserListSendHandToMe = async (Uid: string) => {
+  const UserListSendHandToMe: any = [];
+  const Path = `UserList/${Uid}/UserListSendMe`;
+  try {
+    const collectionRef = await firestore()
+      .collection(Path)
+      .where('IsAccept', '==', false)
+      .get();
+
+    for (const doc of collectionRef.docs) {
+      const data = doc.data();
+      UserListSendHandToMe.push(data);
+    }
+  } catch (error) {
+    console.error('Get_UserListSendHandToMe:', error);
+  }
+
+  return UserListSendHandToMe;
 };
 
 const Get_EventAttendedUserDataList = async (Gender) => {
@@ -185,12 +204,42 @@ const Get_UserListAiByACDGKU = async () => {
   return AttendedUserList.length;
 };
 
+const Get_AllFeed = async (Gender: number | null) => {
+  const FeedList: any = [];
+
+  let FilterGender;
+  if (Gender == 1) {
+    FilterGender = 2;
+  } else if (Gender == 2) {
+    FilterGender = 1;
+  } else if (Gender == null) {
+    FilterGender = 1;
+  }
+  try {
+    const collectionRef = await firestore()
+      .collection('FeedList')
+      .where('Gender', '==', FilterGender)
+      .get();
+
+    for (const doc of collectionRef.docs) {
+      const data = doc.data();
+      FeedList.push(data);
+    }
+  } catch (error) {
+    console.error('Get_AllFeed Error:', error);
+  }
+
+  return FeedList;
+};
+
 export {
   Get_AllUser,
   Get_UserListWantTalkMe,
+  Get_UserListSendHandToMe,
   Get_EventAttendedUserDataList,
   Get_EventAttendedUserEmailList,
   Get_UserListAiByAdmin,
   Get_WaitAiUserListAiByAdmin,
   Get_UserListAiByACDGKU,
+  Get_AllFeed,
 };

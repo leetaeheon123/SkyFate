@@ -1,6 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 import {GetEpochTime} from '^/GetTime';
-import {UserListRequestChating} from '^/NoMistakeWord';
+import {UserListRequestChating, UserListSendMe} from '^/NoMistakeWord';
 
 const RequestAttendFirstEvent = async (UserData: any) => {
   try {
@@ -69,6 +69,39 @@ const Create_RequestChating = async (
   }
 };
 
+const Create_SendMe = async (
+  // 저요를 받은 사람의 Uid = RequestedUid
+  RequestedUid: any,
+  // 저요를 보낸 사람의 UserData = RequestorUserData
+  RequestorUserData: any,
+) => {
+  const CreatedAt = GetEpochTime();
+
+  try {
+    // Firestore 컬렉션 참조
+    const collectionRef = firestore().collection(
+      `UserList/${RequestedUid}/${UserListSendMe}`,
+    );
+
+    const RequestorUid = RequestorUserData.Uid;
+
+    // 추후 혼선을 방지하기 위해 Uid를 객체에서 삭제함
+    delete RequestorUserData.Uid;
+
+    // Firestore에 문서 추가
+    const docRef = await collectionRef.doc(`${RequestorUid}`).set({
+      CreatedAt,
+      RequestedUid,
+      RequestorUid,
+      IsAccept: false,
+      ...RequestorUserData,
+    });
+    console.log('Create_SendMe 새 문서 ID:', docRef?.id);
+  } catch (error) {
+    console.error('Create_SendMe 문서 추가 에러:', error);
+  }
+};
+
 const Create_Feed = async (FeedDesc: String, UserData: any) => {
   const CreatedAt = GetEpochTime();
 
@@ -81,7 +114,7 @@ const Create_Feed = async (FeedDesc: String, UserData: any) => {
     const docRef = await collectionRef.add({
       FeedDesc,
       CreatedAt,
-      UserData,
+      ...UserData,
     });
     console.log('Create_Feed 새 문서 ID:', docRef?.id);
   } catch (error) {
@@ -93,5 +126,6 @@ export {
   RequestAttendFirstEvent,
   RequestAttendFirstEventBackUp,
   Create_RequestChating,
+  Create_SendMe,
   Create_Feed,
 };

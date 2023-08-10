@@ -33,6 +33,7 @@ import {MainColor} from '~/Color/OneColor';
 import {HPer10, HPer5, WPer10, WPer20, WPer40, WPer60} from '~/Per';
 import styles from '~/ManToManBoard';
 import {Enter_ChatSvg} from 'component/Map/MapSvg';
+import {AppStoreInitConnect} from '^/Iap';
 
 export const DescCricle = (
   <LinearGradient
@@ -200,6 +201,14 @@ const MyProfileScreen = ({route, navigation}: any) => {
             {DescScetion(UserData.MySelfIntro)}
           </View>
         </View>
+
+        <TouchableOpacity
+          style={[{width: 30, height: 30, backgroundColor: 'white'}]}
+          onPress={() => {
+            navigation.navigate('SubscriptionScreen');
+          }}>
+          <Text>구독화ㅕㄴ각</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       <TouchableOpacity
@@ -215,7 +224,10 @@ const MyProfileScreen = ({route, navigation}: any) => {
             borderRadius: 20,
             backgroundColor: MainColor,
           },
-        ]}>
+        ]}
+        onPress={() => {
+          AppStoreInitConnect();
+        }}>
         {Enter_ChatSvg(40)}
         {/* <Text
           style={{

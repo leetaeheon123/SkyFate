@@ -37,3 +37,4 @@ export const HPer40 = height * 0.4;
 export const HPer60 = height * 0.6;
 export const HPer70 = height * 0.7;
 export const HPer90 = height * 0.9;
+export const HPer100 = height;
